@@ -264,12 +264,13 @@ class OpenIDBackend:
             openid_response.identity_url)
 
         user = User.objects.create_user(username, email, password=None)
-        self.associate_openid(user, openid_response)
+        OpenIDBackend.associate_openid(user, openid_response)
         self.update_user_details(user, details, openid_response)
 
         return user
 
-    def associate_openid(self, user, openid_response):
+    @staticmethod
+    def associate_openid(user, openid_response):
         """Associate an OpenID with a user account."""
         # Check to see if this OpenID has already been claimed.
         try:
