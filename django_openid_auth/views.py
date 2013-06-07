@@ -40,6 +40,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.template.loader import render_to_string
+from django.views.decorators.http import require_POST
 try:
     from django.views.decorators.csrf import csrf_exempt
 except ImportError:
@@ -142,7 +143,21 @@ def parse_openid_response(request):
     consumer = make_consumer(request)
     return consumer.complete(dict(request.REQUEST.items()), current_url)
 
+def login_show(request, template_name='openid/login.html',
+               form_class=OpenIDLoginForm,
+               redirect_field_name=REDIRECT_FIELD_NAME):
 
+    redirect_to = request.REQUEST.get(redirect_field_name, '')
+
+    login_form = form_class(request.POST or None)
+
+    return render_to_response(template_name, {
+            'form': login_form,
+            'action': reverse('openid-init'),
+            redirect_field_name: redirect_to
+            }, context_instance=RequestContext(request))
+
+@require_POST
 def login_begin(request, template_name='openid/login.html',
                 login_complete_view='openid-complete',
                 form_class=OpenIDLoginForm,
@@ -155,20 +170,13 @@ def login_begin(request, template_name='openid/login.html',
     # to use a fixed server URL.
     openid_url = getattr(settings, 'OPENID_SSO_SERVER_URL', None)
 
-    if openid_url is None:
-        if request.POST:
-            login_form = form_class(data=request.POST)
-            if login_form.is_valid():
-                openid_url = login_form.cleaned_data['openid_identifier']
-        else:
-            login_form = form_class()
-
-        # Invalid or no form data:
-        if openid_url is None:
-            return render_to_response(template_name, {
-                    'form': login_form,
-                    redirect_field_name: redirect_to
-                    }, context_instance=RequestContext(request))
+    login_form = form_class(data=request.POST)
+    if login_form.is_valid():
+            openid_url = login_form.cleaned_data['openid_identifier']
+    else:
+        return login_show(request, template_name=template_name,
+                          form_class=form_class,
+                          redirect_field_name=redirect_field_name)
 
     error = None
     consumer = make_consumer(request)
