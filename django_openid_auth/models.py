@@ -30,6 +30,8 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+import urllib
+
 
 class Nonce(models.Model):
     server_url = models.CharField(max_length=2047)
@@ -56,3 +58,6 @@ class UserOpenID(models.Model):
     user = models.ForeignKey(User)
     claimed_id = models.TextField(max_length=2047, unique=True)
     display_id = models.TextField(max_length=2047)
+
+    def __unicode__(self):
+        return urllib.urlparse(self.display_id).netloc
