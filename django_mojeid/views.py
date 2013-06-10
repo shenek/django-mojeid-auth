@@ -52,12 +52,12 @@ from openid.consumer.discover import DiscoveryFailure
 from openid.extensions import sreg, ax, pape
 from openid.yadis.constants import YADIS_CONTENT_TYPE
 
-from django_openid_auth import teams
-from django_openid_auth.forms import OpenIDLoginForm
-from django_openid_auth.models import UserOpenID
-from django_openid_auth.signals import openid_login_complete
-from django_openid_auth.store import DjangoOpenIDStore
-from django_openid_auth.exceptions import (
+from django_mojeid import teams
+from django_mojeid.forms import OpenIDLoginForm
+from django_mojeid.models import UserOpenID
+from django_mojeid.signals import openid_login_complete
+from django_mojeid.store import DjangoOpenIDStore
+from django_mojeid.exceptions import (
     RequiredAttributeNotReturned,
     DjangoOpenIDException,
 )

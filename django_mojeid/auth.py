@@ -37,9 +37,9 @@ from django.contrib.auth.models import User, Group
 from openid.consumer.consumer import SUCCESS
 from openid.extensions import ax, sreg, pape
 
-from django_openid_auth import teams
-from django_openid_auth.models import UserOpenID
-from django_openid_auth.exceptions import (
+from django_mojeid import teams
+from django_mojeid.models import UserOpenID
+from django_mojeid.exceptions import (
     IdentityAlreadyClaimed,
     DuplicateUsernameViolation,
     MissingUsernameViolation,

@@ -1,5 +1,6 @@
 # django-openid-auth -  OpenID integration for django.contrib.auth
 #
+# Copyright (C) 2013 CZ.NIC
 # Copyright (C) 2008-2013 Canonical Ltd.
 # Copyright (C) 2010 Dave Walker
 #
@@ -29,8 +30,8 @@
 
 from django.conf import settings
 from django.contrib import admin
-from django_openid_auth.models import Nonce, Association, UserOpenID
-from django_openid_auth.store import DjangoOpenIDStore
+from django_mojeid.models import Nonce, Association, UserOpenID
+from django_mojeid.store import DjangoOpenIDStore
 
 
 class NonceAdmin(admin.ModelAdmin):
@@ -72,7 +73,7 @@ admin.site.register(UserOpenID, UserOpenIDAdmin)
 # Support for allowing openid authentication for /admin (django.contrib.admin)
 if getattr(settings, 'OPENID_USE_AS_ADMIN_LOGIN', False):
     from django.http import HttpResponseRedirect
-    from django_openid_auth import views
+    from django_mojeid import views
 
     def _openid_login(self, request, error_message='', extra_context=None):
         if request.user.is_authenticated():

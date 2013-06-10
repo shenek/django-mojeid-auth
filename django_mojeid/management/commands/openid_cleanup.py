@@ -1,5 +1,6 @@
 # django-openid-auth -  OpenID integration for django.contrib.auth
 #
+# Copyright (C) 2013 CZ.NIC
 # Copyright (C) 2009-2013 Canonical Ltd.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +29,7 @@
 
 from django.core.management.base import NoArgsCommand
 
-from django_openid_auth.store import DjangoOpenIDStore
+from django_mojeid.store import DjangoOpenIDStore
 
 
 class Command(NoArgsCommand):

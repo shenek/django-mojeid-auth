@@ -1,7 +1,8 @@
 # django-openid-auth -  OpenID integration for django.contrib.auth
 #
-# Copyright (C) 2007 Simon Willison
+# Copyright (C) 2013 CZ.NIC
 # Copyright (C) 2008-2013 Canonical Ltd.
+# Copyright (C) 2007 Simon Willison
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -69,7 +70,7 @@ else:
 # although not all variations may be possible on all operating systems.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/Chicago'
+TIME_ZONE = 'Europe/Prague'
 
 # Language code for this installation. All choices can be found here:
 # http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
@@ -113,16 +114,19 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
+STATIC_URL = '/static/'
+
 INSTALLED_APPS = (
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.admin',
-    'django_openid_auth',
+    'django.contrib.staticfiles',
+    'django_mojeid',
 )
 
 AUTHENTICATION_BACKENDS = (
-    'django_openid_auth.auth.OpenIDBackend',
+    'django_mojeid.auth.OpenIDBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
 
