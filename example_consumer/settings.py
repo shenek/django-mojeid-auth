@@ -103,6 +103,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
     csrf_middleware,
 )
 
@@ -122,6 +123,7 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.staticfiles',
+    'django.contrib.messages',
     'django_mojeid',
 )
 
@@ -139,7 +141,7 @@ OPENID_UPDATE_DETAILS_FROM_SREG = True
 
 # If set, always use this as the identity URL rather than asking the
 # user.  This only makes sense if it is a server URL.
-OPENID_SSO_SERVER_URL = 'https://login.launchpad.net/'
+OPENID_SSO_SERVER_URL = 'https://mojeid.cz/endpoint'
 
 # Tell django.contrib.auth to use the OpenID signin URLs.
 LOGIN_URL = '/openid/login/'

@@ -37,7 +37,6 @@ from django.contrib.auth.models import User, Group
 from openid.consumer.consumer import SUCCESS
 from openid.extensions import ax, sreg, pape
 
-from django_mojeid import teams
 from django_mojeid.models import UserOpenID
 from django_mojeid.exceptions import (
     IdentityAlreadyClaimed,
@@ -95,28 +94,6 @@ class OpenIDBackend:
             if pape_response is None or \
                pape.AUTH_MULTI_FACTOR_PHYSICAL not in pape_response.auth_policies:
                 raise MissingPhysicalMultiFactor()
-
-        teams_response = teams.TeamsResponse.fromSuccessResponse(
-            openid_response)
-        if teams_response:
-            self.update_groups_from_teams(user, teams_response)
-            self.update_staff_status_from_teams(user, teams_response)
-
-        teams_required = getattr(settings,
-                                 'OPENID_LAUNCHPAD_TEAMS_REQUIRED', [])
-        if teams_required:
-            teams_mapping = self.get_teams_mapping()
-            groups_required = [group for team, group in teams_mapping.items()
-                               if team in teams_required]
-            matches = set(groups_required).intersection(
-                user.groups.values_list('name', flat=True))
-            if not matches:
-                name = 'OPENID_EMAIL_WHITELIST_REGEXP_LIST'
-                whitelist_regexp_list = getattr(settings, name, [])
-                for pattern in whitelist_regexp_list:
-                    if re.match(pattern, user.email):
-                        return user
-                return None
 
         return user
 
@@ -307,46 +284,3 @@ class OpenIDBackend:
 
         if updated:
             user.save()
-
-    def get_teams_mapping(self):
-        teams_mapping_auto = getattr(settings, 'OPENID_LAUNCHPAD_TEAMS_MAPPING_AUTO', False)
-        teams_mapping_auto_blacklist = getattr(settings, 'OPENID_LAUNCHPAD_TEAMS_MAPPING_AUTO_BLACKLIST', [])
-        teams_mapping = getattr(settings, 'OPENID_LAUNCHPAD_TEAMS_MAPPING', {})
-        if teams_mapping_auto:
-            #ignore teams_mapping. use all django-groups
-            teams_mapping = dict()
-            all_groups = Group.objects.exclude(name__in=teams_mapping_auto_blacklist)
-            for group in all_groups:
-                teams_mapping[group.name] = group.name
-        return teams_mapping
-
-    def update_groups_from_teams(self, user, teams_response):
-        teams_mapping = self.get_teams_mapping()
-        if len(teams_mapping) == 0:
-            return
-
-        current_groups = set(user.groups.filter(
-                name__in=teams_mapping.values()))
-        desired_groups = set(Group.objects.filter(
-                name__in=[teams_mapping[lp_team]
-                          for lp_team in teams_response.is_member
-                          if lp_team in teams_mapping]))
-        for group in current_groups - desired_groups:
-            user.groups.remove(group)
-        for group in desired_groups - current_groups:
-            user.groups.add(group)
-
-    def update_staff_status_from_teams(self, user, teams_response):
-        if not hasattr(settings, 'OPENID_LAUNCHPAD_STAFF_TEAMS'):
-            return
-
-        staff_teams = getattr(settings, 'OPENID_LAUNCHPAD_STAFF_TEAMS', [])
-        user.is_staff = False
-
-        for lp_team in teams_response.is_member:
-            if lp_team in staff_teams:
-                user.is_staff = True
-                break
-
-        user.save()
-

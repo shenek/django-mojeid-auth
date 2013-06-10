@@ -52,7 +52,6 @@ from openid.consumer.discover import DiscoveryFailure
 from openid.extensions import sreg, ax, pape
 from openid.yadis.constants import YADIS_CONTENT_TYPE
 
-from django_mojeid import teams
 from django_mojeid.forms import OpenIDLoginForm
 from django_mojeid.models import UserOpenID
 from django_mojeid.signals import openid_login_complete
@@ -180,9 +179,10 @@ def login_begin(request, template_name='openid/login.html',
     if login_form.is_valid():
             openid_url = login_form.cleaned_data['openid_identifier']
     else:
-        return login_show(request, template_name=template_name,
-                          form_class=form_class,
-                          redirect_field_name=redirect_field_name)
+        if not openid_url:
+            return login_show(request, login_template=template_name,
+                              form_class=form_class,
+                              redirect_field_name=redirect_field_name)
 
     error = None
     consumer = make_consumer(request)
@@ -235,20 +235,6 @@ def login_begin(request, template_name='openid/login.html',
         ]
         pape_request = pape.Request(preferred_auth_policies=preferred_auth)
         openid_request.addExtension(pape_request)
-
-    # Request team info
-    teams_mapping_auto = getattr(settings, 'OPENID_LAUNCHPAD_TEAMS_MAPPING_AUTO', False)
-    teams_mapping_auto_blacklist = getattr(settings, 'OPENID_LAUNCHPAD_TEAMS_MAPPING_AUTO_BLACKLIST', [])
-    launchpad_teams = getattr(settings, 'OPENID_LAUNCHPAD_TEAMS_MAPPING', {})
-    if teams_mapping_auto:
-        #ignore launchpad teams. use all django-groups
-        launchpad_teams = dict()
-        all_groups = Group.objects.exclude(name__in=teams_mapping_auto_blacklist)
-        for group in all_groups:
-            launchpad_teams[group.name] = group.name
-
-    if launchpad_teams:
-        openid_request.addExtension(teams.TeamsRequest(launchpad_teams.keys()))
 
     # Construct the request completion URL, including the page we
     # should redirect to.
