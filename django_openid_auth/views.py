@@ -50,6 +50,7 @@ from openid.consumer.consumer import (
     Consumer, SUCCESS, CANCEL, FAILURE)
 from openid.consumer.discover import DiscoveryFailure
 from openid.extensions import sreg, ax, pape
+from openid.yadis.constants import YADIS_CONTENT_TYPE
 
 from django_openid_auth import teams
 from django_openid_auth.forms import OpenIDLoginForm
@@ -323,6 +324,20 @@ def logo(request):
     return HttpResponse(
         OPENID_LOGO_BASE_64.decode('base64'), mimetype='image/gif'
     )
+
+def top(request, template_name='openid/top.html'):
+    url = request.build_absolute_uri(reverse(xrds))
+    title = getattr(settings, 'OPENID_APP_TITLE', 'OpenID Backend')
+    return render_to_response(template_name, { 'url': url, 'title': title },
+                              context_instance=RequestContext(request)
+                             )
+
+def xrds(request, template_name='openid/xrds.xml'):
+    url = request.build_absolute_uri(reverse(top))
+    return render_to_response(template_name, { 'url': url },
+                              context_instance=RequestContext(request),
+                              content_type=YADIS_CONTENT_TYPE
+                             )
 
 # Logo from http://openid.net/login-bg.gif
 # Embedded here for convenience; you should serve this as a static file
