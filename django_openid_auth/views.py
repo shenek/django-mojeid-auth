@@ -180,7 +180,7 @@ def login_begin(request, template_name='openid/login.html',
     if login_form.is_valid():
             openid_url = login_form.cleaned_data['openid_identifier']
     else:
-        return login_show(request, template_name=template_name,
+        return login_show(request, login_template=template_name,
                           form_class=form_class,
                           redirect_field_name=redirect_field_name)
 
