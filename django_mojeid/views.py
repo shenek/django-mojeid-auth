@@ -195,39 +195,14 @@ def login_begin(request, template_name='openid/login.html',
 
     # Request some user details.  If the provider advertises support
     # for attribute exchange, use that.
-    if openid_request.endpoint.supportsType(ax.AXMessage.ns_uri):
-        fetch_request = ax.FetchRequest()
-        # We mark all the attributes as required, since Google ignores
-        # optional attributes.  We request both the full name and
-        # first/last components since some providers offer one but not
-        # the other.
-        for (attr, alias) in [
-            ('http://axschema.org/contact/email', 'email'),
-            ('http://axschema.org/namePerson', 'fullname'),
-            ('http://axschema.org/namePerson/first', 'firstname'),
-            ('http://axschema.org/namePerson/last', 'lastname'),
-            ('http://axschema.org/namePerson/friendly', 'nickname'),
-            # The myOpenID provider advertises AX support, but uses
-            # attribute names from an obsolete draft of the
-            # specification.  We request them for compatibility.
-            ('http://schema.openid.net/contact/email', 'old_email'),
-            ('http://schema.openid.net/namePerson', 'old_fullname'),
-            ('http://schema.openid.net/namePerson/friendly', 'old_nickname')]:
-            fetch_request.add(ax.AttrInfo(attr, alias=alias, required=True))
+    attributes = getattr(settings, 'MOJEID_ATTRIBUTES', [])
+
+    fetch_request = ax.FetchRequest()
+    for attribute in attributes:
+        fetch_request.add(attribute.generate_ax_attrinfo())
+
+    if attributes:
         openid_request.addExtension(fetch_request)
-    else:
-        sreg_required_fields = []
-        sreg_required_fields.extend(
-            getattr(settings, 'OPENID_SREG_REQUIRED_FIELDS', []))
-        sreg_optional_fields = ['email', 'fullname', 'nickname']
-        sreg_optional_fields.extend(
-            getattr(settings, 'OPENID_SREG_EXTRA_FIELDS', []))
-        sreg_optional_fields = [
-            field for field in sreg_optional_fields if (
-                not field in sreg_required_fields)]
-        openid_request.addExtension(
-            sreg.SRegRequest(optional=sreg_optional_fields,
-                required=sreg_required_fields))
             
     if getattr(settings, 'OPENID_PHYSICAL_MULTIFACTOR_REQUIRED', False):
         preferred_auth = [
