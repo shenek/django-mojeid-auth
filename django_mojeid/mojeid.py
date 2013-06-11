@@ -39,10 +39,10 @@ class MojeIDAttribute(object):
     def __init__(self, modelApp, modelClass, modelAttribute, modelFilterField='user_id', required=True):
         self.modelClass = modelClass
         self.modelApp = modelApp
-        self._model = None
         self.modelAttribute = modelAttribute
         self.modelFilterField = modelFilterField
         self.required = required
+        self._model = None
 
     @property
     def model(self):
@@ -64,6 +64,9 @@ class MojeIDAttribute(object):
         packed = {self.modelFilterField: id}
         return self.model.objects.get(**packed)
 
+    def _get_value(self, response):
+        return response.getSingle(self.schema, None)
+
     def set_model_value(self, id, value):
         record = self._get_record(id)
         if not hasattr(record, self.modelAttribute):
@@ -77,6 +80,9 @@ class MojeIDAttribute(object):
 
     def generate_ax_attrinfo(self):
         return ax.AttrInfo(self.schema, alias=self.code, required=self.required)
+
+    def get_key_and_value(self, response):
+        return (self.modelAttribute, self._get_value(response), )
 
 
 class FullName(MojeIDAttribute):

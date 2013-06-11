@@ -34,6 +34,7 @@ import re
 
 from django.conf import settings
 from django.contrib.auth.models import User, Group
+from django.db.models.loading import get_model
 from openid.consumer.consumer import SUCCESS
 from openid.extensions import ax, sreg, pape
 
@@ -96,6 +97,21 @@ class OpenIDBackend:
                 raise MissingPhysicalMultiFactor()
 
         return user
+
+    def _get_model_changes(self, openid_response):
+
+        attributes = getattr(settings, 'MOJEID_ATTRIBUTES', [])
+
+        fetch_response = ax.FetchResponse.fromSuccessResponse(openid_response)
+
+        res = {}
+        for attribute in attributes:
+            if not attribute.model in res.keys():
+                res[attribute.model] = { 'foreign_key_field_name': attribute.modelFilterField }
+            key, val = attribute.get_key_and_value(fetch_response)
+            res[attribute.model][key] = val
+
+        return res
 
     def _extract_user_details(self, openid_response):
         email = fullname = first_name = last_name = nickname = None
@@ -223,26 +239,31 @@ class OpenIDBackend:
 
     def create_user_from_openid(self, openid_response):
         details = self._extract_user_details(openid_response)
-        required_attrs = getattr(settings, 'OPENID_SREG_REQUIRED_FIELDS', [])
-        if getattr(settings, 'OPENID_STRICT_USERNAMES', False):
-            required_attrs.append('nickname')
+        changes = self._get_model_changes(openid_response)
 
-        for required_attr in required_attrs:
-            if required_attr not in details or not details[required_attr]:
-                raise RequiredAttributeNotReturned(
-                    "An attribute required for logging in was not "
-                    "returned ({0}).".format(required_attr))
+        # Create the main user structure
+        app_name, model_name = getattr(settings, 'MOJEID_USER_MODEL')
+        user_model = get_model(app_name, model_name)
 
-        nickname = self._get_preferred_username(details['nickname'],
-            details['email'])
-        email = details['email'] or ''
+        # Id will be generated no need to set this field
+        del changes[user_model]['foreign_key_field_name']
 
-        username = self._get_available_username(nickname,
-            openid_response.identity_url)
+        user = user_model(**changes[user_model])
+        user.save()
 
-        user = User.objects.create_user(username, email, password=None)
+        # User created
+        del changes[user_model]
+        id = user.id
+
+        # Create other structures
+        for model, kwargs in changes.iteritems():
+            foreign_key_name = kwargs['foreign_key_field_name']
+            del kwargs['foreign_key_field_name']
+            kwargs[foreign_key_name] = id
+            m = model(**kwargs)
+            m.save()
+
         OpenIDBackend.associate_openid(user, openid_response)
-        self.update_user_details(user, details, openid_response)
 
         return user
 
