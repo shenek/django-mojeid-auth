@@ -110,7 +110,7 @@ class OpenIDBackend:
 
         for attribute in attributes:
             if not attribute.model in res.keys():
-                res[attribute.model] = { 'foreign_key_field_name': attribute.modelFilterField }
+                res[attribute.model] = {'user_id_field_name': attribute.user_id_field_name}
             key, val = attribute.get_attribute_and_value(fetch_response)
             res[attribute.model][key] = val
 
@@ -122,7 +122,7 @@ class OpenIDBackend:
         user_model = OpenIDBackend.get_user_model()
 
         # Id will be generated no need to set this field
-        del changes[user_model]['foreign_key_field_name']
+        del changes[user_model]['user_id_field_name']
 
         # Create the main user structure
         user = user_model(**changes[user_model])
@@ -133,8 +133,8 @@ class OpenIDBackend:
 
         # Create other structures
         for model, kwargs in changes.iteritems():
-            foreign_key_name = kwargs['foreign_key_field_name']
-            del kwargs['foreign_key_field_name']
+            foreign_key_name = kwargs['user_id_field_name']
+            del kwargs['user_id_field_name']
             kwargs[foreign_key_name] = user.id
             m = model(**kwargs)
             m.save()
@@ -149,8 +149,8 @@ class OpenIDBackend:
         user_model = OpenIDBackend.get_user_model()
 
         for model, kwargs in changes.iteritems():
-            foreign_key_name = kwargs['foreign_key_field_name']
-            del kwargs['foreign_key_field_name']
+            foreign_key_name = kwargs['user_id_field_name']
+            del kwargs['user_id_field_name']
             model.objects.filter(**{foreign_key_name: user_id}).update(**kwargs)
 
     @staticmethod
