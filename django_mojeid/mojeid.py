@@ -33,6 +33,7 @@ from django.core.exceptions import FieldError, ImproperlyConfigured
 
 from openid.extensions import ax
 
+from django_mojeid.exceptions import RequiredAttributeNotReturned
 
 class MojeIDAttribute(object):
 
@@ -81,8 +82,14 @@ class MojeIDAttribute(object):
     def generate_ax_attrinfo(self):
         return ax.AttrInfo(self.schema, alias=self.code, required=self.required)
 
-    def get_key_and_value(self, response):
-        return (self.modelAttribute, self._get_value(response), )
+    def get_attribute_and_value(self, response):
+        value = self._get_value(response)
+        if self.required and value == None:
+            raise RequiredAttributeNotReturned(
+                "Required Attribute '%s' (%s) was not returned."
+                % (self.code, self.text)
+            )
+        return (self.modelAttribute, value, )
 
 
 class FullName(MojeIDAttribute):

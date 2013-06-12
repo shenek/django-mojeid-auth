@@ -33,18 +33,14 @@ __metaclass__ = type
 import re
 
 from django.conf import settings
-from django.contrib.auth.models import User, Group
 from django.db.models.loading import get_model
 from openid.consumer.consumer import SUCCESS
-from openid.extensions import ax, sreg, pape
+from openid.extensions import ax, pape
 
 from django_mojeid.models import UserOpenID
 from django_mojeid.exceptions import (
     IdentityAlreadyClaimed,
-    DuplicateUsernameViolation,
-    MissingUsernameViolation,
     MissingPhysicalMultiFactor,
-    RequiredAttributeNotReturned,
 )
 
 class OpenIDBackend:
@@ -56,8 +52,9 @@ class OpenIDBackend:
 
     def get_user(self, user_id):
         try:
-            return User.objects.get(pk=user_id)
-        except User.DoesNotExist:
+            user_model = OpenIDBackend.get_user_model()
+            return user_model.objects.get(pk=user_id)
+        except user_model.DoesNotExist:
             return None
 
     def authenticate(self, **kwargs):
@@ -74,21 +71,22 @@ class OpenIDBackend:
             return None
 
         user = None
+        new_user = False
         try:
             user_openid = UserOpenID.objects.get(
                 claimed_id__exact=openid_response.identity_url)
         except UserOpenID.DoesNotExist:
             if getattr(settings, 'OPENID_CREATE_USERS', False):
                 user = self.create_user_from_openid(openid_response)
+                new_user = True
         else:
             user = user_openid.user
 
         if user is None:
             return None
 
-        if getattr(settings, 'OPENID_UPDATE_DETAILS_FROM_SREG', False):
-            details = self._extract_user_details(openid_response)
-            self.update_user_details(user, details, openid_response)
+        if not new_user:
+            self.update_user_from_openid(user.id, openid_response)
 
         if getattr(settings, 'OPENID_PHYSICAL_MULTIFACTOR_REQUIRED', False):
             pape_response = pape.Response.fromSuccessResponse(openid_response)
@@ -108,164 +106,47 @@ class OpenIDBackend:
         for attribute in attributes:
             if not attribute.model in res.keys():
                 res[attribute.model] = { 'foreign_key_field_name': attribute.modelFilterField }
-            key, val = attribute.get_key_and_value(fetch_response)
+            key, val = attribute.get_attribute_and_value(fetch_response)
             res[attribute.model][key] = val
 
         return res
 
-    def _extract_user_details(self, openid_response):
-        email = fullname = first_name = last_name = nickname = None
-        sreg_response = sreg.SRegResponse.fromSuccessResponse(openid_response)
-        if sreg_response:
-            email = sreg_response.get('email')
-            fullname = sreg_response.get('fullname')
-            nickname = sreg_response.get('nickname')
-        # If any attributes are provided via Attribute Exchange, use
-        # them in preference.
-        fetch_response = ax.FetchResponse.fromSuccessResponse(openid_response)
-        if fetch_response:
-            # The myOpenID provider advertises AX support, but uses
-            # attribute names from an obsolete draft of the
-            # specification.  We check for them first so the common
-            # names take precedence.
-            email = fetch_response.getSingle(
-                'http://schema.openid.net/contact/email', email)
-            fullname = fetch_response.getSingle(
-                'http://schema.openid.net/namePerson', fullname)
-            nickname = fetch_response.getSingle(
-                'http://schema.openid.net/namePerson/friendly', nickname)
-
-            email = fetch_response.getSingle(
-                'http://axschema.org/contact/email', email)
-            fullname = fetch_response.getSingle(
-                'http://axschema.org/namePerson', fullname)
-            first_name = fetch_response.getSingle(
-                'http://axschema.org/namePerson/first', first_name)
-            last_name = fetch_response.getSingle(
-                'http://axschema.org/namePerson/last', last_name)
-            nickname = fetch_response.getSingle(
-                'http://axschema.org/namePerson/friendly', nickname)
-
-        if fullname and not (first_name or last_name):
-            # Django wants to store first and last names separately,
-            # so we do our best to split the full name.
-            fullname = fullname.strip()
-            split_names = fullname.rsplit(None, 1)
-            if len(split_names) == 2:
-                first_name, last_name = split_names
-            else:
-                first_name = u''
-                last_name = fullname
-
-        return dict(email=email, nickname=nickname,
-                    first_name=first_name, last_name=last_name)
-
-    def _get_preferred_username(self, nickname, email):
-        if nickname:
-            return nickname
-        if email and getattr(settings, 'OPENID_USE_EMAIL_FOR_USERNAME',
-            False):
-            suggestion = ''.join([x for x in email if x.isalnum()])
-            if suggestion:
-                return suggestion
-        return 'openiduser'
-
-    def _get_available_username(self, nickname, identity_url):
-        # If we're being strict about usernames, throw an error if we didn't
-        # get one back from the provider
-        if getattr(settings, 'OPENID_STRICT_USERNAMES', False):
-            if nickname is None or nickname == '':
-                raise MissingUsernameViolation()
-
-        # If we don't have a nickname, and we're not being strict, use a default
-        nickname = nickname or 'openiduser'
-
-        # See if we already have this nickname assigned to a username
-        try:
-            user = User.objects.get(username__exact=nickname)
-        except User.DoesNotExist:
-            # No conflict, we can use this nickname
-            return nickname
-
-        # Check if we already have nickname+i for this identity_url
-        try:
-            user_openid = UserOpenID.objects.get(
-                claimed_id__exact=identity_url,
-                user__username__startswith=nickname)
-            # No exception means we have an existing user for this identity
-            # that starts with this nickname.
-
-            # If they are an exact match, the user already exists and hasn't
-            # changed their username, so continue to use it
-            if nickname == user_openid.user.username:
-                return nickname
-
-            # It is possible we've had to assign them to nickname+i already.
-            oid_username = user_openid.user.username
-            if len(oid_username) > len(nickname):
-                try:
-                    # check that it ends with a number
-                    int(oid_username[len(nickname):])
-                    return oid_username
-                except ValueError:
-                    # username starts with nickname, but isn't nickname+#
-                    pass
-        except UserOpenID.DoesNotExist:
-            # No user associated with this identity_url
-            pass
-
-
-        if getattr(settings, 'OPENID_STRICT_USERNAMES', False):
-            if User.objects.filter(username__exact=nickname).count() > 0:
-                raise DuplicateUsernameViolation(
-                    "The username (%s) with which you tried to log in is "
-                    "already in use for a different account." % nickname)
-
-        # Pick a username for the user based on their nickname,
-        # checking for conflicts.  Start with number of existing users who's
-        # username starts with this nickname to avoid having to iterate over
-        # all of the existing ones.
-        i = User.objects.filter(username__startswith=nickname).count() + 1
-        while True:
-            username = nickname
-            if i > 1:
-                username += str(i)
-            try:
-                user = User.objects.get(username__exact=username)
-            except User.DoesNotExist:
-                break
-            i += 1
-        return username
-
     def create_user_from_openid(self, openid_response):
-        details = self._extract_user_details(openid_response)
         changes = self._get_model_changes(openid_response)
 
-        # Create the main user structure
-        app_name, model_name = getattr(settings, 'MOJEID_USER_MODEL')
-        user_model = get_model(app_name, model_name)
+        user_model = OpenIDBackend.get_user_model()
 
         # Id will be generated no need to set this field
         del changes[user_model]['foreign_key_field_name']
 
+        # Create the main user structure
         user = user_model(**changes[user_model])
         user.save()
 
-        # User created
+        # User created remove it from the dict
         del changes[user_model]
-        id = user.id
 
         # Create other structures
         for model, kwargs in changes.iteritems():
             foreign_key_name = kwargs['foreign_key_field_name']
             del kwargs['foreign_key_field_name']
-            kwargs[foreign_key_name] = id
+            kwargs[foreign_key_name] = user.id
             m = model(**kwargs)
             m.save()
 
         OpenIDBackend.associate_openid(user, openid_response)
 
         return user
+
+    def update_user_from_openid(self, user_id, openid_response):
+        changes = self._get_model_changes(openid_response)
+
+        user_model = OpenIDBackend.get_user_model()
+
+        for model, kwargs in changes.iteritems():
+            foreign_key_name = kwargs['foreign_key_field_name']
+            del kwargs['foreign_key_field_name']
+            model.objects.filter(**{foreign_key_name: user_id}).update(**kwargs)
 
     @staticmethod
     def associate_openid(user, openid_response):
@@ -288,20 +169,7 @@ class OpenIDBackend:
 
         return user_openid
 
-    def update_user_details(self, user, details, openid_response):
-        updated = False
-        if details['first_name']:
-            user.first_name = details['first_name'][:30]
-            updated = True
-        if details['last_name']:
-            user.last_name = details['last_name'][:30]
-            updated = True
-        if details['email']:
-            user.email = details['email']
-            updated = True
-        if getattr(settings, 'OPENID_FOLLOW_RENAMES', False):
-            user.username = self._get_available_username(details['nickname'], openid_response.identity_url)
-            updated = True
-
-        if updated:
-            user.save()
+    @staticmethod
+    def get_user_model():
+        app_name, model_name = getattr(settings, 'MOJEID_USER_MODEL')
+        return get_model(app_name, model_name)
