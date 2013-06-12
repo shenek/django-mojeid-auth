@@ -80,7 +80,11 @@ class OpenIDBackend:
                 user = self.create_user_from_openid(openid_response)
                 new_user = True
         else:
-            user = user_openid.user
+            user_model = OpenIDBackend.get_user_model()
+            try:
+                user = user_model.objects.get(pk=user_openid.user_id)
+            except user_model.DoesNotExist:
+                user = None
 
         if user is None:
             return None
@@ -162,12 +166,12 @@ class OpenIDBackend:
                 claimed_id__exact=openid_response.identity_url)
         except UserOpenID.DoesNotExist:
             user_openid = UserOpenID(
-                user=user,
+                user_id=user.id,
                 claimed_id=openid_response.identity_url,
                 display_id=openid_response.endpoint.getDisplayIdentifier())
             user_openid.save()
         else:
-            if user_openid.user != user:
+            if user_openid.user_id != user.id:
                 raise IdentityAlreadyClaimed(
                     "The identity %s has already been claimed"
                     % openid_response.identity_url)
