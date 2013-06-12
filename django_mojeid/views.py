@@ -114,6 +114,7 @@ def render_openid_request(request, openid_request, return_to, trust_root=None):
         trust_root = getattr(settings, 'OPENID_TRUST_ROOT',
                              request.build_absolute_uri('/'))
 
+    #import ipdb; ipdb.set_trace()
     if openid_request.shouldSendRedirect():
         redirect_url = openid_request.redirectURL(
             trust_root, return_to)
@@ -227,6 +228,52 @@ def login_begin(request, template_name='openid/login.html',
 
     return render_openid_request(request, openid_request, return_to)
 
+def registration(request, template_name='openid/registration_form.html',
+                login_complete_view='openid-complete',
+                form_class=OpenIDLoginForm,
+                render_failure=default_render_failure,
+                redirect_field_name=REDIRECT_FIELD_NAME):
+    """Begin an OpenID login request, possibly asking for an identity URL."""
+    redirect_to = request.REQUEST.get(redirect_field_name, '')
+
+    # Get the OpenID URL to try.  First see if we've been configured
+    # to use a fixed server URL.
+    #openid_url = 'https://mojeid.cz/registration/endpoint'
+    openid_url = 'https://mojeid.fred.nic.cz/endpoint/'
+    registration_url = 'https://mojeid.fred.nic.cz/registration/endpoint'
+
+    error = None
+    consumer = make_consumer(request)
+    try:
+        openid_request = consumer.begin(openid_url)
+    except DiscoveryFailure, exc:
+        return render_failure(
+            request, "OpenID discovery error: %s" % (str(exc),), status=500,
+            exception=exc)
+
+    realm = 'http://localhost:8000/'
+    nonce = '2013-06-12T13%3A18%3A15ZZFLr1x'
+
+    # Construct the request completion URL, including the page we
+    # should redirect to.
+    return_to = request.build_absolute_uri(reverse(login_complete_view))
+    if redirect_to:
+        if '?' in return_to:
+            return_to += '&'
+        else:
+            return_to += '?'
+        # Django gives us Unicode, which is great.  We must encode URI.
+        # urllib enforces str. We can't trust anything about the default
+        # encoding inside  str(foo) , so we must explicitly make foo a str.
+        return_to += urllib.urlencode(
+            {redirect_field_name: redirect_to.encode("UTF-8")})
+
+    return render_to_response(template_name, {
+            'form': template_name,
+            'action': registration_url,
+            'realm': realm,
+            'nonce': nonce,
+            }, context_instance=RequestContext(request))
 
 @csrf_exempt
 def login_complete(request, redirect_field_name=REDIRECT_FIELD_NAME,

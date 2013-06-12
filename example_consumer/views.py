@@ -50,6 +50,12 @@ def index(request):
     s.append('</p>')
 
     s.append('<p><a href="/private">This requires authentication</a></p>')
+    s.append("""
+        <form action='https://mojeid.cz/registration/endpoint' method='post'>
+            <input name="username"/>
+            <input type="submit" value="Zalozit ucet" />
+        </form>
+""")
     return HttpResponse('\n'.join(s))
 
 
