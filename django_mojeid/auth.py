@@ -96,13 +96,18 @@ class OpenIDBackend:
 
         return user
 
-    def _get_model_changes(self, openid_response):
+    def _get_model_changes(self, openid_response, only_updatable=False):
 
         attributes = getattr(settings, 'MOJEID_ATTRIBUTES', [])
 
         fetch_response = ax.FetchResponse.fromSuccessResponse(openid_response)
 
         res = {}
+
+        # filter remove non-updatable attributes
+        if only_updatable:
+            attributes = [x for x in attributes if x.updatable]
+
         for attribute in attributes:
             if not attribute.model in res.keys():
                 res[attribute.model] = { 'foreign_key_field_name': attribute.modelFilterField }
@@ -139,7 +144,7 @@ class OpenIDBackend:
         return user
 
     def update_user_from_openid(self, user_id, openid_response):
-        changes = self._get_model_changes(openid_response)
+        changes = self._get_model_changes(openid_response, only_updatable=True)
 
         user_model = OpenIDBackend.get_user_model()
 

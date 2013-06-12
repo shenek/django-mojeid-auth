@@ -159,6 +159,6 @@ MOJEID_ATTRIBUTES = [
     Email('auth', 'User', 'email', 'pk'),
     #FullName(User, 'username', 'id'),
     FirstName('auth', 'User', 'first_name', 'pk'),
-    LastName('auth', 'User', 'last_name', 'pk'),
+    LastName('auth', 'User', 'last_name', 'pk', updatable=True),
     NickName('auth', 'User', 'username', 'pk'),
 ]

@@ -37,12 +37,13 @@ from django_mojeid.exceptions import RequiredAttributeNotReturned
 
 class MojeIDAttribute(object):
 
-    def __init__(self, modelApp, modelClass, modelAttribute, modelFilterField='user_id', required=True):
+    def __init__(self, modelApp, modelClass, modelAttribute, modelFilterField='user_id', required=True, updatable=False):
         self.modelClass = modelClass
         self.modelApp = modelApp
         self.modelAttribute = modelAttribute
         self.modelFilterField = modelFilterField
         self.required = required
+        self.updatable = updatable
         self._model = None
 
     @property
