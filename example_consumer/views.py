@@ -39,6 +39,11 @@ def index(request):
                 escape(request.user.username),
                 escape(request.user.get_full_name())))
         s.append(' | <a href="/logout">Sign out</a>')
+
+        if request.user.userextraattributes_set.exists():
+            extra = request.user.userextraattributes_set.all()[0]
+            s.append('<br />adult: %s<br /> student: %s<br /> phone: %s <br />' % (extra.adult, extra.student, extra.phone))
+
     else:
         s.append('<a href="/openid/login">Sign in with OpenID</a>')
 

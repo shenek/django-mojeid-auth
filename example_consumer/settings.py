@@ -125,6 +125,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.messages',
     'django_mojeid',
+    'example_app',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -157,4 +158,6 @@ MOJEID_ATTRIBUTES = [
     FirstName('auth', 'User', 'first_name', 'pk'),
     LastName('auth', 'User', 'last_name', 'pk', updatable=True),
     NickName('auth', 'User', 'username', 'pk'),
+    Student('example_app', 'UserExtraAttributes', 'student', 'user_id', updatable=True),
+    Phone('example_app', 'UserExtraAttributes', 'phone', 'user_id'),
 ]
