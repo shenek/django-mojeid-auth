@@ -116,7 +116,9 @@ class OpenIDBackend:
             if not attribute.model in res.keys():
                 res[attribute.model] = {'user_id_field_name': attribute.user_id_field_name}
             key, val = attribute.get_attribute_and_value(fetch_response)
-            res[attribute.model][key] = val
+
+            if val != None:
+                res[attribute.model][key] = val
 
         return res
 

@@ -156,7 +156,7 @@ MOJEID_ATTRIBUTES = [
     Email('auth', 'User', 'email', 'pk'),
     #FullName(User, 'username', 'id'),
     FirstName('auth', 'User', 'first_name', 'pk'),
-    LastName('auth', 'User', 'last_name', 'pk', updatable=True),
+    LastName('auth', 'User', 'last_name', 'pk', updatable=True, required=False),
     NickName('auth', 'User', 'username', 'pk'),
     Student('example_app', 'UserExtraAttributes', 'student', 'user_id', updatable=True),
     Phone('example_app', 'UserExtraAttributes', 'phone', 'user_id'),
