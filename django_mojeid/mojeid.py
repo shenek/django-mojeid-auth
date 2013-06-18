@@ -92,6 +92,10 @@ class MojeIDAttribute(object):
             )
         return (self.modelAttribute, value, )
 
+class BirthDate(MojeIDAttribute):
+    code = 'birthdate'
+    schema = 'http://axschema.org/birthDate'
+    text = 'Datum Narození'
 
 class FullName(MojeIDAttribute):
     code = 'fullname'
