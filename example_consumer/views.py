@@ -1,7 +1,8 @@
 # django-openid-auth -  OpenID integration for django.contrib.auth
 #
-# Copyright (C) 2007 Simon Willison
+# Copyright (C) 2013 CZ.NIC
 # Copyright (C) 2008-2013 Canonical Ltd.
+# Copyright (C) 2007 Simon Willison
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -30,34 +31,23 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.utils.html import escape
+from django.shortcuts import render
 
 
 def index(request):
-    s = ['<p>']
+    extra = None
+    user = None
     if request.user.is_authenticated():
-        s.append('You are signed in as <strong>%s</strong> (%s)' % (
-                escape(request.user.username),
-                escape(request.user.get_full_name())))
-        s.append(' | <a href="/logout">Sign out</a>')
-
+        user = request.user
         if request.user.userextraattributes_set.exists():
             extra = request.user.userextraattributes_set.all()[0]
-            s.append('<br />adult: %s<br /> student: %s<br /> phone: %s <br />' % (extra.adult, extra.student, extra.phone))
 
-    else:
-        s.append('<a href="/openid/login">Sign in with OpenID</a>')
-
-    s.append('</p>')
-
-    s.append('<p><a href="/private">This requires authentication</a></p>')
-    s.append("""
-        <form action='https://mojeid.cz/registration/endpoint' method='post'>
-            <input name="username"/>
-            <input type="submit" value="Zalozit ucet" />
-        </form>
-""")
-    return HttpResponse('\n'.join(s))
-
+    return render(request, 'index.html',
+                  {
+                      'user': user,
+                      'extra': extra
+                  }
+    )
 
 def next_works(request):
     return HttpResponse('?next= bit works. <a href="/">Home</a>')

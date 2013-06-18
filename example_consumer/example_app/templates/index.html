@@ -1,0 +1,20 @@
+<html>
+    <head><title>MojeID sample</title></head>
+    <body>
+        <p>
+{% if user %}
+            You are signed in as <strong>{{ user.username }}</strong> ({{ user.get_full_name }})
+            <a href="/logout">Sign out</a>
+    {% if extra %}
+            <br />adult: {{ extra.adult }}
+            <br />student: {{ extra.student }} 
+            <br />phone: {{ extra.phone }}
+            <br />
+    {% endif %}
+{% else %}
+        <a href="/openid/login">Sign in with OpenID</a>
+{% endif %}
+        </p>
+        <p><a href="/private">This requires authentication</a></p>
+    </body>
+</html>
