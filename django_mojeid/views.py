@@ -268,8 +268,17 @@ def registration(request, template_name='openid/registration_form.html',
         return_to += urllib.urlencode(
             {redirect_field_name: redirect_to.encode("UTF-8")})
 
+    fields = []
+    attrs = getattr(settings, 'MOJEID_ATTRIBUTES', [])
+    # TDB general user
+    if request.user.is_authenticated():
+        for attr in attrs:
+            form_attr = attr.registration_form_attrs_html(request.user.id)
+            if form_attr:
+                fields.append(form_attr)
+
     return render_to_response(template_name, {
-            'form': template_name,
+            'fields': fields,
             'action': registration_url,
             'realm': realm,
             'nonce': nonce,
