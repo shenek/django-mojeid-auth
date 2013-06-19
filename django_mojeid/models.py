@@ -42,11 +42,15 @@ class Nonce(models.Model):
         return u"Nonce: %s, %s" % (self.server_url, self.salt)
 
     def __init__(self, *args, **kwargs):
+
         # Generate default salt
         if not 'salt' in kwargs:
             kwargs['salt'] = os.urandom(30).encode('base64')[:-1]
+
+        # Set the timestamp if not present
         if not 'timestamp' in kwargs:
             kwargs['timestamp'] = time.time()
+
         super(Nonce, self).__init__(*args, **kwargs)
 
     @property

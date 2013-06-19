@@ -510,3 +510,35 @@ class Image(MojeIDAttribute):
     code = 'image'
     schema = 'http://specs.nic.cz/attr/contact/image'
     text = 'Obrázek (base64)'
+
+class Assertion:
+
+    # Status codes for the assertions
+    class StatusCodes:
+        _codes = [
+                  'REGISTERED',
+                  'CONDITIONALLY_IDENTIFIED',
+                  'IDENTIFIED',
+                  'VALIDATED',
+                 ]
+
+        class __metaclass__(type):
+            def __iter__(self):
+                for attr in self._codes:
+                    yield attr
+
+            def __getattr__(self, name):
+                if name not in self._codes:
+                    raise AttributeError("class %s has no attribute '%s'" %
+                                         (self.__name__, name))
+                return name
+
+
+    #Error strings
+    class ErrorString:
+        BAD_REQUEST = 'Bad request.'
+        MISSING_STATUS = 'Status is missing.'
+        INVALID_STATUS = 'Status is invalid.'
+        MISSING_CLAIMED_ID = 'Claimed ID is missing.'
+        MISSING_NONCE = 'Registration nonce is missing.'
+        INVALID_NONCE = 'Registration nonce is invalid.'

@@ -29,6 +29,7 @@
 
 import re
 import urllib
+
 from urlparse import urlsplit
 
 from django.conf import settings
@@ -50,6 +51,7 @@ from openid.consumer.consumer import (
     Consumer, SUCCESS, CANCEL, FAILURE)
 from openid.consumer.discover import DiscoveryFailure
 from openid.extensions import sreg, ax, pape
+from openid.kvform import dictToKV
 from openid.yadis.constants import YADIS_CONTENT_TYPE
 
 from django_mojeid.forms import OpenIDLoginForm
@@ -63,6 +65,7 @@ from django_mojeid.exceptions import (
 
 from auth import OpenIDBackend
 from models import Nonce
+from mojeid import Assertion
 
 
 next_url_re = re.compile('^/[-\w/]+$')
@@ -331,11 +334,57 @@ def login_complete(request, redirect_field_name=REDIRECT_FIELD_NAME,
         assert False, (
             "Unknown OpenID response type: %r" % openid_response.status)
 
+@csrf_exempt
 def assertion(request):
     """
     MojeID server connects here to propagate a response to the registration
     """
-    pass
+    def _reject(request, error):
+        return HttpResponse(dictToKV({'mode': 'reject', 'reason': error}))
+
+    def _accept(request):
+        return HttpResponse(dictToKV({'mode': 'accept'}))
+
+    # Accept only post
+    if not request.method == 'POST':
+        return _reject(request, Assertion.ErrorString.BAD_REQUEST)
+
+    # Accept only valid status
+    status = request.POST.get('status')
+    if not status:
+        return _reject(request, Assertion.ErrorString.MISSING_STATUS)
+    if not status in Assertion.StatusCodes:
+        return _reject(request, Assertion.ErrorString.INVALID_STATUS)
+
+    # TODO check whether this request is from mojeID server and uses https with a proper certificate
+
+    # Test calimed ID
+    claimed_id = request.POST.get('claimed_id')
+    if not claimed_id:
+        return _reject(request, Assertion.ErrorString.MISSING_CLAIMED_ID)
+
+    # The user was registered for mojeID
+    if status == 'REGISTERED':
+        registration_nonce = request.POST.get('registration_nonce')
+        if registration_nonce is None:
+            return _reject(request, Assertion.ErrorString.MISSING_NONCE)
+
+        # check nonce
+        try:
+            nonce = Nonce.get_registration_nonce(registration_nonce)
+        except Nonce.DoesNotExist:
+            return _reject(request, INVALID_NONCE)
+
+        # Fetch the user
+        ##user = nonce.user_id = ..
+
+        nonce.delete()
+
+        # Create association
+        ##display_id = urlparse.urldefrag(claimed_id)[0]
+        ## UserOpenID(display_id, claimed_id, user_id)
+
+    return _accept(request)
 
 def top(request, template_name='openid/top.html'):
     url = request.build_absolute_uri(reverse(xrds))
