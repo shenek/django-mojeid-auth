@@ -364,7 +364,7 @@ def assertion(request):
         return _reject(request, Assertion.ErrorString.MISSING_CLAIMED_ID)
 
     # The user was registered for mojeID
-    if status == 'REGISTERED':
+    if status == Association.StatusCodes.REGISTERED:
         registration_nonce = request.POST.get('registration_nonce')
         if registration_nonce is None:
             return _reject(request, Assertion.ErrorString.MISSING_NONCE)
@@ -381,6 +381,7 @@ def assertion(request):
         nonce.delete()
 
         # Create association
+        # TODO Throw IdentityAlreadyClaimed if already exists with another user
         ##display_id = urlparse.urldefrag(claimed_id)[0]
         ## UserOpenID(display_id, claimed_id, user_id)
 
