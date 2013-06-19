@@ -38,5 +38,4 @@ urlpatterns = patterns('',
     url(r'^registration/$', views.registration, name='openid-registration'),
     url(r'^initiate/$', views.login_begin, name='openid-init'),
     url(r'^complete/$', views.login_complete, name='openid-complete'),
-    url(r'^logo.gif$', views.logo, name='openid-logo'),
 )
