@@ -145,7 +145,7 @@ class OpenIDBackend:
             m = model(**kwargs)
             m.save()
 
-        OpenIDBackend.associate_openid(user, openid_response)
+        OpenIDBackend.associate_openid_response(user, openid_response)
 
         return user
 
@@ -160,23 +160,31 @@ class OpenIDBackend:
             model.objects.filter(**{foreign_key_name: user_id}).update(**kwargs)
 
     @staticmethod
-    def associate_openid(user, openid_response):
+    def associate_openid_response(user, openid_response):
+        """Associate an OpenID request with a user account."""
+        # Check to see if this OpenID has already been claimed.
+        return OpenIDBackend.associate_openid(
+            user, openid_response.identity_url,
+            openid_response.endpoint.getDisplayIdentifier())
+
+    @staticmethod
+    def associate_openid(user, claimed_id, display_id):
         """Associate an OpenID with a user account."""
         # Check to see if this OpenID has already been claimed.
         try:
             user_openid = UserOpenID.objects.get(
-                claimed_id__exact=openid_response.identity_url)
+                claimed_id__exact=claimed_id)
         except UserOpenID.DoesNotExist:
             user_openid = UserOpenID(
                 user_id=user.id,
-                claimed_id=openid_response.identity_url,
-                display_id=openid_response.endpoint.getDisplayIdentifier())
+                claimed_id=claimed_id,
+                display_id=display_id)
             user_openid.save()
         else:
             if user_openid.user_id != user.id:
                 raise IdentityAlreadyClaimed(
                     "The identity %s has already been claimed"
-                    % openid_response.identity_url)
+                    % claimed_id)
 
         return user_openid
 

@@ -34,6 +34,7 @@ import time
 import urllib
 
 class Nonce(models.Model):
+    user_id = models.IntegerField(null=True)
     server_url = models.CharField(max_length=2047)
     timestamp = models.IntegerField()
     salt = models.CharField(max_length=40)

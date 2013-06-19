@@ -30,7 +30,7 @@
 import re
 import urllib
 
-from urlparse import urlsplit
+from urlparse import urlsplit, urldefrag
 
 from django.conf import settings
 from django.contrib.auth import (
@@ -61,6 +61,7 @@ from django_mojeid.store import DjangoOpenIDStore
 from django_mojeid.exceptions import (
     RequiredAttributeNotReturned,
     DjangoOpenIDException,
+    IdentityAlreadyClaimed,
 )
 
 from auth import OpenIDBackend
@@ -248,8 +249,11 @@ def registration(request, template_name='openid/registration_form.html',
 
     realm = request.build_absolute_uri(reverse(top))
 
+    #TODO generic user sturcture
+    user_id = request.user.id if request.user.is_authenticated() else None
+
     # Create Nonce
-    nonce = Nonce(server_url=realm)
+    nonce = Nonce(server_url=realm, user_id=user_id)
     nonce.save()
 
     # Construct the request completion URL, including the page we
@@ -268,7 +272,7 @@ def registration(request, template_name='openid/registration_form.html',
 
     fields = []
     attrs = getattr(settings, 'MOJEID_ATTRIBUTES', [])
-    # TDB general user
+    # TODO general user
     if request.user.is_authenticated():
         for attr in attrs:
             form_attr = attr.registration_form_attrs_html(request.user.id)
@@ -300,7 +304,7 @@ def login_complete(request, redirect_field_name=REDIRECT_FIELD_NAME,
         try:
             if request.user.is_authenticated():
                 #Create association with currently logged in user
-                    OpenIDBackend.associate_openid(request.user, openid_response)
+                    OpenIDBackend.associate_openid_response(request.user, openid_response)
                     user = request.user
             else:
                 #Create a new user
@@ -375,15 +379,20 @@ def assertion(request):
         except Nonce.DoesNotExist:
             return _reject(request, Assertion.ErrorString.INVALID_NONCE)
 
-        # Fetch the user
-        ##user = nonce.user_id = ..
-
+        user_id = nonce.user_id
         nonce.delete()
 
-        # Create association
-        # TODO Throw IdentityAlreadyClaimed if already exists with another user
-        ##display_id = urlparse.urldefrag(claimed_id)[0]
-        ## UserOpenID(display_id, claimed_id, user_id)
+        # Fetch the user
+        user_model = OpenIDBackend.get_user_model()
+        try:
+            user = user_model.objects.get(pk=user_id)
+            display_id = urldefrag(claimed_id)[0]
+            # Create association
+            OpenIDBackend.associate_openid(user, claimed_id, display_id)
+        except (user_model.DoesNotExist, IdentityAlreadyClaimed):
+            # Don't associte the user when the user doesn't exist or is already claimed
+            # And assume that server sent us a valid claimed_id
+            pass
 
     return _accept(request)
 
