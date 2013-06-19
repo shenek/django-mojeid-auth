@@ -541,4 +541,3 @@ class Assertion:
         MISSING_CLAIMED_ID = 'Claimed ID is missing.'
         MISSING_NONCE = 'Registration nonce is missing.'
         INVALID_NONCE = 'Registration nonce is invalid.'
-        ASSOCIATION_FAILED = 'Assocation with user failed.'
