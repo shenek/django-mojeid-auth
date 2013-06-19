@@ -116,7 +116,7 @@ def render_openid_request(request, openid_request, return_to, trust_root=None):
     """Render an OpenID authentication request."""
     if trust_root is None:
         trust_root = getattr(settings, 'OPENID_TRUST_ROOT',
-                             request.build_absolute_uri('/'))
+                             request.build_absolute_uri(reverse(top)))
 
     #import ipdb; ipdb.set_trace()
     if openid_request.shouldSendRedirect():

@@ -533,7 +533,6 @@ class Assertion:
                                          (self.__name__, name))
                 return name
 
-
     #Error strings
     class ErrorString:
         BAD_REQUEST = 'Bad request.'
