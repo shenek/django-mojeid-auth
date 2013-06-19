@@ -29,8 +29,9 @@
 
 from django.db import models
 
+import os
+import time
 import urllib
-
 
 class Nonce(models.Model):
     server_url = models.CharField(max_length=2047)
@@ -39,6 +40,23 @@ class Nonce(models.Model):
 
     def __unicode__(self):
         return u"Nonce: %s, %s" % (self.server_url, self.salt)
+
+    def __init__(self, *args, **kwargs):
+        # Generate default salt
+        if not 'salt' in kwargs:
+            kwargs['salt'] = os.urandom(30).encode('base64')[:-1]
+        if not 'timestamp' in kwargs:
+            kwargs['timestamp'] = time.time()
+        super(Nonce, self).__init__(*args, **kwargs)
+
+    @property
+    def registration_nonce(self):
+        return "%d==%s" % (self.timestamp, self.salt)
+
+    @classmethod
+    def get_registration_nonce(cls, registration_nonce):
+        timestamp, salt = registration_nonce.split('==')
+        return cls.objects.get(timestamp=timestamp, salt=salt)
 
 
 class Association(models.Model):

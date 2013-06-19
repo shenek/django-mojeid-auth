@@ -4,7 +4,11 @@
     <XRD>
         <Service>
             <Type>http://specs.openid.net/auth/2.0/return_to</Type>
-            <URI>{{ url }}</URI>
+            <URI>{{ return_to_url }}</URI>
+        </Service>
+        <Service>
+            <Type>http://specs.nic.cz/registration/assert_url</Type>
+            <URI>{{ assertion_url }}</URI>
         </Service>
     </XRD>
 </xrds:XRDS>

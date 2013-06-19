@@ -62,6 +62,7 @@ from django_mojeid.exceptions import (
 )
 
 from auth import OpenIDBackend
+from models import Nonce
 
 
 next_url_re = re.compile('^/[-\w/]+$')
@@ -244,7 +245,9 @@ def registration(request, template_name='openid/registration_form.html',
 
     realm = request.build_absolute_uri(reverse(top))
 
-    nonce = '2013-06-12T13%3A18%3A15ZZFLr1x'
+    # Create Nonce
+    nonce = Nonce(server_url=realm)
+    nonce.save()
 
     # Construct the request completion URL, including the page we
     # should redirect to.
@@ -273,7 +276,7 @@ def registration(request, template_name='openid/registration_form.html',
             'fields': fields,
             'action': registration_url,
             'realm': realm,
-            'nonce': nonce,
+            'nonce': nonce.registration_nonce,
             }, context_instance=RequestContext(request))
 
 @csrf_exempt
@@ -328,6 +331,12 @@ def login_complete(request, redirect_field_name=REDIRECT_FIELD_NAME,
         assert False, (
             "Unknown OpenID response type: %r" % openid_response.status)
 
+def assertion(request):
+    """
+    MojeID server connects here to propagate a response to the registration
+    """
+    pass
+
 def top(request, template_name='openid/top.html'):
     url = request.build_absolute_uri(reverse(xrds))
     title = getattr(settings, 'OPENID_APP_TITLE', 'OpenID Backend')
@@ -336,8 +345,11 @@ def top(request, template_name='openid/top.html'):
                              )
 
 def xrds(request, template_name='openid/xrds.xml'):
-    url = request.build_absolute_uri(reverse(login_complete))
-    return render_to_response(template_name, { 'url': url },
+    return_to_url = request.build_absolute_uri(reverse(login_complete))
+    assertion_url = request.build_absolute_uri(reverse(assertion))
+    return render_to_response(template_name,
+                              {'return_to_url': return_to_url,
+                               'assertion_url': assertion_url},
                               context_instance=RequestContext(request),
                               content_type=YADIS_CONTENT_TYPE
                              )
