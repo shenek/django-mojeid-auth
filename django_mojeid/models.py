@@ -59,6 +59,10 @@ class Nonce(models.Model):
 
     @classmethod
     def get_registration_nonce(cls, registration_nonce):
+        # separate using first '=='
+        splitted = registration_nonce.split('==', 1)
+        if len(splitted) < 2:
+            raise cls.DoesNotExist
         timestamp, salt = registration_nonce.split('==')
         return cls.objects.get(timestamp=timestamp, salt=salt)
 

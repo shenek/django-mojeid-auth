@@ -364,7 +364,7 @@ def assertion(request):
         return _reject(request, Assertion.ErrorString.MISSING_CLAIMED_ID)
 
     # The user was registered for mojeID
-    if status == Association.StatusCodes.REGISTERED:
+    if status == Assertion.StatusCodes.REGISTERED:
         registration_nonce = request.POST.get('registration_nonce')
         if registration_nonce is None:
             return _reject(request, Assertion.ErrorString.MISSING_NONCE)
@@ -373,7 +373,7 @@ def assertion(request):
         try:
             nonce = Nonce.get_registration_nonce(registration_nonce)
         except Nonce.DoesNotExist:
-            return _reject(request, INVALID_NONCE)
+            return _reject(request, Assertion.ErrorString.INVALID_NONCE)
 
         # Fetch the user
         ##user = nonce.user_id = ..
