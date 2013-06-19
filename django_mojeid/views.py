@@ -240,16 +240,7 @@ def registration(request, template_name='openid/registration_form.html',
     # to use a fixed server URL.
     #openid_url = 'https://mojeid.cz/registration/endpoint'
     openid_url = 'https://mojeid.fred.nic.cz/endpoint/'
-    registration_url = 'https://mojeid.fred.nic.cz/registration/endpoint'
-
-    error = None
-    consumer = make_consumer(request)
-    try:
-        openid_request = consumer.begin(openid_url)
-    except DiscoveryFailure, exc:
-        return render_failure(
-            request, "OpenID discovery error: %s" % (str(exc),), status=500,
-            exception=exc)
+    registration_url = 'https://mojeid.fred.nic.cz/registration/endpoint/'
 
     realm = 'http://localhost:8000/'
     nonce = '2013-06-12T13%3A18%3A15ZZFLr1x'
