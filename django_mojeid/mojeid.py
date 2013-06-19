@@ -430,31 +430,31 @@ class ICQ(MojeIDAttribute):
     code = 'icq'
     schema = 'http://axschema.org/contact/IM/ICQ'
     text = 'IM – ICQ'
-    registration_field = 'urladdress__icq__username'
+    registration_field = 'imaccount__icq__username'
 
 class Jabber(MojeIDAttribute):
     code = 'jabber'
     schema = 'http://axschema.org/contact/IM/Jabber'
     text = 'IM – Jabber'
-    registration_field = 'urladdress__jabber__username'
+    registration_field = 'imaccount__jabber__username'
 
 class Skype(MojeIDAttribute):
     code = 'skype'
     schema = 'http://axschema.org/contact/IM/Skype'
     text = 'IM – Skype'
-    registration_field = 'urladdress__skype__username'
+    registration_field = 'imaccount__skype__username'
 
 class GoogleTalk(MojeIDAttribute):
     code = 'gtalk'
     schema = 'http://specs.nic.cz/attr/im/google_talk'
     text = 'IM – Google Talk'
-    registration_field = 'urladdress__google_talk__username'
+    registration_field = 'imaccount__google_talk__username'
 
 class WindowsLive(MojeIDAttribute):
     code = 'wlive'
     schema = 'http://specs.nic.cz/attr/im/windows_live'
     text = 'IM – Windows Live'
-    registration_field = 'urladdress__windows_live__username'
+    registration_field = 'imaccout__windows_live__username'
 
 class ICO(MojeIDAttribute):
     code = 'vat_id'
