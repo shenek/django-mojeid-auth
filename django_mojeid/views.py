@@ -342,7 +342,7 @@ def top(request, template_name='openid/top.html'):
                              )
 
 def xrds(request, template_name='openid/xrds.xml'):
-    url = request.build_absolute_uri(reverse(top))
+    url = request.build_absolute_uri(reverse(login_complete))
     return render_to_response(template_name, { 'url': url },
                               context_instance=RequestContext(request),
                               content_type=YADIS_CONTENT_TYPE
