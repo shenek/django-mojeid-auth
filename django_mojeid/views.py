@@ -242,7 +242,8 @@ def registration(request, template_name='openid/registration_form.html',
     openid_url = 'https://mojeid.fred.nic.cz/endpoint/'
     registration_url = 'https://mojeid.fred.nic.cz/registration/endpoint/'
 
-    realm = 'http://localhost:8000/'
+    realm = request.build_absolute_uri(reverse(top))
+
     nonce = '2013-06-12T13%3A18%3A15ZZFLr1x'
 
     # Construct the request completion URL, including the page we
