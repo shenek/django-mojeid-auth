@@ -27,11 +27,9 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""Glue between OpenID and django.contrib.auth."""
+"""OpenID authentication"""
 
 __metaclass__ = type
-
-import re
 
 from django.conf import settings
 from django.db.models.loading import get_model

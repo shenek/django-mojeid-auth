@@ -166,7 +166,6 @@ def login_show(request, login_template='openid/login.html',
             OpenIDBackend.get_redirect_field_name(): redirect_to
             }, context_instance=RequestContext(request))
 
-@require_POST
 def login_begin(request, template_name='openid/login.html',
                 login_complete_view='openid-complete',
                 form_class=OpenIDLoginForm,
@@ -176,16 +175,11 @@ def login_begin(request, template_name='openid/login.html',
 
     # Get the OpenID URL to try.  First see if we've been configured
     # to use a fixed server URL.
-    openid_url = getattr(settings, 'OPENID_SSO_SERVER_URL', None)
+    openid_url = 'https://mojeid.fred.nic.cz/endpoint/'
 
     login_form = form_class(data=request.POST)
     if login_form.is_valid():
-            openid_url = login_form.cleaned_data['openid_identifier']
-    else:
-        if not openid_url:
-            return login_show(request, login_template=template_name,
-                              form_class=form_class,
-                              redirect_field_name=redirect_field_name)
+        openid_url = login_form.cleaned_data['openid_identifier']
 
     error = None
     consumer = make_consumer(request)
@@ -226,7 +220,7 @@ def login_begin(request, template_name='openid/login.html',
         # urllib enforces str. We can't trust anything about the default
         # encoding inside  str(foo) , so we must explicitly make foo a str.
         return_to += urllib.urlencode(
-            {redirect_field_name: redirect_to.encode("UTF-8")})
+            {OpenIDBackend.get_redirect_field_name(): redirect_to.encode("UTF-8")})
 
     return render_openid_request(request, openid_request, return_to)
 
