@@ -33,6 +33,8 @@ __metaclass__ = type
 
 from django.conf import settings
 from django.db.models.loading import get_model
+from django.core.exceptions import ValidationError
+
 from openid.consumer.consumer import SUCCESS
 from openid.extensions import ax, pape
 
@@ -40,6 +42,7 @@ from django_mojeid.models import UserOpenID
 from django_mojeid.exceptions import (
     IdentityAlreadyClaimed,
     MissingPhysicalMultiFactor,
+    DuplicateUserViolation,
 )
 
 class OpenIDBackend:
@@ -176,7 +179,12 @@ class OpenIDBackend:
 
         # Create the main user structure
         user = user_model(**changes[user_model])
+        try:
+            user.validate_unique()
+        except ValidationError, e:
+            raise DuplicateUserViolation(", ".join(e.messages))
         user.save()
+
 
         # User created remove it from the dict
         del changes[user_model]

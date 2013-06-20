@@ -42,11 +42,11 @@ class IdentityAlreadyClaimed(DjangoOpenIDException):
         else:
             self.message = message
 
-class DuplicateUsernameViolation(DjangoOpenIDException):
+class DuplicateUserViolation(DjangoOpenIDException):
 
     def __init__(self, message=None):
         if message is None:
-            self.message = "Your desired username is already being used."
+            self.message = "Your user was already being used."
         else:
             self.message = message
 
