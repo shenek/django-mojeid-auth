@@ -1,7 +1,8 @@
 # django-openid-auth -  OpenID integration for django.contrib.auth
 #
-# Copyright (C) 2007 Simon Willison
+# Copyright (C) 2013 CZ.NIC
 # Copyright (C) 2008-2013 Canonical Ltd.
+# Copyright (C) 2007 Simon Willison
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,8 +34,6 @@ import urllib
 from urlparse import urlsplit, urldefrag
 
 from django.conf import settings
-from django.contrib.auth import (
-    REDIRECT_FIELD_NAME, authenticate, login as auth_login)
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
@@ -151,10 +150,9 @@ def parse_openid_response(request):
 
 def login_show(request, login_template='openid/login.html',
                associate_temlate='openid/associate.html',
-               form_class=OpenIDLoginForm,
-               redirect_field_name=REDIRECT_FIELD_NAME):
+               form_class=OpenIDLoginForm):
 
-    redirect_to = request.REQUEST.get(redirect_field_name, '')
+    redirect_to = OpenIDBackend.get_redirect_to(request)
 
     login_form = form_class(request.POST or None)
 
@@ -165,17 +163,16 @@ def login_show(request, login_template='openid/login.html',
     return render_to_response(template_name, {
             'form': login_form,
             'action': reverse('openid-init'),
-            redirect_field_name: redirect_to
+            OpenIDBackend.get_redirect_field_name(): redirect_to
             }, context_instance=RequestContext(request))
 
 @require_POST
 def login_begin(request, template_name='openid/login.html',
                 login_complete_view='openid-complete',
                 form_class=OpenIDLoginForm,
-                render_failure=default_render_failure,
-                redirect_field_name=REDIRECT_FIELD_NAME):
+                render_failure=default_render_failure):
     """Begin an OpenID login request, possibly asking for an identity URL."""
-    redirect_to = request.REQUEST.get(redirect_field_name, '')
+    redirect_to = OpenIDBackend.get_redirect_to(request)
 
     # Get the OpenID URL to try.  First see if we've been configured
     # to use a fixed server URL.
@@ -236,15 +233,9 @@ def login_begin(request, template_name='openid/login.html',
 def registration(request, template_name='openid/registration_form.html',
                 login_complete_view='openid-complete',
                 form_class=OpenIDLoginForm,
-                render_failure=default_render_failure,
-                redirect_field_name=REDIRECT_FIELD_NAME):
+                render_failure=default_render_failure):
     """Begin an OpenID login request, possibly asking for an identity URL."""
-    redirect_to = request.REQUEST.get(redirect_field_name, '')
 
-    # Get the OpenID URL to try.  First see if we've been configured
-    # to use a fixed server URL.
-    #openid_url = 'https://mojeid.cz/registration/endpoint'
-    openid_url = 'https://mojeid.fred.nic.cz/endpoint/'
     registration_url = 'https://mojeid.fred.nic.cz/registration/endpoint/'
 
     realm = request.build_absolute_uri(reverse(top))
@@ -255,20 +246,6 @@ def registration(request, template_name='openid/registration_form.html',
     # Create Nonce
     nonce = Nonce(server_url=realm, user_id=user_id)
     nonce.save()
-
-    # Construct the request completion URL, including the page we
-    # should redirect to.
-    return_to = request.build_absolute_uri(reverse(login_complete_view))
-    if redirect_to:
-        if '?' in return_to:
-            return_to += '&'
-        else:
-            return_to += '?'
-        # Django gives us Unicode, which is great.  We must encode URI.
-        # urllib enforces str. We can't trust anything about the default
-        # encoding inside  str(foo) , so we must explicitly make foo a str.
-        return_to += urllib.urlencode(
-            {redirect_field_name: redirect_to.encode("UTF-8")})
 
     fields = []
     attrs = getattr(settings, 'MOJEID_ATTRIBUTES', [])
@@ -287,9 +264,8 @@ def registration(request, template_name='openid/registration_form.html',
             }, context_instance=RequestContext(request))
 
 @csrf_exempt
-def login_complete(request, redirect_field_name=REDIRECT_FIELD_NAME,
-                   render_failure=None):
-    redirect_to = request.REQUEST.get(redirect_field_name, '')
+def login_complete(request, render_failure=None):
+    redirect_to = OpenIDBackend.get_redirect_to(request)
     render_failure = render_failure or \
                      getattr(settings, 'OPENID_RENDER_FAILURE', None) or \
                      default_render_failure
@@ -309,12 +285,13 @@ def login_complete(request, redirect_field_name=REDIRECT_FIELD_NAME,
                 OpenIDBackend.associate_openid_response(user_orig, openid_response)
             else:
                 #Create a new user
-                user_new = authenticate(openid_response=openid_response)
+                user_new = OpenIDBackend.authenticate_using_all_backends(
+                    openid_response=openid_response)
                 if not user_new:
                     return render_failure(request, 'Unknown user')
                 if not OpenIDBackend.is_user_active(user_new):
                     return render_failure(request, 'Disabled account')
-                auth_login(request, user_new)
+                OpenIDBackend.associate_user_with_session(request, user_new)
         except DjangoOpenIDException, e:
             return render_failure(request, e.message, exception=e)
 

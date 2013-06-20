@@ -45,8 +45,7 @@ from django_mojeid.exceptions import (
 )
 
 class OpenIDBackend:
-    """A django.contrib.auth backend that authenticates the user based on
-    an OpenID response."""
+    """A backend that authenticates the user based on an OpenID response."""
 
     supports_object_permissions = False
     supports_anonymous_user = True
@@ -76,6 +75,33 @@ class OpenIDBackend:
         """This method can be overwritten to implement custom user/session mechanizms
         currently it uses standard django.contrib.auth"""
         return user.is_authenticated() if user else False
+
+    @classmethod
+    def get_redirect_to(cls, request):
+        """This method can be overwritten to implement custom user/session mechanizms
+        currently it uses standard django.contrib.auth"""
+        return request.REQUEST.get(cls.get_redirect_field_name(), '')
+
+    @classmethod
+    def get_redirect_field_name(cls):
+        """This method can be overwritten to implement custom user/session mechanizms
+        currently it uses standard django.contrib.auth"""
+        from django.contrib.auth import REDIRECT_FIELD_NAME
+        return REDIRECT_FIELD_NAME
+
+    @staticmethod
+    def authenticate_using_all_backends(**credentials):
+        """This method can be overwritten to implement custom user/session mechanizms
+        currently it uses standard django.contrib.auth"""
+        from django.contrib.auth import authenticate
+        return authenticate(**credentials)
+
+    @staticmethod
+    def associate_user_with_session(request, user):
+        """This method can be overwritten to implement custom user/session mechanizms
+        currently it uses standard django.contrib.auth"""
+        from django.contrib.auth import login as auth_login
+        return auth_login(request, user)
 
     def authenticate(self, **kwargs):
         """Authenticate the user based on an OpenID response."""
