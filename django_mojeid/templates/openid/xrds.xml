@@ -3,6 +3,10 @@
     xmlns="xri://$xrd*($v*2.0)">
     <XRD>
         <Service>
+            <Type>http://specs.openid.net/auth/2.0/signon</Type>
+            <URI>{{ top_url }}</URI>
+        </Service>
+        <Service>
             <Type>http://specs.openid.net/auth/2.0/return_to</Type>
             <URI>{{ return_to_url }}</URI>
         </Service>
