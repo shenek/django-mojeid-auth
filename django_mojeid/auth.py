@@ -1,5 +1,6 @@
 # django-openid-auth -  OpenID integration for django.contrib.auth
 #
+# Copyright (C) 2013 CZ.NIC
 # Copyright (C) 2008-2013 Canonical Ltd.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -50,12 +51,31 @@ class OpenIDBackend:
     supports_object_permissions = False
     supports_anonymous_user = True
 
-    def get_user(self, user_id):
+    @classmethod
+    def get_user(cls, user_id):
         try:
             user_model = OpenIDBackend.get_user_model()
             return user_model.objects.get(pk=user_id)
         except user_model.DoesNotExist:
             return None
+
+    @classmethod
+    def get_user_from_request(cls, request):
+        """This method can be overwritten to implement custom user/session mechanizms
+        currently it uses standard django.contrib.auth"""
+        return request.user if request.user.is_authenticated() else None
+
+    @classmethod
+    def is_user_active(cls, user):
+        """This method can be overwritten to implement custom user/session mechanizms
+        currently it uses standard django.contrib.auth"""
+        return user.is_active if user else False
+
+    @classmethod
+    def is_user_authenticated(cls, user):
+        """This method can be overwritten to implement custom user/session mechanizms
+        currently it uses standard django.contrib.auth"""
+        return user.is_authenticated() if user else False
 
     def authenticate(self, **kwargs):
         """Authenticate the user based on an OpenID response."""

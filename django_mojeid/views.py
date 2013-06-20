@@ -35,7 +35,6 @@ from urlparse import urlsplit, urldefrag
 from django.conf import settings
 from django.contrib.auth import (
     REDIRECT_FIELD_NAME, authenticate, login as auth_login)
-from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
@@ -119,7 +118,6 @@ def render_openid_request(request, openid_request, return_to, trust_root=None):
         trust_root = getattr(settings, 'OPENID_TRUST_ROOT',
                              request.build_absolute_uri(reverse(top)))
 
-    #import ipdb; ipdb.set_trace()
     if openid_request.shouldSendRedirect():
         redirect_url = openid_request.redirectURL(
             trust_root, return_to)
@@ -160,7 +158,9 @@ def login_show(request, login_template='openid/login.html',
 
     login_form = form_class(request.POST or None)
 
-    template_name = associate_temlate if request.user.is_authenticated() else login_template
+    user = OpenIDBackend.get_user_from_request(request)
+
+    template_name = associate_temlate if user else login_template
 
     return render_to_response(template_name, {
             'form': login_form,
@@ -249,8 +249,8 @@ def registration(request, template_name='openid/registration_form.html',
 
     realm = request.build_absolute_uri(reverse(top))
 
-    #TODO generic user sturcture
-    user_id = request.user.id if request.user.is_authenticated() else None
+    user = OpenIDBackend.get_user_from_request(request)
+    user_id = user.id if user else None
 
     # Create Nonce
     nonce = Nonce(server_url=realm, user_id=user_id)
@@ -272,10 +272,10 @@ def registration(request, template_name='openid/registration_form.html',
 
     fields = []
     attrs = getattr(settings, 'MOJEID_ATTRIBUTES', [])
-    # TODO general user
-    if request.user.is_authenticated():
+    # Append attributes to creation request
+    if user:
         for attr in attrs:
-            form_attr = attr.registration_form_attrs_html(request.user.id)
+            form_attr = attr.registration_form_attrs_html(user_id)
             if form_attr:
                 fields.append(form_attr)
 
@@ -299,35 +299,33 @@ def login_complete(request, redirect_field_name=REDIRECT_FIELD_NAME,
         return render_failure(
             request, 'This is an OpenID relying party endpoint.')
 
+    user_orig = OpenIDBackend.get_user_from_request(request)
+
     if openid_response.status == SUCCESS:
 
         try:
-            if request.user.is_authenticated():
+            if user_orig:
                 #Create association with currently logged in user
-                    OpenIDBackend.associate_openid_response(request.user, openid_response)
-                    user = request.user
+                OpenIDBackend.associate_openid_response(user_orig, openid_response)
             else:
                 #Create a new user
-                user = authenticate(openid_response=openid_response)
+                user_new = authenticate(openid_response=openid_response)
+                if not user_new:
+                    return render_failure(request, 'Unknown user')
+                if not OpenIDBackend.is_user_active(user_new):
+                    return render_failure(request, 'Disabled account')
+                auth_login(request, user_new)
         except DjangoOpenIDException, e:
             return render_failure(request, e.message, exception=e)
 
-        if user is not None:
+        response = HttpResponseRedirect(sanitise_redirect_url(redirect_to))
 
-            if user.is_active and not request.user.is_authenticated():
-                auth_login(request, user)
-            elif not request.user.is_authenticated():
-                return render_failure(request, 'Disabled account')
+        # Notify any listeners that we successfully logged in.
+        openid_login_complete.send(sender=UserOpenID, request=request,
+            openid_response=openid_response)
 
-            response = HttpResponseRedirect(sanitise_redirect_url(redirect_to))
+        return response
 
-            # Notify any listeners that we successfully logged in.
-            openid_login_complete.send(sender=UserOpenID, request=request,
-                openid_response=openid_response)
-
-            return response
-        else:
-            return render_failure(request, 'Unknown user')
     elif openid_response.status == FAILURE:
         return render_failure(
             request, 'OpenID authentication failed: %s' %
