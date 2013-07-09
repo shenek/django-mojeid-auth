@@ -1,4 +1,5 @@
 <form action='/openid/initiate'>
-    <input type="hidden" name="next" value="{{ request.get_full_path }}"></input>
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{% if redirect %}{{ redirect }}{% else %}{{ request.get_full_path }}{% endif %}"></input>
     <input type="image"  src="/static/mojeid/black_162x32.png"></input>
 </form>

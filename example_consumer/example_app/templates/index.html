@@ -1,6 +1,7 @@
 <html>
     <head><title>MojeID sample</title></head>
     <body>
+        <h1>Index</h1>
         <p>
 {% if user %}
             You are signed in as <strong>{{ user.username }}</strong> ({{ user.get_full_name }})
@@ -12,9 +13,14 @@
             <br />
     {% endif %}
 {% else %}
-        <a href="/openid/login">Sign in with OpenID</a>
-        <br />
-        {% include "mojeid/_login.html" %}
+        <p>
+            {% include "openid/_login.html" %}
+        </p>
+        <p>
+            {% include "mojeid/_login.html" %}
+            <a href="http://www.mojeid.cz/page/805/vyhody-mojeid/">Proč mojeID?</a>
+            <a href="{% url 'openid-registration' %}">Nový účet mojeID</a>
+        </p>
 {% endif %}
         </p>
         <p><a href="/private">This requires authentication</a></p>

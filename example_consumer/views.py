@@ -32,7 +32,17 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.utils.html import escape
 from django.shortcuts import render
+from django.conf import settings
+from django_mojeid.auth import OpenIDBackend
 
+def login(request):
+    # Get the redirect field from url
+    redirect = OpenIDBackend.get_redirect_to(request)
+
+    # If the redirect is not in url get the defualt
+    redirect = redirect if redirect else getattr(settings, "LOGIN_REDIRECT_URL", None)
+
+    return render(request, 'login.html', {'redirect': redirect})
 
 def index(request):
     extra = None

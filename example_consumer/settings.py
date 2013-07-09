@@ -144,7 +144,7 @@ OPENID_CREATE_USERS = True
 OPENID_SSO_SERVER_URL = 'https://mojeid.cz/endpoint'
 
 # Tell django.contrib.auth to use the OpenID signin URLs.
-LOGIN_URL = '/openid/login/'
+LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 
 # Should django_auth_openid be used to sign into the admin interface?
