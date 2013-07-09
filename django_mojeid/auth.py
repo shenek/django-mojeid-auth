@@ -78,6 +78,12 @@ class OpenIDBackend:
         return user.is_authenticated() if user else False
 
     @classmethod
+    def is_user_associated_with_openid(cls, user):
+        if not user:
+            return False
+        return UserOpenID.objects.filter(user_id=user.id).exists()
+
+    @classmethod
     def get_redirect_to(cls, request):
         """This method can be overwritten to implement custom user/session mechanizms
         currently it uses standard django.contrib.auth"""

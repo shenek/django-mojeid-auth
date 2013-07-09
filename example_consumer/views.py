@@ -55,6 +55,7 @@ def index(request):
     return render(request, 'index.html',
                   {
                       'user': user,
+                      'associated': OpenIDBackend.is_user_associated_with_openid(user),
                       'extra': extra
                   }
     )
