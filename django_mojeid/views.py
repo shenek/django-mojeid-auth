@@ -200,7 +200,7 @@ def login_begin(request, template_name='openid/login.html',
 
     if attributes:
         openid_request.addExtension(fetch_request)
-            
+
     if getattr(settings, 'OPENID_PHYSICAL_MULTIFACTOR_REQUIRED', False):
         preferred_auth = [
             pape.AUTH_MULTI_FACTOR_PHYSICAL,

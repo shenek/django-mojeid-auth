@@ -13,7 +13,8 @@
     {% endif %}
 {% else %}
         <a href="/openid/login">Sign in with OpenID</a>
-        <a href="/openid/initiate">Sign in with MojeID</a>
+        <br />
+        {% include "mojeid/_login.html" %}
 {% endif %}
         </p>
         <p><a href="/private">This requires authentication</a></p>
