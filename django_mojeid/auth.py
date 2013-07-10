@@ -84,6 +84,17 @@ class OpenIDBackend:
         return UserOpenID.objects.filter(user_id=user.id).exists()
 
     @classmethod
+    def get_user_association(cls, user):
+        if not user:
+            return None
+        try:
+            association = UserOpenID.objects.get(user_id=user.id)
+        except UserOpenID.DoesNotExist:
+            association = None
+
+        return association
+
+    @classmethod
     def get_redirect_to(cls, request):
         """This method can be overwritten to implement custom user/session mechanizms
         currently it uses standard django.contrib.auth"""

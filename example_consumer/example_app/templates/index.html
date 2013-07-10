@@ -12,7 +12,7 @@
             <br />phone: {{ extra.phone }}
             <br />
     {% endif %}
-    {% if not associated %}
+    {% if not association %}
         <p>
             {% include "openid/_associate.html" %}
         </p>
@@ -22,6 +22,13 @@
             <a href="http://www.mojeid.cz/page/805/vyhody-mojeid/">Proč mojeID?</a>
             <a href="{% url 'openid-registration' %}">Nový účet mojeID</a>
         </div>
+    {% else %}
+            Associated with: {{ association }}
+            <form action='{% url 'openid-disassociate' %}' method='post'>
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}"></input>
+                <input type="submit" value="Disassociate"></input>
+            </form>
     {% endif %}
 {% else %}
         <p>

@@ -40,6 +40,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
+from django.http import Http404
 try:
     from django.views.decorators.csrf import csrf_exempt
 except ImportError:
@@ -381,3 +382,17 @@ def xrds(request, template_name='openid/xrds.xml'):
                               context_instance=RequestContext(request),
                               content_type=YADIS_CONTENT_TYPE
                              )
+@require_POST
+def disassociate(request):
+    user = OpenIDBackend.get_user_from_request(request)
+    if not user:
+        raise Http404
+    association = OpenIDBackend.get_user_association(user)
+    if not association:
+        raise Http404
+    association.delete()
+
+    redirect = OpenIDBackend.get_redirect_to(request)
+    redirect = redirect if redirect else getattr(settings, 'LOGIN_REDIRECT_URL', '/')
+
+    return HttpResponseRedirect(sanitise_redirect_url(redirect))
