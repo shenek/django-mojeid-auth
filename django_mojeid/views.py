@@ -55,7 +55,7 @@ from openid.yadis.constants import YADIS_CONTENT_TYPE
 
 from django_mojeid.forms import OpenIDLoginForm
 from django_mojeid.models import UserOpenID
-from django_mojeid.signals import openid_login_complete
+from django_mojeid.signals import openid_login_complete, user_login_report
 from django_mojeid.store import DjangoOpenIDStore
 from django_mojeid.exceptions import (
     RequiredAttributeNotReturned,
@@ -271,6 +271,7 @@ def login_complete(request, render_failure=None):
             request, 'This is an OpenID relying party endpoint.')
 
     user_orig = OpenIDBackend.get_user_from_request(request)
+    user_model = OpenIDBackend.get_user_model()
 
     if openid_response.status == SUCCESS:
 
@@ -288,23 +289,60 @@ def login_complete(request, render_failure=None):
                     return render_failure(request, 'Disabled account')
                 OpenIDBackend.associate_user_with_session(request, user_new)
         except DjangoOpenIDException, e:
+            # Send signal to log the login attempt
+            try:
+                user_id = UserOpenID.objects.get(claimed_id=openid_response.identity_url).user_id
+            except UserOpenID.DoesNotExist, user_model.DoesNotExist:
+                user_login_report.send(sender=__name__,
+                                       request=request,
+                                       username=openid_response.identity_url,
+                                       method='openid',
+                                       success=False)
+            user_login_report.send(sender=__name__,
+                                   request=request,
+                                   user_id=user_id,
+                                   method='openid',
+                                   success=False)
+
             return render_failure(request, e.message, exception=e)
 
         response = HttpResponseRedirect(sanitise_redirect_url(redirect_to))
 
-        # Notify any listeners that we successfully logged in.
+        # Send signal to log the login attempt
+        user_login_report.send(sender=__name__,
+                               request=request,
+                               user_id=user_new.id,
+                               method='openid',
+                               success=True)
+
+        # Notify any listeners that we successfully logged in
         openid_login_complete.send(sender=UserOpenID, request=request,
             openid_response=openid_response)
 
         return response
 
     elif openid_response.status == FAILURE:
+        user_login_report.send(sender=__name__,
+                               request=request,
+                               username=openid_response.identity_url,
+                               method='openid',
+                               success=False)
         return render_failure(
             request, 'OpenID authentication failed: %s' %
             openid_response.message)
     elif openid_response.status == CANCEL:
+        user_login_report.send(sender=__name__,
+                               request=request,
+                               username=openid_response.identity_url,
+                               method='openid',
+                               success=False)
         return render_failure(request, 'Authentication cancelled')
     else:
+        user_login_report.send(sender=__name__,
+                               request=request,
+                               username=openid_response.identity_url,
+                               method='openid',
+                               success=False)
         assert False, (
             "Unknown OpenID response type: %r" % openid_response.status)
 

@@ -32,3 +32,6 @@ import django.dispatch
 
 openid_login_complete = django.dispatch.Signal(providing_args=[
     'request', 'openid_response'])
+
+user_login_report = django.dispatch.Signal(providing_args=[
+    'request', 'username', 'user_id', 'method', 'success'])
