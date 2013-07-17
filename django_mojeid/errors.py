@@ -15,7 +15,7 @@ class DiscoveryError(GeneralError):
         self.exception = exception
 
     def __repr__(self):
-        return "%s: %s" % (self.text, str(self.exception))
+        return "%s: %s" % (self.text, str(self.exception.message))
 
 class EndpointError(GeneralError):
     name = 'endpoint'
@@ -46,7 +46,7 @@ class AuthenticationFailed(GeneralError):
         self.exception = exception
 
     def __repr__(self):
-        return "%s: %s" % (self.text, str(self.exception))
+        return "%s: %s" % (self.text, str(self.exception.message))
 
 class OpenIDAuthenticationFailed(GeneralError):
     http_status = 403

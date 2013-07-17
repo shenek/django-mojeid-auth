@@ -285,7 +285,7 @@ def login_complete(request):
                     return render_failure(request, errors.DisabledAccount(user_new))
                 OpenIDBackend.associate_user_with_session(request, user_new)
         except DjangoOpenIDException, e:
-            # Send signal to log the login attempt
+            user_id = None
             try:
                 user_id = UserOpenID.objects.get(claimed_id=openid_response.identity_url).user_id
             except UserOpenID.DoesNotExist, user_model.DoesNotExist:
@@ -296,6 +296,7 @@ def login_complete(request):
                                        success=False)
             user_login_report.send(sender=__name__,
                                    request=request,
+                                   username=openid_response.identity_url,
                                    user_id=user_id,
                                    method='openid',
                                    success=False)
