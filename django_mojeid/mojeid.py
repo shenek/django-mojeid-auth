@@ -35,6 +35,9 @@ from openid.extensions import ax
 
 from django_mojeid.exceptions import RequiredAttributeNotReturned
 
+MOJEID_ENDPOINT_ADDRESS = 'https://mojeid.fred.nic.cz/endpoint/'
+MOJEID_REGISTRATION_ADDRESS = 'https://mojeid.fred.nic.cz/registration/endpoint/'
+
 class MojeIDAttribute(object):
 
     def __init__(self, modelApp, modelClass, modelAttribute,

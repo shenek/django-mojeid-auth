@@ -55,6 +55,7 @@ from openid.yadis.constants import YADIS_CONTENT_TYPE
 
 from django_mojeid.forms import OpenIDLoginForm
 from django_mojeid.models import UserOpenID
+from django_mojeid.mojeid import MOJEID_REGISTRATION_ADDRESS, MOJEID_ENDPOINT_ADDRESS
 from django_mojeid.signals import openid_login_complete, user_login_report, trigger_error
 from django_mojeid.store import DjangoOpenIDStore
 from django_mojeid.exceptions import (
@@ -132,10 +133,10 @@ def render_openid_request(request, openid_request, return_to, trust_root=None):
 def render_failure(request, error, template_name='openid/failure.html'):
     """Render an error page to the user."""
     resp = trigger_error.send(sender=__name__, error=error, request=request)
-    resp = filter(lambda r: not r is None and isinstance(r, HttpResponse), resp)
+    resp = filter(lambda r: not r[1] is None and isinstance(r[1], HttpResponse), resp)
     if resp:
         # Return first valid response
-        return resp[0]
+        return resp[0][1]
 
     # Render default page
     data = render_to_string(template_name, {'message': str(error)},
@@ -178,9 +179,7 @@ def login_begin(request, template_name='openid/login.html',
     """Begin an OpenID login request, possibly asking for an identity URL."""
     redirect_to = OpenIDBackend.get_redirect_to(request)
 
-    # Get the OpenID URL to try.  First see if we've been configured
-    # to use a fixed server URL.
-    openid_url = 'https://mojeid.fred.nic.cz/endpoint/'
+    openid_url = MOJEID_ENDPOINT_URL
 
     login_form = form_class(data=request.POST)
     if login_form.is_valid():
@@ -232,7 +231,7 @@ def registration(request, template_name='openid/registration_form.html',
                 form_class=OpenIDLoginForm):
     """Begin an OpenID login request, possibly asking for an identity URL."""
 
-    registration_url = 'https://mojeid.fred.nic.cz/registration/endpoint/'
+    registration_url = MOJEID_REGISTRATION_URL
 
     realm = request.build_absolute_uri(reverse(top))
 
