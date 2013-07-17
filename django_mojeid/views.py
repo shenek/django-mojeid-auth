@@ -55,7 +55,7 @@ from openid.yadis.constants import YADIS_CONTENT_TYPE
 
 from django_mojeid.forms import OpenIDLoginForm
 from django_mojeid.models import UserOpenID
-from django_mojeid.mojeid import MOJEID_REGISTRATION_ADDRESS, MOJEID_ENDPOINT_ADDRESS
+from django_mojeid.mojeid import MOJEID_REGISTRATION_URL, MOJEID_ENDPOINT_URL
 from django_mojeid.signals import openid_login_complete, user_login_report, trigger_error
 from django_mojeid.store import DjangoOpenIDStore
 from django_mojeid.exceptions import (
