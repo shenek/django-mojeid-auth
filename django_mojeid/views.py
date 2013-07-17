@@ -55,7 +55,7 @@ from openid.yadis.constants import YADIS_CONTENT_TYPE
 
 from django_mojeid.forms import OpenIDLoginForm
 from django_mojeid.models import UserOpenID
-from django_mojeid.signals import openid_login_complete, user_login_report
+from django_mojeid.signals import openid_login_complete, user_login_report, trigger_error
 from django_mojeid.store import DjangoOpenIDStore
 from django_mojeid.exceptions import (
     RequiredAttributeNotReturned,
@@ -63,10 +63,11 @@ from django_mojeid.exceptions import (
     IdentityAlreadyClaimed,
 )
 
+import errors
+
 from auth import OpenIDBackend
 from models import Nonce
 from mojeid import Assertion
-
 
 next_url_re = re.compile('^/[-\w/]+$')
 
@@ -128,14 +129,18 @@ def render_openid_request(request, openid_request, return_to, trust_root=None):
         return HttpResponse(form_html, content_type='text/html;charset=UTF-8')
 
 
-def default_render_failure(request, message, status=403,
-                           template_name='openid/failure.html',
-                           exception=None):
+def render_failure(request, error, template_name='openid/failure.html'):
     """Render an error page to the user."""
-    data = render_to_string(
-        template_name, dict(message=message, exception=exception),
+    resp = trigger_error.send(sender=__name__, error=error, request=request)
+    resp = filter(lambda r: not r is None and isinstance(r, HttpResponse), resp)
+    if resp:
+        # Return first valid response
+        return resp[0]
+
+    # Render default page
+    data = render_to_string(template_name, {'message': str(error)},
         context_instance=RequestContext(request))
-    return HttpResponse(data, status=status)
+    return HttpResponse(data, status=error.http_status)
 
 
 def parse_openid_response(request):
@@ -169,8 +174,7 @@ def login_show(request, login_template='openid/login.html',
 
 def login_begin(request, template_name='openid/login.html',
                 login_complete_view='openid-complete',
-                form_class=OpenIDLoginForm,
-                render_failure=default_render_failure):
+                form_class=OpenIDLoginForm):
     """Begin an OpenID login request, possibly asking for an identity URL."""
     redirect_to = OpenIDBackend.get_redirect_to(request)
 
@@ -187,9 +191,7 @@ def login_begin(request, template_name='openid/login.html',
     try:
         openid_request = consumer.begin(openid_url)
     except DiscoveryFailure, exc:
-        return render_failure(
-            request, "OpenID discovery error: %s" % (str(exc),), status=500,
-            exception=exc)
+        return render_failure(request, errors.DiscoveryError(exc))
 
     # Request some user details.  If the provider advertises support
     # for attribute exchange, use that.
@@ -227,8 +229,7 @@ def login_begin(request, template_name='openid/login.html',
 
 def registration(request, template_name='openid/registration_form.html',
                 login_complete_view='openid-complete',
-                form_class=OpenIDLoginForm,
-                render_failure=default_render_failure):
+                form_class=OpenIDLoginForm):
     """Begin an OpenID login request, possibly asking for an identity URL."""
 
     registration_url = 'https://mojeid.fred.nic.cz/registration/endpoint/'
@@ -259,16 +260,12 @@ def registration(request, template_name='openid/registration_form.html',
             }, context_instance=RequestContext(request))
 
 @csrf_exempt
-def login_complete(request, render_failure=None):
+def login_complete(request):
     redirect_to = OpenIDBackend.get_redirect_to(request)
-    render_failure = render_failure or \
-                     getattr(settings, 'OPENID_RENDER_FAILURE', None) or \
-                     default_render_failure
 
     openid_response = parse_openid_response(request)
     if not openid_response:
-        return render_failure(
-            request, 'This is an OpenID relying party endpoint.')
+        return render_failure(request, errors.EndpointError())
 
     user_orig = OpenIDBackend.get_user_from_request(request)
     user_model = OpenIDBackend.get_user_model()
@@ -284,9 +281,9 @@ def login_complete(request, render_failure=None):
                 user_new = OpenIDBackend.authenticate_using_all_backends(
                     openid_response=openid_response)
                 if not user_new:
-                    return render_failure(request, 'Unknown user')
+                    return render_failure(request, errors.UnknownUser())
                 if not OpenIDBackend.is_user_active(user_new):
-                    return render_failure(request, 'Disabled account')
+                    return render_failure(request, errors.DisabledAccount(user_new))
                 OpenIDBackend.associate_user_with_session(request, user_new)
         except DjangoOpenIDException, e:
             # Send signal to log the login attempt
@@ -304,7 +301,7 @@ def login_complete(request, render_failure=None):
                                    method='openid',
                                    success=False)
 
-            return render_failure(request, e.message, exception=e)
+            return render_failure(request, errors.AuthenticationFailed(e))
 
         response = HttpResponseRedirect(sanitise_redirect_url(redirect_to))
 
@@ -327,24 +324,22 @@ def login_complete(request, render_failure=None):
                                username=openid_response.identity_url,
                                method='openid',
                                success=False)
-        return render_failure(
-            request, 'OpenID authentication failed: %s' %
-            openid_response.message)
+        return render_failure(request, errors.OpenIDAuthenticationFailed(openid_response))
+
     elif openid_response.status == CANCEL:
         user_login_report.send(sender=__name__,
                                request=request,
                                username=openid_response.identity_url,
                                method='openid',
                                success=False)
-        return render_failure(request, 'Authentication cancelled')
+        return render_failure(request, errors.OpenIDAuthenticationCanceled())
     else:
         user_login_report.send(sender=__name__,
                                request=request,
                                username=openid_response.identity_url,
                                method='openid',
                                success=False)
-        assert False, (
-            "Unknown OpenID response type: %r" % openid_response.status)
+        return render_failure(request, OpenIDUnknownResponseType(openid_response))
 
 @csrf_exempt
 def assertion(request):
