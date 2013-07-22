@@ -308,7 +308,7 @@ def login_complete(request):
         # Send signal to log the login attempt
         user_login_report.send(sender=__name__,
                                request=request,
-                               user_id=user_new.id,
+                               user_id=user_orig.id if user_orig else user_new.id,
                                method='openid',
                                success=True)
 
