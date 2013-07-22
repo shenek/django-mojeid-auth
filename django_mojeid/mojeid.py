@@ -130,6 +130,12 @@ class MojeIDAttribute(object):
             field['name'], field['label'], field['name'], field['value']
         )
 
+class MojeIDBooleanAttribute(MojeIDAttribute):
+    def _get_value(self, response):
+        res = response.getSingle(self.schema, None)
+        if res is None:
+            return None
+        return True if res.lower() == 'true' else False
 
 class BirthDate(MojeIDAttribute):
     code = 'birthdate'
@@ -489,22 +495,24 @@ class MPSV(MojeIDAttribute):
     text = 'Identifikátor – MPSV'
     registration_field = 'ssn_id_num'
 
-class Student(MojeIDAttribute):
+class Student(MojeIDBooleanAttribute):
     code = 'student'
     schema = 'http://specs.nic.cz/attr/contact/student'
     text = 'Příznak – Student'
 
-class Valid(MojeIDAttribute):
+class Valid(MojeIDBooleanAttribute):
+    # Probably not supported anymore
     code = 'valid'
     schema = 'http://specs.nic.cz/attr/contact/valid'
     text = 'Příznak – Validace'
 
 class Status(MojeIDAttribute):
+    # Probably not supported anymore
     code = 'status'
     schema = 'http://specs.nic.cz/attr/contact/status'
     text = 'Stav účtu'
 
-class Adult(MojeIDAttribute):
+class Adult(MojeIDBooleanAttribute):
     code = 'adult'
     schema = 'http://specs.nic.cz/attr/contact/adult'
     text = 'Příznak – Starší 18 let'
