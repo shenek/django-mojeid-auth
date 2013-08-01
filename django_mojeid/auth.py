@@ -38,7 +38,6 @@ from django.core.exceptions import ValidationError
 from openid.consumer.consumer import SUCCESS
 from openid.extensions import ax, pape
 
-from django_mojeid.models import UserOpenID
 from django_mojeid.exceptions import (
     IdentityAlreadyClaimed,
     MissingPhysicalMultiFactor,
@@ -81,10 +80,12 @@ class OpenIDBackend:
     def is_user_associated_with_openid(cls, user):
         if not user:
             return False
+        from django_mojeid.models import UserOpenID
         return UserOpenID.objects.filter(user_id=user.id).exists()
 
     @classmethod
     def get_user_association(cls, user):
+        from django_mojeid.models import UserOpenID
         if not user:
             return None
         try:
@@ -126,6 +127,8 @@ class OpenIDBackend:
         # Require that the OpenID response be passed in as a keyword
         # argument, to make sure we don't match the username/password
         # calling conventions of authenticate.
+
+        from django_mojeid.models import UserOpenID
 
         openid_response = kwargs.get('openid_response')
         if openid_response is None:
@@ -239,6 +242,9 @@ class OpenIDBackend:
     @staticmethod
     def associate_openid(user, claimed_id, display_id):
         """Associate an OpenID with a user account."""
+
+        from django_mojeid.models import UserOpenID
+
         # Check to see if this OpenID has already been claimed.
         try:
             user_openid = UserOpenID.objects.get(

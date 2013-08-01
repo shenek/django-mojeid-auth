@@ -27,12 +27,27 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import django.dispatch
+from django.db.models.signals import post_delete
+from django.dispatch import Signal, receiver
 
-openid_login_complete = django.dispatch.Signal(providing_args=[
+from auth import OpenIDBackend
+
+openid_login_complete = Signal(providing_args=[
     'request', 'openid_response'])
 
-user_login_report = django.dispatch.Signal(providing_args=[
+user_login_report = Signal(providing_args=[
     'request', 'username', 'user_id', 'method', 'success'])
 
-trigger_error = django.dispatch.Signal(providing_args=['request', 'error'])
+trigger_error = Signal(providing_args=['request', 'error'])
+
+# Fetch the delete user
+user_model = OpenIDBackend.get_user_model()
+@receiver(post_delete, sender=user_model, dispatch_uid='user_delete')
+def delete_association(**kwargs):
+
+    from django_mojeid.models import UserOpenID
+
+    sender = kwargs['sender']
+    user = kwargs['instance']
+    if sender == user_model:
+        UserOpenID.objects.filter(user_id=user.id).delete()

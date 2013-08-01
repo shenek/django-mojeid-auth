@@ -32,6 +32,7 @@ from django.db import models
 import os
 import time
 import urllib
+import signals
 
 class Nonce(models.Model):
     user_id = models.IntegerField(null=True)
