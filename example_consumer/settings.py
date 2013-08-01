@@ -139,10 +139,6 @@ AUTHENTICATION_BACKENDS = (
 # Should users be created when new OpenIDs are used to log in?
 OPENID_CREATE_USERS = True
 
-# If set, always use this as the identity URL rather than asking the
-# user.  This only makes sense if it is a server URL.
-OPENID_SSO_SERVER_URL = 'https://mojeid.cz/endpoint'
-
 # Tell django.contrib.auth to use the OpenID signin URLs.
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
