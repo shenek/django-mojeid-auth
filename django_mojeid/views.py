@@ -158,6 +158,10 @@ def parse_openid_response(request):
 def login_show(request, login_template='openid/login.html',
                associate_temlate='openid/associate.html',
                form_class=OpenIDLoginForm):
+    """
+    Render a sample template to show the login form.
+    Most of the time the app would use its custom login form.
+    """
 
     redirect_to = OpenIDBackend.get_redirect_to(request)
 
@@ -229,7 +233,7 @@ def login_begin(request, template_name='openid/login.html',
 def registration(request, template_name='openid/registration_form.html',
                 login_complete_view='openid-complete',
                 form_class=OpenIDLoginForm):
-    """Begin an OpenID login request, possibly asking for an identity URL."""
+    """ Try to submit all the registration attributes for mojeID registration"""
 
     registration_url = MOJEID_REGISTRATION_URL
 
