@@ -5,7 +5,7 @@
         <p>
 {% if user %}
             You are signed in as <strong>{{ user.username }}</strong> ({{ user.get_full_name }})
-            <a href="/logout">Sign out</a>
+            <a href="/logout?next=/">Sign out</a>
     {% if extra %}
             <br />adult: {{ extra.adult }}
             <br />student: {{ extra.student }} 
