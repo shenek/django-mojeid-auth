@@ -107,14 +107,56 @@ If your users should use a physical multi-factor authentication method, such as 
 If the user's OpenID provider supports the PAPE extension and provides the Physical Multifactor authentication policy, this will
 cause the OpenID login to fail if the user does not provide valid physical authentication to the provider.
 
-== Override Login Failure Handling ==
+== Override Login Failure Handling==
+To override the default OpenID login fail view it is necessary to respond to the signal trigger_error.
 
-== Updating Attributes ==
-when
-how
+        from django_mojeid.signals import trigger_error
+
+        @receiver(trigger_error, dispatch_uid='trigger_error')
+        def redirect_to_login(**kwargs):
+            request = kwargs['request']
+            error = kwargs['error']
+            ...
+            return HttpResponse(...)
+
+== Login Reports ==
+It is also possible to log the OpenID login attempts thanks to user_login_report signal.
+
+        from django_mojeid.signals import user_login_report
+
+        @receiver(user_login_report, dispatch_uid="login_report")
+        def store_report(**kwargs):
+            request = kwargs['request']     # request (used to obtain client IP)
+            method = kwargs['method']       # Set to 'openid'
+            success = kwargs['success']     # True / False
+            user_id = kwargs.get('user_id', None) # user_id or username is set
+            if not user_id:
+                username = kwargs.get('user_name', '')
+            ...
 
 == Registration ==
+To register an existing user to MojeID a registration form is generated and redirected to mojeid registration page.
+Only the attributes marked with use_for_registration=True are passed.
+
+After the registration MojeID server tries to connect to the server and notify it that the registration work well and the existing user can be associated with MojeID account.
+This procedure is called Assertion.
 
 == Assertion ==
+You need to have a public IP and a valid ssl certificate (not self-signed). You can test your certificat via "openssl s_client ...".
+The procedure goes as follows:
+    * MojeID server connects to https://example.org/openid and gets addres of xrds.xml
+    * MojeID server downloads https://example.org/openid/xrds.xml
+    * MojeID server parses the xml file and obtains the assertion url
+    * MojeID server opens the assertion url using POST and passes mandatory args
+    * Client server verifies the args and associates local user with mojeid account
 
-== Error handling ==
+== URL map ==
+
+openid/                 - Top OpenID address
+openid/login/           - Default login page
+openid/initiate/        - Start the authentication (redirects to OpenID server)
+openid/complete/        - Finish the authentication (redirects from OpenID server)
+openid/registration/    - Register new MojeID user (redirects to MojeID server)
+openid/assertion/       - assertion url (see Assertion)
+openid/xrds.xml         - xrds.xml (see Assertion)
+openid/disassociate     - Removes association between current user and OpenID
