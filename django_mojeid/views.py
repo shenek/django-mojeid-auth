@@ -56,7 +56,7 @@ from openid.yadis.constants import YADIS_CONTENT_TYPE
 from django_mojeid.forms import OpenIDLoginForm
 from django_mojeid.models import UserOpenID
 from django_mojeid.mojeid import MOJEID_REGISTRATION_URL, MOJEID_ENDPOINT_URL
-from django_mojeid.signals import openid_login_complete, user_login_report, trigger_error
+from django_mojeid.signals import user_login_report, trigger_error
 from django_mojeid.store import DjangoOpenIDStore
 from django_mojeid.exceptions import (
     RequiredAttributeNotReturned,
@@ -105,30 +105,34 @@ def make_consumer(request):
 
 
 def render_openid_request(request, openid_request, return_to, trust_root=None):
-    """Render an OpenID authentication request."""
+    """ Render an OpenID authentication request.
+        This request will automatically redirect client to OpenID server.
+    """
     if trust_root is None:
         trust_root = getattr(settings, 'OPENID_TRUST_ROOT',
                              request.build_absolute_uri(reverse(top)))
 
+    # Directly redirect to the OpenID server
     if openid_request.shouldSendRedirect():
-        redirect_url = openid_request.redirectURL(
-            trust_root, return_to)
+        redirect_url = openid_request.redirectURL(trust_root, return_to)
         return HttpResponseRedirect(redirect_url)
-    else:
-        form_html = openid_request.htmlMarkup(
-            trust_root, return_to, form_tag_attrs={'id': 'openid_message'})
-        return HttpResponse(form_html, content_type='text/html;charset=UTF-8')
 
+    # Render a form wich will redirect the client
+    else:
+        form_html = openid_request.htmlMarkup(trust_root, return_to,
+            form_tag_attrs={'id': 'openid_message'})
+        return HttpResponse(form_html, content_type='text/html;charset=UTF-8')
 
 def render_failure(request, error, template_name='openid/failure.html'):
     """Render an error page to the user."""
+    # Render the response to trigger_error signal
     resp = trigger_error.send(sender=__name__, error=error, request=request)
     resp = filter(lambda r: not r[1] is None and isinstance(r[1], HttpResponse), resp)
     if resp:
         # Return first valid response
         return resp[0][1]
 
-    # Render default page
+    # No response to signal - render default page
     data = render_to_string(template_name, {'message': str(error)},
         context_instance=RequestContext(request))
     return HttpResponse(data, status=error.http_status)
@@ -136,9 +140,6 @@ def render_failure(request, error, template_name='openid/failure.html'):
 
 def parse_openid_response(request):
     """Parse an OpenID response from a Django request."""
-    # Short cut if there is no request parameters.
-    #if len(request.REQUEST) == 0:
-    #    return None
 
     current_url = request.build_absolute_uri()
 
@@ -150,7 +151,6 @@ def login_show(request, login_template='openid/login.html',
                form_class=OpenIDLoginForm):
     """
     Render a sample template to show the login form.
-    Most of the time the app would use its custom login form.
     """
 
     redirect_to = OpenIDBackend.get_redirect_to(request)
@@ -167,9 +167,7 @@ def login_show(request, login_template='openid/login.html',
             OpenIDBackend.get_redirect_field_name(): redirect_to
             }, context_instance=RequestContext(request))
 
-def login_begin(request, template_name='openid/login.html',
-                login_complete_view='openid-complete',
-                form_class=OpenIDLoginForm):
+def login_begin(request, form_class=OpenIDLoginForm):
     """Begin an OpenID login request, possibly asking for an identity URL."""
     redirect_to = OpenIDBackend.get_redirect_to(request)
 
@@ -206,7 +204,7 @@ def login_begin(request, template_name='openid/login.html',
 
     # Construct the request completion URL, including the page we
     # should redirect to.
-    return_to = request.build_absolute_uri(reverse(login_complete_view))
+    return_to = request.build_absolute_uri(reverse(login_complete))
     if redirect_to:
         if '?' in return_to:
             return_to += '&'
@@ -226,7 +224,7 @@ def registration(request, template_name='openid/registration_form.html',
     """ Try to submit all the registration attributes for mojeID registration"""
 
     registration_url = MOJEID_REGISTRATION_URL
-
+    # Realm should be always something like 'https://example.org/openid/'
     realm = request.build_absolute_uri(reverse(top))
 
     user = OpenIDBackend.get_user_from_request(request)
@@ -238,13 +236,14 @@ def registration(request, template_name='openid/registration_form.html',
 
     fields = []
     attrs = getattr(settings, 'MOJEID_ATTRIBUTES', [])
-    # Append attributes to creation request
+    # Append attributes to creation request if user is valid
     if user:
         for attr in attrs:
             form_attr = attr.registration_form_attrs_html(user_id)
             if form_attr:
                 fields.append(form_attr)
 
+    # Render the redirection template
     return render_to_response(template_name, {
             'fields': fields,
             'action': registration_url,
@@ -254,12 +253,15 @@ def registration(request, template_name='openid/registration_form.html',
 
 @csrf_exempt
 def login_complete(request):
+    # Get addres where to redirect after the login
     redirect_to = OpenIDBackend.get_redirect_to(request)
 
+    # Get OpenID response and test whether it is valid
     openid_response = parse_openid_response(request)
     if not openid_response:
         return render_failure(request, errors.EndpointError())
 
+    # Check whether the user is already logged in
     user_orig = OpenIDBackend.get_user_from_request(request)
     user_model = OpenIDBackend.get_user_model()
 
@@ -267,27 +269,35 @@ def login_complete(request):
 
         try:
             if user_orig:
-                #Create association with currently logged in user
+                # Create association with currently logged in user
                 OpenIDBackend.associate_openid_response(user_orig, openid_response)
             else:
-                #Create a new user
+                # Create a new user
                 user_new = OpenIDBackend.authenticate_using_all_backends(
                     openid_response=openid_response)
                 if not user_new:
+                    # Failed to create a user
                     return render_failure(request, errors.UnknownUser())
                 if not OpenIDBackend.is_user_active(user_new):
+                    # user is deactivated
                     return render_failure(request, errors.DisabledAccount(user_new))
+                # Create an association with the new user
                 OpenIDBackend.associate_user_with_session(request, user_new)
         except DjangoOpenIDException, e:
+            # Something went wrong
             user_id = None
             try:
+                # Try to get user id
                 user_id = UserOpenID.objects.get(claimed_id=openid_response.identity_url).user_id
             except UserOpenID.DoesNotExist, user_model.DoesNotExist:
+                # Report an error with identity_url
                 user_login_report.send(sender=__name__,
                                        request=request,
                                        username=openid_response.identity_url,
                                        method='openid',
                                        success=False)
+
+            # Report an error with the username
             user_login_report.send(sender=__name__,
                                    request=request,
                                    username=openid_response.identity_url,
@@ -295,23 +305,21 @@ def login_complete(request):
                                    method='openid',
                                    success=False)
 
+            # Render the failure page
             return render_failure(request, errors.AuthenticationFailed(e))
 
         response = HttpResponseRedirect(sanitise_redirect_url(redirect_to))
 
-        # Send signal to log the login attempt
+        # Send signal to log the successful login attempt
         user_login_report.send(sender=__name__,
                                request=request,
                                user_id=user_orig.id if user_orig else user_new.id,
                                method='openid',
                                success=True)
 
-        # Notify any listeners that we successfully logged in
-        openid_login_complete.send(sender=UserOpenID, request=request,
-            openid_response=openid_response)
-
         return response
 
+    # Render other failures
     elif openid_response.status == FAILURE:
         user_login_report.send(sender=__name__,
                                request=request,
@@ -341,9 +349,11 @@ def assertion(request):
     MojeID server connects here to propagate a response to the registration
     """
     def _reject(request, error):
+        """ Reject response """
         return HttpResponse(dictToKV({'mode': 'reject', 'reason': error}))
 
     def _accept(request):
+        """ Accept response """
         return HttpResponse(dictToKV({'mode': 'accept'}))
 
     # Accept only post
@@ -351,7 +361,7 @@ def assertion(request):
         return _reject(request, Assertion.ErrorString.BAD_REQUEST)
 
     # Accept only valid status
-    status = request.POST.get('status')
+    status = request.POST.get('status', None)
     if not status:
         return _reject(request, Assertion.ErrorString.MISSING_STATUS)
     if not status in Assertion.StatusCodes:
@@ -394,6 +404,9 @@ def assertion(request):
     return _accept(request)
 
 def top(request, template_name='openid/top.html'):
+    """ The openid Endpoint
+        this page should be only accessible by MojeID server
+    """
     url = request.build_absolute_uri(reverse(xrds))
     title = getattr(settings, 'OPENID_APP_TITLE', 'OpenID Backend')
     return render_to_response(template_name, { 'url': url, 'title': title },
@@ -401,6 +414,9 @@ def top(request, template_name='openid/top.html'):
                              )
 
 def xrds(request, template_name='openid/xrds.xml'):
+    """ Render xrds file
+        This file should contain assertion and return_to urls.
+    """
     return_to_url = request.build_absolute_uri(reverse(login_complete))
     assertion_url = request.build_absolute_uri(reverse(assertion))
     return render_to_response(template_name,
@@ -411,15 +427,24 @@ def xrds(request, template_name='openid/xrds.xml'):
                              )
 @require_POST
 def disassociate(request):
+    """
+        Disassociate current user with OpenID
+    """
+
+    # Get the User
     user = OpenIDBackend.get_user_from_request(request)
     if not user:
         raise Http404
+
+    # Get OpenID association
     association = OpenIDBackend.get_user_association(user)
     if not association:
         raise Http404
+
+    # Remove the association
     association.delete()
 
+    # Redirect back
     redirect = OpenIDBackend.get_redirect_to(request)
     redirect = redirect if redirect else getattr(settings, 'LOGIN_REDIRECT_URL', '/')
-
     return HttpResponseRedirect(sanitise_redirect_url(redirect))

@@ -32,9 +32,6 @@ from django.dispatch import Signal, receiver
 
 from auth import OpenIDBackend
 
-openid_login_complete = Signal(providing_args=[
-    'request', 'openid_response'])
-
 user_login_report = Signal(providing_args=[
     'request', 'username', 'user_id', 'method', 'success'])
 
