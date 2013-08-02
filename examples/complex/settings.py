@@ -110,7 +110,7 @@ MIDDLEWARE_CLASSES = (
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
 TEMPLATE_CONTEXT_PROCESSORS+=('django.core.context_processors.request',)
 
-ROOT_URLCONF = 'example_consumer.urls'
+ROOT_URLCONF = 'complex.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
