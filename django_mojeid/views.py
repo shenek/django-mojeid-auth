@@ -70,16 +70,6 @@ from auth import OpenIDBackend
 from models import Nonce
 from mojeid import Assertion
 
-next_url_re = re.compile('^/[-\w/]+$')
-
-def is_valid_next_url(next):
-    # When we allow this:
-    #   /openid/?next=/welcome/
-    # For security reasons we want to restrict the next= bit to being a local
-    # path, not a complete URL.
-    return bool(next_url_re.match(next))
-
-
 def sanitise_redirect_url(redirect_to):
     """Sanitise the redirection URL."""
     # Light security check -- make sure redirect_to isn't garbage.
