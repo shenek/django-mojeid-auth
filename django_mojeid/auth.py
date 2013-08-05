@@ -115,11 +115,14 @@ class OpenIDBackend:
         from django.contrib.auth import authenticate
         return authenticate(**credentials)
 
-    @staticmethod
-    def associate_user_with_session(request, user):
+    @classmethod
+    def associate_user_with_session(cls, request, user):
         """This method can be overwritten to implement custom user/session mechanizms
         currently it uses standard django.contrib.auth"""
         from django.contrib.auth import login as auth_login
+        # Set backend if it is not set
+        if not hasattr(user, 'backend'):
+            setattr(user, 'backend', 'django_mojeid.auth.OpenIDBackend')
         return auth_login(request, user)
 
     def authenticate(self, **kwargs):
@@ -165,9 +168,11 @@ class OpenIDBackend:
                pape.AUTH_MULTI_FACTOR_PHYSICAL not in pape_response.auth_policies:
                 raise MissingPhysicalMultiFactor()
 
+        import ipdb; ipdb.set_trace()
         return user
 
-    def _get_model_changes(self, openid_response, only_updatable=False):
+    @staticmethod
+    def get_model_changes(openid_response, only_updatable=False):
 
         attributes = getattr(settings, 'MOJEID_ATTRIBUTES', [])
 
@@ -190,7 +195,7 @@ class OpenIDBackend:
         return res
 
     def create_user_from_openid(self, openid_response):
-        changes = self._get_model_changes(openid_response)
+        changes = OpenIDBackend.get_model_changes(openid_response)
 
         user_model = OpenIDBackend.get_user_model()
 
@@ -221,8 +226,9 @@ class OpenIDBackend:
 
         return user
 
+    @classmethod
     def update_user_from_openid(self, user_id, openid_response):
-        changes = self._get_model_changes(openid_response, only_updatable=True)
+        changes = OpenIDBackend.get_model_changes(openid_response, only_updatable=True)
 
         user_model = OpenIDBackend.get_user_model()
 
@@ -230,6 +236,8 @@ class OpenIDBackend:
             foreign_key_name = kwargs['user_id_field_name']
             del kwargs['user_id_field_name']
             model.objects.filter(**{foreign_key_name: user_id}).update(**kwargs)
+
+        return changes
 
     @staticmethod
     def associate_openid_response(user, openid_response):

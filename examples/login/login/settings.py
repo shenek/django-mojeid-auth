@@ -172,8 +172,8 @@ MOJEID_USER_MODEL = ('auth', 'User', )
 
 from django_mojeid.mojeid import *
 MOJEID_ATTRIBUTES = [
-    Email('auth', 'User', 'email', 'pk'),
+    Email('auth', 'User', 'email', 'pk', updatable=True),
     NickName('auth', 'User', 'username', 'pk'),
-    FirstName('auth', 'User', 'first_name', 'pk'),
-    LastName('auth', 'User', 'last_name', 'pk'),
+    FirstName('auth', 'User', 'first_name', 'pk', updatable=True),
+    LastName('auth', 'User', 'last_name', 'pk', updatable=True),
 ]

@@ -56,7 +56,7 @@ from openid.yadis.constants import YADIS_CONTENT_TYPE
 from django_mojeid.forms import OpenIDLoginForm
 from django_mojeid.models import UserOpenID
 from django_mojeid.mojeid import MOJEID_REGISTRATION_URL, MOJEID_ENDPOINT_URL
-from django_mojeid.signals import user_login_report, trigger_error
+from django_mojeid.signals import user_login_report, trigger_error, authenticate_user
 from django_mojeid.store import DjangoOpenIDStore
 from django_mojeid.exceptions import (
     RequiredAttributeNotReturned,
@@ -254,7 +254,7 @@ def registration(request, template_name='openid/registration_form.html',
 @csrf_exempt
 def login_complete(request):
     # Get addres where to redirect after the login
-    redirect_to = OpenIDBackend.get_redirect_to(request)
+    redirect_to = sanitise_redirect_url(OpenIDBackend.get_redirect_to(request))
 
     # Get OpenID response and test whether it is valid
     openid_response = parse_openid_response(request)
@@ -272,7 +272,15 @@ def login_complete(request):
                 # Create association with currently logged in user
                 OpenIDBackend.associate_openid_response(user_orig, openid_response)
             else:
-                # Create a new user
+                # Authenticate MojeID user.
+                # Send a signal to obtain HttpResponse
+                resp = authenticate_user.send(sender=__name__, request=request, openid_response=openid_response, redirect=redirect_to)
+                resp = [r[1] for r in resp if isinstance(r[1], HttpResponse)]
+                if resp:
+                    # Return first valid response
+                    return resp[0]
+
+                # Perform a default action
                 user_new = OpenIDBackend.authenticate_using_all_backends(
                     openid_response=openid_response)
                 if not user_new:
@@ -308,7 +316,7 @@ def login_complete(request):
             # Render the failure page
             return render_failure(request, errors.AuthenticationFailed(e))
 
-        response = HttpResponseRedirect(sanitise_redirect_url(redirect_to))
+        response = HttpResponseRedirect(redirect_to)
 
         # Send signal to log the successful login attempt
         user_login_report.send(sender=__name__,

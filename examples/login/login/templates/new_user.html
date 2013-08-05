@@ -1,0 +1,29 @@
+<html>
+    <head><title>Create User</title></head>
+    <body>
+        <h1>Create User</h1>
+        <p>
+            Creating users can be automatic. (default behaviour) <br/>
+            Or a custom action can be triggered. (such as redirection to this page)
+        </p>
+        <h3>Parameters from MojeID</h3>
+        <table border="1">
+            <tr>
+                <th>Username</th>
+                <td>{{ username.0 }}</td>
+            </tr>
+            <tr>
+                <th>First name</th>
+                <td>{{ first_name.0 }}</td>
+            </tr>
+            <tr>
+                <th>Last name</th>
+                <td>{{ last_name.0 }}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{ email.0 }}</td>
+            </tr>
+        </table>
+    </body>
+</html>
