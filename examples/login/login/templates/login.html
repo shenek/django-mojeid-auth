@@ -15,6 +15,6 @@
             </tr>
         </table>
         <h2> Login Form </h2>
-{% include 'mojeid/_login.html' %}
+{% include 'mojeid/_login.html' with request=request why_my_id_url=why_my_id_url only %}
     </body>
 </html>

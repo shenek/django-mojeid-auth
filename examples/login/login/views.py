@@ -16,7 +16,7 @@ def login(request):
     # Auto logout
     logout(request)
 
-    return render(request, 'login.html', {})
+    return render(request, 'login.html', {'why_my_id_url': 'https://www.nic.cz/'})
 
 def new_user(request):
     """ Display new user form """
