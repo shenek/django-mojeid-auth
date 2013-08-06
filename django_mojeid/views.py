@@ -56,7 +56,7 @@ from openid.yadis.constants import YADIS_CONTENT_TYPE
 from django_mojeid.forms import OpenIDLoginForm
 from django_mojeid.models import UserOpenID
 from django_mojeid.mojeid import MOJEID_REGISTRATION_URL, MOJEID_ENDPOINT_URL
-from django_mojeid.signals import user_login_report, trigger_error, authenticate_user
+from django_mojeid.signals import user_login_report, trigger_error, authenticate_user, associate_user
 from django_mojeid.store import DjangoOpenIDStore
 from django_mojeid.exceptions import (
     RequiredAttributeNotReturned,
@@ -269,12 +269,23 @@ def login_complete(request):
 
         try:
             if user_orig:
+                # Send a signal to obtain HttpResponse
+                resp = associate_user.send(sender=__name__, request=request,
+                                           openid_response=openid_response,
+                                           redirect=redirect_to)
+                resp = [r[1] for r in resp if isinstance(r[1], HttpResponse)]
+                if resp:
+                    # Return first valid response
+                    return resp[0]
+
                 # Create association with currently logged in user
                 OpenIDBackend.associate_openid_response(user_orig, openid_response)
             else:
                 # Authenticate MojeID user.
                 # Send a signal to obtain HttpResponse
-                resp = authenticate_user.send(sender=__name__, request=request, openid_response=openid_response, redirect=redirect_to)
+                resp = authenticate_user.send(sender=__name__, request=request,
+                                              openid_response=openid_response,
+                                              redirect=redirect_to)
                 resp = [r[1] for r in resp if isinstance(r[1], HttpResponse)]
                 if resp:
                     # Return first valid response

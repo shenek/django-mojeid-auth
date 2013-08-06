@@ -1,0 +1,48 @@
+<html>
+    <head><title>Associate Example</title></head>
+    <body>
+        <h1> Disassociate First </h1>
+        Local user to associate: {{ user }} <br />
+        with: {{ claimed_id.0 }}
+        <h3> Attributes </h3>
+        {% if user_associated %}
+        <p>This claimed id is already used! (with user {{ user_associated.username }})</p>
+        <table>
+            <tr>
+                <th>Attribute</th><th>Current User</th><th>MojeID Attribute</th><th>Already associated</th>
+            </tr>
+            <tr>
+                <th>Username</th><td>{{ user.username }}</td><td>{{ username.0 }}</td><td>{{ user_associated.username }}</td>
+            </tr>
+            <tr>
+                <th>First Name</th><td>{{ user.first_name }}</td><td>{{ first_name.0 }}</td><td>{{ user_associated.first_name }}</td>
+            </tr>
+            <tr>
+                <th>Last Name</th><td>{{ user.last_name }}</td><td>{{ last_name.0 }}</td><td>{{ user_associated.last_name }}</td>
+            </tr>
+            <tr>
+                <th>Email</th><td>{{ user.email }}</td><td>{{ email.0 }}</td><td>{{ user_associated.email }}</td>
+            </tr>
+        </table>
+        {% else %}
+        <p> Current user is already associated with: {{ claimed_associated.0 }} </p>
+        <table>
+            <tr>
+                <th>Attribute</th><th>Local Attribute</th><th>MojeID Attribute</th>
+            </tr>
+            <tr>
+                <th>Username</th><td>{{ user.username }}</td><td>{{ username.0 }}</td>
+            </tr>
+            <tr>
+                <th>First Name</th><td>{{ user.first_name }}</td><td>{{ first_name.0 }}</td>
+            </tr>
+            <tr>
+                <th>Last Name</th><td>{{ user.last_name }}</td><td>{{ last_name.0 }}</td>
+            </tr>
+            <tr>
+                <th>Email</th><td>{{ user.email }}</td><td>{{ email.0 }}</td>
+            </tr>
+        </table>
+        {% endif %}
+    </body>
+</html>

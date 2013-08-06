@@ -6,9 +6,9 @@ from django.dispatch import receiver
 from django.shortcuts import render, redirect
 from django.http import QueryDict
 
-from django_mojeid.signals import authenticate_user
 from django_mojeid.auth import OpenIDBackend
 from django_mojeid.models import UserOpenID
+from django_mojeid.signals import authenticate_user
 
 def login(request):
     """ Display the login page """
@@ -30,7 +30,7 @@ def display_user(request):
 # This overrides a part of the default MojeID login_complete logic
 @receiver(authenticate_user, dispatch_uid="mojeid_create_user")
 def authenticate_user(**kwargs):
-    """ Display create user form prefilled with data from MojeID """
+    """ Display user forms prefilled with data from MojeID """
     request = kwargs['request']
     openid_response = kwargs['openid_response']
     redirect_to = kwargs['redirect']
@@ -67,6 +67,7 @@ def authenticate_user(**kwargs):
     if 'user_id_field_name' in params:
         del params['user_id_field_name']
     qd.update(params)
+    # TODO claimed_id as a param!
 
     url = "%s?%s" % (path, qd.urlencode())
     return redirect(url)

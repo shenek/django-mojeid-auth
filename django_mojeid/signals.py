@@ -39,6 +39,8 @@ trigger_error = Signal(providing_args=['request', 'error'])
 
 authenticate_user = Signal(providing_args=['request', 'openid_response', 'redirect'])
 
+associate_user = Signal(providing_args=['request', 'openid_response', 'redirect'])
+
 # Fetch the delete user
 user_model = OpenIDBackend.get_user_model()
 @receiver(post_delete, sender=user_model, dispatch_uid='user_delete')
