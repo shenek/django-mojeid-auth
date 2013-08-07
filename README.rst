@@ -66,12 +66,12 @@ Basic Installation
 
 #) Set the MOJEID_ATTRIBUTES to determine which attributes of mojeid should be used::
         MOJEID_ATTRIBUTES = [
-          | Email('auth', 'User', 'email', 'pk'),
-          | FirstName('auth', 'User', 'first_name', 'pk'),
-          | LastName('auth', 'User', 'last_name', 'pk', updatable=True, required=False),
-          | NickName('auth', 'User', 'username', 'pk', use_for_registration=False),
-          | Phone('example_app', 'UserExtraAttributes', 'phone', 'user_id'),
-          | ]
+            Email('auth', 'User', 'email', 'pk'),
+            FirstName('auth', 'User', 'first_name', 'pk'),
+            LastName('auth', 'User', 'last_name', 'pk', updatable=True, required=False),
+            NickName('auth', 'User', 'username', 'pk', use_for_registration=False),
+            Phone('example_app', 'UserExtraAttributes', 'phone', 'user_id'),
+            ]
 
     First four parameters are mandatory. First parameter is an app name.
     Second is a model name. Third models attribute.
