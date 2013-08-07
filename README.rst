@@ -1,11 +1,11 @@
-Django OpenID Authentication Support
-====================================
+Django MojeID/OpenID Authentication Support
+===========================================
 
-This package provides integration between Django's authentication
-system and OpenID authentication.  It also includes support for using
-a fixed OpenID server endpoint, which can be useful when implementing
-single signon systems.
+This package provides integration between Django's authentication system and OpenID authentication.
+It is a fork of https://launchpad.net/django-openid-auth
 
+The main purpose of this fork is to remove launchpad related stuff and add MojeID related stuff.
+MojeID is a czech openid implementation managed by `CZ.NIC z.s.p.o. <http://www.nic.cz/>`_
 
 Basic Installation
 ------------------
@@ -17,7 +17,7 @@ Basic Installation
    It can also be found in most Linux distributions packaged as *python-openid*.
    Version 2.2.0 or later will be needed.
 
-#) Add 'django_mojeid_auth' to INSTALLED_APPS for your application.
+#) Add 'django_mojeid_auth' to INSTALLED_APPS for your application in your *settings.py*.
 
    At a minimum, you'll need the following in there::
 
@@ -25,19 +25,19 @@ Basic Installation
             'django.contrib.auth',
             'django.contrib.contenttypes',
             'django.contrib.sessions',
-            'django_mojeid_auth',
+            'django_mojeid',
         )
 
-#) Add 'django_auth_openid.auth.OpenIDBackend' to AUTHENTICATION_BACKENDS.
+#) Add 'django_mojeid.auth.OpenIDBackend' to AUTHENTICATION_BACKENDS in your *settings.py*.
 
    This should be in addition to the default ModelBackend::
 
         AUTHENTICATION_BACKENDS = (
-            'django_mojeid_auth.auth.OpenIDBackend',
+            'django_mojeid.auth.OpenIDBackend',
             'django.contrib.auth.backends.ModelBackend',
         )
 
-#) To create users automatically when a new OpenID is used::
+#) To create users automatically when a new MojeID/OpenID credential is used update your *settings.py*::
 
         OPENID_CREATE_USERS = True
 
@@ -49,22 +49,22 @@ Basic Installation
             ...
         )
 
-#) Configure the LOGIN_URL and LOGIN_REDIRECT_URL appropriately for your site::
+#) Configure the LOGIN_URL and LOGIN_REDIRECT_URL in your *settings.py* appropriately for your site::
 
         LOGIN_URL = '/openid/login/'
         LOGIN_REDIRECT_URL = '/'
 
    This will allow pages that use the standard @login_required
-   decorator to use the OpenID login page.
+   decorator to be redirected to defined login page.
 
-#) Set the MOJEID_USER_MODEL to specify the user model::
+#) Set the MOJEID_USER_MODEL in your *settings.py* to specify the user model::
 
         MOJEID_USER_MODEL = ('auth', 'User', )
 
 
    This will force app to use standard django.contrib.auth.User model for authentication
 
-#) Set the MOJEID_ATTRIBUTES to determine which attributes of mojeid should be used::
+#) Set the MOJEID_ATTRIBUTES in your *settings.py* to determine which attributes of mojeid should be used::
 
         MOJEID_ATTRIBUTES = [
             Email('auth', 'User', 'email', 'pk'),
@@ -79,20 +79,32 @@ Basic Installation
    - Fourth is an attribute which holds the user id.
    - required(=True) - fail authentication when this attr is not obtained from mojeid
    - updatable(=False) - update the attributes of the model after login
-   - use_for_registration - prefill mojeid registration form with this attribute
+   - use_for_registration(=True) - prefill mojeid registration form with this attribute
 
 #) Sync your database to add all necessary tables::
 
     python manage.py syncdb
 
+Examples
+--------
+TBD in /examples/
+
+MojeID Attributes
+-----------------
+Where are defined
+Types
+How are they used
+etc.
+
 External redirect domains
 -------------------------
 
-By default, redirecting back to an external URL after auth is forbidden. To permit redirection to external URLs on a separate domain, define ALLOWED_EXTERNAL_OPENID_REDIRECT_DOMAINS in your settings.py file as a list of permitted domains::
+By default, redirecting back to an external URL after auth is forbidden.
+To permit redirection to external URLs on a separate domain, define ALLOWED_EXTERNAL_OPENID_REDIRECT_DOMAINS in your settings.py file as a list of permitted domains::
 
-	ALLOWED_EXTERNAL_OPENID_REDIRECT_DOMAINS = ['example.com', 'example.org']
+    ALLOWED_EXTERNAL_OPENID_REDIRECT_DOMAINS = ['example.com', 'example.org']
 
-and redirects to external URLs on those domains will additionally be permitted.
+Redirects to external URLs on those domains will additionally be permitted.
 
 Use as /admin (django.admin.contrib) login
 ------------------------------------------
@@ -101,9 +113,9 @@ If you require openid authentication into the admin application, add the followi
 
     OPENID_USE_AS_ADMIN_LOGIN = True
 
-It is worth noting that a user needs to be be marked as a "staff user" to be able to access the admin interface.  A new openid user will not normally be a "staff user".  
-The easiest way to resolve this is to use traditional authentication (OPENID_USE_AS_ADMIN_LOGIN = False) to sign in as your first user with a password and authorise your 
-openid user to be staff.
+It is worth noting that a user needs to be marked as a "staff user" to be able to access the admin interface.
+A new openid user will not normally be a "staff user".
+The easiest way to resolve this is to use traditional authentication (OPENID_USE_AS_ADMIN_LOGIN = False) to sign in as your first user with a password and authorise your openid user to be staff.
 
 Require Physical Multi-Factor Authentication
 --------------------------------------------
@@ -127,6 +139,17 @@ To override the default OpenID login fail view it is necessary to respond to the
             error = kwargs['error']
             ...
             return HttpResponse(...)
+
+This can be triggered e.g. when a user doesn't provide the required attributes from OpenID/MojeID server.
+By default this view is quite ugly and when you want to integrate error messages into your web app you are encouraged to respond to this signal.
+
+Overrride Authentication
+------------------------
+TBD
+
+Override Association
+--------------------
+TBD
 
 Login Reports
 -------------
@@ -182,3 +205,11 @@ URL map
     xrds.xml (see Assertion)
 **openid/disassociate**
     Removes association between current user and OpenID
+
+Troubleshooting
+---------------
+TBD
+
+Localhost related stuff
+
+SSL certificate verificiation via openssl
