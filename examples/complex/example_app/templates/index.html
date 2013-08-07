@@ -19,8 +19,6 @@
         <div>
             Associate with mojeID:
             {% include "mojeid/_associate.html" %}
-            <a href="http://www.mojeid.cz/page/805/vyhody-mojeid/">Proč mojeID?</a>
-            <a href="{% url 'openid-registration' %}">Nový účet mojeID</a>
         </div>
     {% else %}
             Associated with: {{ association }}
@@ -36,8 +34,6 @@
         </p>
         <p>
             {% include "mojeid/_login.html" %}
-            <a href="http://www.mojeid.cz/page/805/vyhody-mojeid/">Proč mojeID?</a>
-            <a href="{% url 'openid-registration' %}">Nový účet mojeID</a>
         </p>
 {% endif %}
         </p>
