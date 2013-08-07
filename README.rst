@@ -10,14 +10,16 @@ single signon systems.
 Basic Installation
 ------------------
 
-1) Install the Jan Rain Python OpenID library.  It can be found at:
+1) Install the Jan Rain Python OpenID library. 
 
-        http://openidenabled.com/python-openid/
+    It can be found at: http://openidenabled.com/python-openid/
 
     It can also be found in most Linux distributions packaged as
-    "python-openid".  You will need version 2.2.0 or later.
+    *python-openid*.
+    Version 2.2.0 or later will be needed.
 
 #) Add 'django_mojeid_auth' to INSTALLED_APPS for your application.
+
     At a minimum, you'll need the following in there::
 
         INSTALLED_APPS = (
@@ -27,22 +29,20 @@ Basic Installation
             'django_mojeid_auth',
         )
 
-#) Add 'django_auth_openid.auth.OpenIDBackend' to
-    AUTHENTICATION_BACKENDS.  This should be in addition to the
-    default ModelBackend::
+#) Add 'django_auth_openid.auth.OpenIDBackend' to AUTHENTICATION_BACKENDS.
+
+    This should be in addition to the default ModelBackend::
 
         AUTHENTICATION_BACKENDS = (
             'django_mojeid_auth.auth.OpenIDBackend',
             'django.contrib.auth.backends.ModelBackend',
         )
 
-#) To create users automatically when a new OpenID is used, add the
-    following to the settings:
+#) To create users automatically when a new OpenID is used::
 
         OPENID_CREATE_USERS = True
 
-#) Hook up the login URLs to your application's urlconf with
-    something like::
+#) Hook up the login URLs to your application's urlconf with:: 
 
         urlpatterns = patterns('',
             ...
@@ -50,8 +50,7 @@ Basic Installation
             ...
         )
 
-#) Configure the LOGIN_URL and LOGIN_REDIRECT_URL appropriately for
-    your site::
+#) Configure the LOGIN_URL and LOGIN_REDIRECT_URL appropriately for your site::
 
         LOGIN_URL = '/openid/login/'
         LOGIN_REDIRECT_URL = '/'
@@ -59,16 +58,14 @@ Basic Installation
     This will allow pages that use the standard @login_required
     decorator to use the OpenID login page.
 
-#) Set the MOJEID_USER_MODEL to specify
-    the user model::
+#) Set the MOJEID_USER_MODEL to specify the user model::
 
         MOJEID_USER_MODEL = ('auth', 'User', )
 
 
     This will force app to use standard django.contrib.auth.User model for authentication
 
-#) Set the MOJEID_ATTRIBUTES to determine which attributes of mojeid should
-    be used::
+#) Set the MOJEID_ATTRIBUTES to determine which attributes of mojeid should be used::
 
         MOJEID_ATTRIBUTES = [
             Email('auth', 'User', 'email', 'pk'),
@@ -103,7 +100,7 @@ Use as /admin (django.admin.contrib) login
 
 If you require openid authentication into the admin application, add the following setting::
 
-        OPENID_USE_AS_ADMIN_LOGIN = True
+    OPENID_USE_AS_ADMIN_LOGIN = True
 
 It is worth noting that a user needs to be be marked as a "staff user" to be able to access the admin interface.  A new openid user will not normally be a "staff user".  
 The easiest way to resolve this is to use traditional authentication (OPENID_USE_AS_ADMIN_LOGIN = False) to sign in as your first user with a password and authorise your 
@@ -114,8 +111,8 @@ Require Physical Multi-Factor Authentication
 
 If your users should use a physical multi-factor authentication method, such as RSA tokens or YubiKey, add the following setting::
 
-        OPENID_PHYSICAL_MULTIFACTOR_REQUIRED = True
-        
+    OPENID_PHYSICAL_MULTIFACTOR_REQUIRED = True
+
 If the user's OpenID provider supports the PAPE extension and provides the Physical Multifactor authentication policy, this will
 cause the OpenID login to fail if the user does not provide valid physical authentication to the provider.
 
