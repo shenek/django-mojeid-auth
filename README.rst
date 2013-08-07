@@ -12,15 +12,14 @@ Basic Installation
 
 1) Install the Jan Rain Python OpenID library. 
 
-    It can be found at: http://openidenabled.com/python-openid/
+   It can be found at: http://openidenabled.com/python-openid/
 
-    It can also be found in most Linux distributions packaged as
-    *python-openid*.
-    Version 2.2.0 or later will be needed.
+   It can also be found in most Linux distributions packaged as *python-openid*.
+   Version 2.2.0 or later will be needed.
 
 #) Add 'django_mojeid_auth' to INSTALLED_APPS for your application.
 
-    At a minimum, you'll need the following in there::
+   At a minimum, you'll need the following in there::
 
         INSTALLED_APPS = (
             'django.contrib.auth',
@@ -31,7 +30,7 @@ Basic Installation
 
 #) Add 'django_auth_openid.auth.OpenIDBackend' to AUTHENTICATION_BACKENDS.
 
-    This should be in addition to the default ModelBackend::
+   This should be in addition to the default ModelBackend::
 
         AUTHENTICATION_BACKENDS = (
             'django_mojeid_auth.auth.OpenIDBackend',
@@ -55,15 +54,15 @@ Basic Installation
         LOGIN_URL = '/openid/login/'
         LOGIN_REDIRECT_URL = '/'
 
-    This will allow pages that use the standard @login_required
-    decorator to use the OpenID login page.
+   This will allow pages that use the standard @login_required
+   decorator to use the OpenID login page.
 
 #) Set the MOJEID_USER_MODEL to specify the user model::
 
         MOJEID_USER_MODEL = ('auth', 'User', )
 
 
-    This will force app to use standard django.contrib.auth.User model for authentication
+   This will force app to use standard django.contrib.auth.User model for authentication
 
 #) Set the MOJEID_ATTRIBUTES to determine which attributes of mojeid should be used::
 
@@ -75,12 +74,12 @@ Basic Installation
             Phone('example_app', 'UserExtraAttributes', 'phone', 'user_id'),
             ]
 
-    - First four parameters are mandatory. First parameter is an app name.
-    - Second is a model name. Third models attribute.
-    - Fourth is an attribute which holds the user id.
-    - required(=True) - fail authentication when this attr is not obtained from mojeid
-    - updatable(=False) - update the attributes of the model after login
-    - use_for_registration - prefill mojeid registration form with this attribute
+   - First four parameters are mandatory. First parameter is an app name.
+   - Second is a model name. Third models attribute.
+   - Fourth is an attribute which holds the user id.
+   - required(=True) - fail authentication when this attr is not obtained from mojeid
+   - updatable(=False) - update the attributes of the model after login
+   - use_for_registration - prefill mojeid registration form with this attribute
 
 #) Sync your database to add all necessary tables::
 
