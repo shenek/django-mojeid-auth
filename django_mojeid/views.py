@@ -418,6 +418,12 @@ def assertion(request):
         except (user_model.DoesNotExist, IdentityAlreadyClaimed):
             # Don't associte the user when the user doesn't exist or is already claimed
             # And assume that server sent us a valid claimed_id
+            #
+            # Note that user might been deleted before this assertion is triggered
+            # Or the newly created MojeID account might been already associated
+            # with a local account by the client
+            #
+            # Both of these cases are not considered as errors
             pass
 
     return _accept(request)
