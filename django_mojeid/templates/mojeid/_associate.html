@@ -1,5 +1,5 @@
 <div id='mojeid_associate'>
-    <form action='/openid/initiate'>
+    <form action='{% url 'openid-init' %}'>
         {% csrf_token %}
         <input type="hidden" name="next" value="{% if redirect %}{{ redirect }}{% else %}{{ request.get_full_path }}{% endif %}"></input>
         <table>
