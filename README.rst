@@ -1,4 +1,5 @@
-= Django OpenID Authentication Support =
+Django OpenID Authentication Support
+====================================
 
 This package provides integration between Django's authentication
 system and OpenID authentication.  It also includes support for using
@@ -6,7 +7,8 @@ a fixed OpenID server endpoint, which can be useful when implementing
 single signon systems.
 
 
-== Basic Installation ==
+Basic Installation
+------------------
 
  1. Install the Jan Rain Python OpenID library.  It can be found at:
 
@@ -80,7 +82,8 @@ single signon systems.
  9. Rerun "python manage.py syncdb" to add the UserOpenID table to
     your database.
 
-== External redirect domains ==
+External redirect domains
+-------------------------
 
 By default, redirecting back to an external URL after auth is forbidden. To permit redirection to external URLs on a separate domain, define ALLOWED_EXTERNAL_OPENID_REDIRECT_DOMAINS in your settings.py file as a list of permitted domains:
 
@@ -88,7 +91,8 @@ By default, redirecting back to an external URL after auth is forbidden. To perm
 
 and redirects to external URLs on those domains will additionally be permitted.
 
-== Use as /admin (django.admin.contrib) login ==
+Use as /admin (django.admin.contrib) login
+------------------------------------------
 
 If you require openid authentication into the admin application, add the following setting:
 
@@ -98,7 +102,8 @@ It is worth noting that a user needs to be be marked as a "staff user" to be abl
 The easiest way to resolve this is to use traditional authentication (OPENID_USE_AS_ADMIN_LOGIN = False) to sign in as your first user with a password and authorise your 
 openid user to be staff.
 
-== Require Physical Multi-Factor Authentication ==
+Require Physical Multi-Factor Authentication
+--------------------------------------------
 
 If your users should use a physical multi-factor authentication method, such as RSA tokens or YubiKey, add the following setting:
 
@@ -107,7 +112,8 @@ If your users should use a physical multi-factor authentication method, such as 
 If the user's OpenID provider supports the PAPE extension and provides the Physical Multifactor authentication policy, this will
 cause the OpenID login to fail if the user does not provide valid physical authentication to the provider.
 
-== Override Login Failure Handling==
+Override Login Failure Handling
+-------------------------------
 To override the default OpenID login fail view it is necessary to respond to the signal trigger_error.
 
         from django_mojeid.signals import trigger_error
@@ -119,7 +125,8 @@ To override the default OpenID login fail view it is necessary to respond to the
             ...
             return HttpResponse(...)
 
-== Login Reports ==
+Login Reports
+-------------
 It is also possible to log the OpenID login attempts thanks to user_login_report signal.
 
         from django_mojeid.signals import user_login_report
@@ -134,14 +141,16 @@ It is also possible to log the OpenID login attempts thanks to user_login_report
                 username = kwargs.get('user_name', '')
             ...
 
-== Registration ==
+Registration
+------------
 To register an existing user to MojeID a registration form is generated and redirected to mojeid registration page.
 Only the attributes marked with use_for_registration=True are passed.
 
 After the registration MojeID server tries to connect to the server and notify it that the registration work well and the existing user can be associated with MojeID account.
 This procedure is called Assertion.
 
-== Assertion ==
+Assertion
+---------
 You need to have a public IP and a valid ssl certificate (not self-signed). You can test your certificat via "openssl s_client ...".
 The procedure goes as follows:
     * MojeID server connects to https://example.org/openid and gets addres of xrds.xml
@@ -150,7 +159,8 @@ The procedure goes as follows:
     * MojeID server opens the assertion url using POST and passes mandatory args
     * Client server verifies the args and associates local user with mojeid account
 
-== URL map ==
+URL map
+-------
 
 openid/                 - Top OpenID address
 openid/login/           - Default login page
