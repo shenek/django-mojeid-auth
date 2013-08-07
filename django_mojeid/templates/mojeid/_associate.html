@@ -1,0 +1,21 @@
+<div id='mojeid_associate'>
+    <form action='/openid/initiate'>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{% if redirect %}{{ redirect }}{% else %}{{ request.get_full_path }}{% endif %}"></input>
+        <table>
+            <tr>
+                <th colspan="2">
+                    <input type="image"  src="/static/mojeid/black_92x32.png"></input>
+                </th>
+            </tr>
+            <tr>
+                <td>
+                    <a href='{% if why_my_id_url %}{{ why_my_id_url }}{% else %}http://www.mojeid.cz/page/805/vyhody-mojeid/{% endif %}'>Proč MojeID?</a>
+                </td>
+                <td>
+                    <a href='{% url 'openid-registration' %}'>Nový účet MojeID</a>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>

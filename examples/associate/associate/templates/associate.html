@@ -1,0 +1,23 @@
+<html>
+    <head><title>Associate Example</title></head>
+    <body>
+        <h1> Associate Example </h1>
+        <h3> Example Users </h3>
+        <table>
+            <tr>
+                <th>login</th><th>password</th><th>associated</th>
+            </tr>
+            <tr>
+                <td>frantisek-vomacka</td><td>frantisek-vomacka</td><td>Yes</td>
+            </tr>
+            <tr>
+                <td>jonatan-vomacka</td><td>jonatan-vomacka</td><td>No</td>
+            </tr>
+        </table>
+        <h3> User switch </h3>
+        logged in as: <b>{{ user }}</b><br />
+        change login to <a href='?username={{ other_user }}'>{{ other_user }}</a>
+        <h3> Associate Form </h3>
+{% include 'mojeid/_associate.html' with request=request why_my_id_url=why_my_id_url only %}
+    </body>
+</html>

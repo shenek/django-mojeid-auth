@@ -1,0 +1,39 @@
+<html>
+    <head><title>Authenticate User</title></head>
+    <body>
+        <h1>Authenticate User</h1>
+        <p>
+            User authentication is finished. <br/>
+            All updatable attributes are updated. (default behaviour) <br/>
+            Or a custom action can be triggered. (such as redirection to this page)
+        </p>
+        <h3>Attributes to be updated from MojeID</h3>
+        <table border="1">
+            <tr>
+                <th>Attribute</th>
+                <th>Current</th>
+                <th>From MojeID</th>
+            </tr>
+            <tr>
+                <th>Username</th>
+                <td>{{ user.username }}</td>
+                <td>{{ username.0 }}</td>
+            </tr>
+            <tr>
+                <th>First name</th>
+                <td>{{ user.first_name }}</td>
+                <td>{{ first_name.0 }}</td>
+            </tr>
+            <tr>
+                <th>Last name</th>
+                <td>{{ user.last_name }}</td>
+                <td>{{ last_name.0 }}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{ user.email }}</td>
+                <td>{{ email.0 }}</td>
+            </tr>
+        </table>
+    </body>
+</html>

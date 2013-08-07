@@ -1,0 +1,20 @@
+<html>
+    <head><title>Login Example</title></head>
+    <body>
+        <h1> Login Example </h1>
+        <h2> Example Users </h2>
+        <table>
+            <tr>
+                <th>login</th><th>password</th><th>exists</th>
+            </tr>
+            <tr>
+                <td>frantisek-vomacka</td><td>frantisek-vomacka</td><td>Yes</td>
+            </tr>
+            <tr>
+                <td>jonatan-vomacka</td><td>jonatan-vomacka</td><td>No</td>
+            </tr>
+        </table>
+        <h2> Login Form </h2>
+{% include 'mojeid/_login.html' with request=request why_my_id_url=why_my_id_url only %}
+    </body>
+</html>

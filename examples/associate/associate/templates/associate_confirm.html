@@ -1,0 +1,26 @@
+<html>
+    <head><title>Associate Example</title></head>
+    <body>
+        <h1> Associate </h1>
+        Local user to associate: {{ user }} <br />
+        with: {{ claimed_id.0 }}
+        <h3> Attributes </h3>
+        <table>
+            <tr>
+                <th>Attribute</th><th>Local Attribute</th><th>MojeID Attribute</th>
+            </tr>
+            <tr>
+                <th>Username</th><td>{{ user.username }}</td><td>{{ username.0 }}</td>
+            </tr>
+            <tr>
+                <th>First Name</th><td>{{ user.first_name }}</td><td>{{ first_name.0 }}</td>
+            </tr>
+            <tr>
+                <th>Last Name</th><td>{{ user.last_name }}</td><td>{{ last_name.0 }}</td>
+            </tr>
+            <tr>
+                <th>Email</th><td>{{ user.email }}</td><td>{{ email.0 }}</td>
+            </tr>
+        </table>
+    </body>
+</html>

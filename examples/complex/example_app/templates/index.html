@@ -1,0 +1,42 @@
+<html>
+    <head><title>MojeID sample</title></head>
+    <body>
+        <h1>Index</h1>
+        <p>
+{% if user %}
+            You are signed in as <strong>{{ user.username }}</strong> ({{ user.get_full_name }})
+            <a href="/logout?next=/">Sign out</a>
+    {% if extra %}
+            <br />adult: {{ extra.adult }}
+            <br />student: {{ extra.student }} 
+            <br />phone: {{ extra.phone }}
+            <br />
+    {% endif %}
+    {% if not association %}
+        <p>
+            {% include "openid/_associate.html" %}
+        </p>
+        <div>
+            Associate with mojeID:
+            {% include "mojeid/_associate.html" %}
+        </div>
+    {% else %}
+            Associated with: {{ association }}
+            <form action='{% url 'openid-disassociate' %}' method='post'>
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}"></input>
+                <input type="submit" value="Disassociate"></input>
+            </form>
+    {% endif %}
+{% else %}
+        <p>
+            {% include "openid/_login.html" %}
+        </p>
+        <p>
+            {% include "mojeid/_login.html" %}
+        </p>
+{% endif %}
+        </p>
+        <p><a href="/private">This requires authentication</a></p>
+    </body>
+</html>
