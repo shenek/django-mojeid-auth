@@ -59,12 +59,17 @@ Basic Installation
     This will allow pages that use the standard @login_required
     decorator to use the OpenID login page.
 
-#) Set the MOJEID_USER_MODEL to specify the user model::
+#) Set the MOJEID_USER_MODEL to specify
+    the user model::
 
         MOJEID_USER_MODEL = ('auth', 'User', )
+
+
     This will force app to use standard django.contrib.auth.User model for authentication
 
-#) Set the MOJEID_ATTRIBUTES to determine which attributes of mojeid should be used::
+#) Set the MOJEID_ATTRIBUTES to determine which attributes of mojeid should
+    be used::
+
         MOJEID_ATTRIBUTES = [
             Email('auth', 'User', 'email', 'pk'),
             FirstName('auth', 'User', 'first_name', 'pk'),
@@ -73,15 +78,16 @@ Basic Installation
             Phone('example_app', 'UserExtraAttributes', 'phone', 'user_id'),
             ]
 
-    First four parameters are mandatory. First parameter is an app name.
-    Second is a model name. Third models attribute.
-    Fourth is an attribute which holds the user id.
-    required(=True) - fail authentication when this attr is not obtained from mojeid
-    updatable(=False) - update the attributes of the model after login
-    use_for_registration - prefill mojeid registration form with this attribute
+    - First four parameters are mandatory. First parameter is an app name.
+    - Second is a model name. Third models attribute.
+    - Fourth is an attribute which holds the user id.
+    - required(=True) - fail authentication when this attr is not obtained from mojeid
+    - updatable(=False) - update the attributes of the model after login
+    - use_for_registration - prefill mojeid registration form with this attribute
 
-#) Rerun "python manage.py syncdb" to add the UserOpenID table to
-    your database.
+#) Sync your database to add all necessary tables::
+
+    python manage.py syncdb
 
 External redirect domains
 -------------------------
