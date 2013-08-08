@@ -1,5 +1,17 @@
 <html>
     <head><title>Registration Example</title></head>
+    <style>
+        div#mojeid_registration img {
+            display: inline;
+            border: 3px solid red;
+
+            margin: 10px;
+            padding: 5px;
+            -webkit-border-radius: 10px;
+            -moz-border-radius: 10px;
+            border-radius: 10px;
+        }
+    </style>
     <body>
         <h1> Registration Example </h1>
         <a href='?usecase=1' {% if usecase == 1 %}style='font-weight:bold'{% endif %} >
