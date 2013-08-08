@@ -18,6 +18,6 @@
         logged in as: <b>{{ user }}</b><br />
         change login to <a href='?username={{ other_user }}'>{{ other_user }}</a>
         <h3> Associate Form </h3>
-{% include 'mojeid/_associate.html' with request=request why_my_id_url=why_my_id_url only %}
+{% include 'mojeid/_associate.html' with request=request why_my_id_url=why_my_id_url %}
     </body>
 </html>
