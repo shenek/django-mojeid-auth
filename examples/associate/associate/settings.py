@@ -170,10 +170,10 @@ OPENID_USE_AS_ADMIN_LOGIN = False
 # Define the main user structure
 MOJEID_USER_MODEL = ('auth', 'User', )
 
-from django_mojeid.mojeid import *
+from django_mojeid import mojeid
 MOJEID_ATTRIBUTES = [
-    Email('auth', 'User', 'email', 'pk', updatable=True),
-    NickName('auth', 'User', 'username', 'pk'),
-    FirstName('auth', 'User', 'first_name', 'pk', updatable=True),
-    LastName('auth', 'User', 'last_name', 'pk', updatable=True),
+    mojeid.Email('auth', 'User', 'email', 'pk', updatable=True),
+    mojeid.NickName('auth', 'User', 'username', 'pk'),
+    mojeid.FirstName('auth', 'User', 'first_name', 'pk', updatable=True),
+    mojeid.LastName('auth', 'User', 'last_name', 'pk', updatable=True),
 ]

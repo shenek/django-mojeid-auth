@@ -150,13 +150,13 @@ OPENID_USE_AS_ADMIN_LOGIN = False
 MOJEID_USER_MODEL = ('auth', 'User', )
 
 # Setting of mojeID attributes
-from django_mojeid.mojeid import *
+from django_mojeid import mojeid
 MOJEID_ATTRIBUTES = [
-    Email('auth', 'User', 'email', 'pk'),
-    #FullName(User, 'username', 'id'),
-    FirstName('auth', 'User', 'first_name', 'pk'),
-    LastName('auth', 'User', 'last_name', 'pk', updatable=True, required=False),
-    NickName('auth', 'User', 'username', 'pk', use_for_registration=False),
-    Student('example_app', 'UserExtraAttributes', 'student', 'user_id', updatable=True),
-    Phone('example_app', 'UserExtraAttributes', 'phone', 'user_id'),
+    mojeid.Email('auth', 'User', 'email', 'pk'),
+    #mojeid.FullName(User, 'username', 'id'),
+    mojeid.FirstName('auth', 'User', 'first_name', 'pk'),
+    mojeid.LastName('auth', 'User', 'last_name', 'pk', updatable=True, required=False),
+    mojeid.NickName('auth', 'User', 'username', 'pk', use_for_registration=False),
+    mojeid.Student('example_app', 'UserExtraAttributes', 'student', 'user_id', updatable=True),
+    mojeid.Phone('example_app', 'UserExtraAttributes', 'phone', 'user_id'),
 ]
