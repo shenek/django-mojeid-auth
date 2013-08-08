@@ -4,7 +4,7 @@ class GeneralError(object):
     text = 'General OpenID error.'
 
     def __repr__(self):
-        return text
+        return self.text
 
 class DiscoveryError(GeneralError):
     http_status = 404
