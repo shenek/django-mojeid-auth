@@ -85,6 +85,14 @@ Basic Installation
 
     python manage.py syncdb
 
+#) Set the proper mojeID server.
+
+   By default all mojeID related actions are performed against the testing server https://mojeid.fred.nic.cz
+   To use the actual mojeID server you need to set two variables in your *settings.py*::
+
+        MOJEID_ENDPOINT_URL = 'https://mojeid.cz/endpoint/'
+        MOJEID_REGISTRATION_URL = 'https://mojeid.cz/registration/endpoint/'
+
 Examples
 --------
 TBD in /examples/

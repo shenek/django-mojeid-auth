@@ -172,7 +172,7 @@ def login_begin(request, form_class=OpenIDLoginForm):
     """Begin an OpenID login request, possibly asking for an identity URL."""
     redirect_to = OpenIDBackend.get_redirect_to(request)
 
-    openid_url = MOJEID_ENDPOINT_URL
+    openid_url = getattr(settings, 'MOJEID_ENDPOINT_URL', MOJEID_ENDPOINT_URL)
 
     login_form = form_class(data=request.POST)
     if login_form.is_valid():
@@ -224,7 +224,8 @@ def registration(request, template_name='openid/registration_form.html',
                 form_class=OpenIDLoginForm):
     """ Try to submit all the registration attributes for mojeID registration"""
 
-    registration_url = MOJEID_REGISTRATION_URL
+    registration_url = getattr(settings, 'MOJEID_REGISTRATION_URL', MOJEID_REGISTRATION_URL)
+
     # Realm should be always something like 'https://example.org/openid/'
     realm = request.build_absolute_uri(reverse(top))
 

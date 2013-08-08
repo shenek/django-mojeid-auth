@@ -149,6 +149,10 @@ OPENID_USE_AS_ADMIN_LOGIN = False
 # Define the main user structure
 MOJEID_USER_MODEL = ('auth', 'User', )
 
+# For production set the urls to actual mojeid server
+#MOJEID_ENDPOINT_URL = 'https://mojeid.cz/endpoint/'
+#MOJEID_REGISTRATION_URL = 'https://mojeid.cz/registration/endpoint/'
+
 # Setting of mojeID attributes
 from django_mojeid import mojeid
 MOJEID_ATTRIBUTES = [
