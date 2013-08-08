@@ -6,7 +6,7 @@ input.openid {
     padding-left: 16px;
 }
 </style>
-<form action='/openid/initiate'>
+<form action='{% url 'openid-init' %}' method='post'>
     {% csrf_token %}
     <input type="hidden" name="next" value="{% if redirect %}{{ redirect }}{% else %}{{ request.get_full_path }}{% endif %}"></input>
     <label for="id_openid_identifier">{% trans "Associate with OpenID:" %}</label><br />

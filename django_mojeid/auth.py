@@ -168,7 +168,6 @@ class OpenIDBackend:
                pape.AUTH_MULTI_FACTOR_PHYSICAL not in pape_response.auth_policies:
                 raise MissingPhysicalMultiFactor()
 
-        import ipdb; ipdb.set_trace()
         return user
 
     @staticmethod

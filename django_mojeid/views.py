@@ -167,6 +167,7 @@ def login_show(request, login_template='openid/login.html',
             OpenIDBackend.get_redirect_field_name(): redirect_to
             }, context_instance=RequestContext(request))
 
+@require_POST
 def login_begin(request, form_class=OpenIDLoginForm):
     """Begin an OpenID login request, possibly asking for an identity URL."""
     redirect_to = OpenIDBackend.get_redirect_to(request)
