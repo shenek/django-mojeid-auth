@@ -153,6 +153,11 @@ MOJEID_USER_MODEL = ('auth', 'User', )
 #MOJEID_ENDPOINT_URL = 'https://mojeid.cz/endpoint/'
 #MOJEID_REGISTRATION_URL = 'https://mojeid.cz/registration/endpoint/'
 
+# Set a custom REALM (by deafult https://myweb.com/openid/)
+# Note that you need to include meta header which points to xrds.xml in MOJEID_REALM page
+# (e.g. <meta http-equiv="x-xrds-location" content="https://myweb.com/openid/xrds.xml" />)
+# MOJEID_REALM = 'https://myweb.com/'
+
 # Setting of mojeID attributes
 from django_mojeid import mojeid
 MOJEID_ATTRIBUTES = [

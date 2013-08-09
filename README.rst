@@ -93,6 +93,16 @@ Basic Installation
         MOJEID_ENDPOINT_URL = 'https://mojeid.cz/endpoint/'
         MOJEID_REGISTRATION_URL = 'https://mojeid.cz/registration/endpoint/'
 
+Realm
+-----
+
+    A "realm" is a pattern that represents the part of URL-space for which an OpenID Authentication request is valid.
+
+see http://openid.net/specs/openid-authentication-2_0-12.html#realms
+
+Realm is also used to identify the web from which the client was redirected to the mojeID registration page.
+Note that only the sites with properly set realm can participate in `Incentive programme for web service providers <http://www.mojeid.cz/page/877/motivacni-program-pro-poskytovatele-sluzeb/>`_.
+
 Examples
 --------
 TBD in /examples/

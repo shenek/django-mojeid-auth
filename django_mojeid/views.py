@@ -104,22 +104,23 @@ def make_consumer(request):
     return Consumer(session, store)
 
 
-def render_openid_request(request, openid_request, return_to, trust_root=None):
+def render_openid_request(request, openid_request, return_to):
     """ Render an OpenID authentication request.
         This request will automatically redirect client to OpenID server.
     """
-    if trust_root is None:
-        trust_root = getattr(settings, 'OPENID_TRUST_ROOT',
-                             request.build_absolute_uri(reverse(top)))
+
+    # Realm should be always something like 'https://example.org/openid/'
+    realm = getattr(settings, 'MOJEID_REALM',
+                    request.build_absolute_uri(reverse(top)))
 
     # Directly redirect to the OpenID server
     if openid_request.shouldSendRedirect():
-        redirect_url = openid_request.redirectURL(trust_root, return_to)
+        redirect_url = openid_request.redirectURL(realm, return_to)
         return HttpResponseRedirect(redirect_url)
 
     # Render a form wich will redirect the client
     else:
-        form_html = openid_request.htmlMarkup(trust_root, return_to,
+        form_html = openid_request.htmlMarkup(realm, return_to,
             form_tag_attrs={'id': 'openid_message'})
         return HttpResponse(form_html, content_type='text/html;charset=UTF-8')
 
@@ -224,10 +225,12 @@ def registration(request, template_name='openid/registration_form.html',
                 form_class=OpenIDLoginForm):
     """ Try to submit all the registration attributes for mojeID registration"""
 
-    registration_url = getattr(settings, 'MOJEID_REGISTRATION_URL', MOJEID_REGISTRATION_URL)
+    registration_url = getattr(settings, 'MOJEID_REGISTRATION_URL',
+                               MOJEID_REGISTRATION_URL)
 
     # Realm should be always something like 'https://example.org/openid/'
-    realm = request.build_absolute_uri(reverse(top))
+    realm = getattr(settings, 'MOJEID_REALM',
+                    request.build_absolute_uri(reverse(top)))
 
     user = OpenIDBackend.get_user_from_request(request)
     user_id = user.id if user else None
