@@ -103,6 +103,16 @@ see http://openid.net/specs/openid-authentication-2_0-12.html#realms
 Realm is also used to identify the web from which the client was redirected to the mojeID registration page.
 Note that only the sites with properly set realm can participate in `Incentive programme for web service providers <http://www.mojeid.cz/page/877/motivacni-program-pro-poskytovatele-sluzeb/>`_.
 
+To set a realm you can simply place following line into *settings.py*::
+
+    MOJEID_REALM = 'https://myweb.com/'
+
+Note that it is necessary to include following meta tag to your realm page::
+
+    <meta http-equiv="x-xrds-location" content="https://myweb.com/openid/xrds.xml" />
+
+The OpenID/mojeID servers will be looking for the xrds.xml file so you need set this tag.
+
 Examples
 --------
 TBD in /examples/
