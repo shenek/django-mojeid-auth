@@ -3,5 +3,5 @@
 
 from django_mojeid.attribute_handlers import register_handler
 @register_handler('full_name_handler')
-def print_fullname_to_console(full_name):
-    print '>>>', full_name, '<<<'
+def print_fullname_to_console(user, full_name):
+    print '>>>', full_name, '<<< for user ', user

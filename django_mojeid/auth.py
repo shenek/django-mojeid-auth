@@ -171,7 +171,7 @@ class OpenIDBackend:
                 raise MissingPhysicalMultiFactor()
 
         # Run custom Attribute handler
-        OpenIDBackend.run_handlers(openid_response)
+        OpenIDBackend.run_handlers(openid_response, user)
 
         return user
 
@@ -199,7 +199,7 @@ class OpenIDBackend:
         return res
 
     @staticmethod
-    def run_handlers(openid_response):
+    def run_handlers(openid_response, user):
         handlers = [x for x in getattr(settings, 'MOJEID_ATTRIBUTES', []) if x.type == 'handler']
 
         if not handlers:
@@ -209,7 +209,7 @@ class OpenIDBackend:
 
         for handler in handlers:
             val = handler.attribute.get_value(fetch_response, handler.required)
-            call_handler(handler.name, val)
+            call_handler(handler.name, user, val)
 
     def create_user_from_openid(self, openid_response):
         changes = OpenIDBackend.get_model_changes(openid_response)
