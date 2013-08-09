@@ -39,7 +39,7 @@ def display_disassociate(request):
 
 @receiver(associate_user, dispatch_uid="mojeid_associate_user")
 def associate_user(**kwargs):
-    """ Display associate forms prefilled with data from MojeID """
+    """ Display associate forms prefilled with data from mojeID """
     request = kwargs['request']
     openid_response = kwargs['openid_response']
     redirect_to = kwargs['redirect']

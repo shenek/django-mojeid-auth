@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*- 
 
-# django-mojeid - MojeID integration for django
+# django-mojeid - mojeID integration for django
 #
 # Copyright (C) 2013 CZ.NIC
 #

@@ -1,11 +1,11 @@
-Django MojeID/OpenID Authentication Support
+Django mojeID/OpenID Authentication Support
 ===========================================
 
 This package provides integration between Django's authentication system and OpenID authentication.
 It is a fork of https://launchpad.net/django-openid-auth
 
-The main purpose of this fork is to remove launchpad related stuff and add MojeID related stuff.
-MojeID is a czech openid implementation managed by `CZ.NIC z.s.p.o. <http://www.nic.cz/>`_
+The main purpose of this fork is to remove launchpad related stuff and add mojeID related stuff.
+mojeID is a czech openid implementation managed by `CZ.NIC z.s.p.o. <http://www.nic.cz/>`_
 
 Basic Installation
 ------------------
@@ -37,7 +37,7 @@ Basic Installation
             'django.contrib.auth.backends.ModelBackend',
         )
 
-#) To create users automatically when a new MojeID/OpenID credential is used update your *settings.py*::
+#) To create users automatically when a new mojeID/OpenID credential is used update your *settings.py*::
 
         OPENID_CREATE_USERS = True
 
@@ -97,7 +97,7 @@ Examples
 --------
 TBD in /examples/
 
-MojeID Attributes
+mojeID Attributes
 -----------------
 Where are defined
 Types
@@ -148,7 +148,7 @@ To override the default OpenID login fail view it is necessary to respond to the
             ...
             return HttpResponse(...)
 
-This can be triggered e.g. when a user doesn't provide the required attributes from OpenID/MojeID server.
+This can be triggered e.g. when a user doesn't provide the required attributes from OpenID/mojeID server.
 By default this view is quite ugly and when you want to integrate error messages into your web app you are encouraged to respond to this signal.
 
 Overrride Authentication
@@ -177,10 +177,10 @@ It is also possible to log the OpenID login attempts thanks to user_login_report
 
 Registration
 ------------
-To register an existing user to MojeID a registration form is generated and redirected to mojeid registration page.
+To register an existing user to mojeID a registration form is generated and redirected to mojeid registration page.
 Only the attributes marked with use_for_registration=True are passed.
 
-After the registration MojeID server tries to connect to the server and notify it that the registration work well and the existing user can be associated with MojeID account.
+After the registration mojeID server tries to connect to the server and notify it that the registration work well and the existing user can be associated with mojeID account.
 This procedure is called Assertion.
 
 Assertion
@@ -188,11 +188,11 @@ Assertion
 You need to have a public IP and a valid ssl certificate (not self-signed). You can test your certificat via "openssl s_client ...".
 The procedure goes as follows:
 
-1) MojeID server connects to https://example.org/openid and gets addres of xrds.xml
-#) MojeID server downloads https://example.org/openid/xrds.xml
-#) MojeID server parses the xml file and obtains the assertion url
-#) MojeID server opens the assertion url using POST and passes mandatory args
-#) Client server verifies the args and associates local user with mojeid account
+1) mojeID server connects to https://example.org/openid and gets addres of xrds.xml
+#) mojeID server downloads https://example.org/openid/xrds.xml
+#) mojeID server parses the xml file and obtains the assertion url
+#) mojeID server opens the assertion url using POST and passes mandatory args
+#) Client server verifies the args and associates local user with mojeID account
 
 URL map
 -------
@@ -206,7 +206,7 @@ URL map
 **openid/complete/**
     Finish the authentication (redirects from OpenID server)
 **openid/registration/**
-    Register new MojeID user (redirects to MojeID server)
+    Register new mojeID user (redirects to mojeID server)
 **openid/assertion/**
     assertion url (see Assertion)
 **openid/xrds.xml**

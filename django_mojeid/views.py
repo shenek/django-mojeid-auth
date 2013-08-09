@@ -283,7 +283,7 @@ def login_complete(request):
                 # Create association with currently logged in user
                 OpenIDBackend.associate_openid_response(user_orig, openid_response)
             else:
-                # Authenticate MojeID user.
+                # Authenticate mojeID user.
                 # Send a signal to obtain HttpResponse
                 resp = authenticate_user.send(sender=__name__, request=request,
                                               openid_response=openid_response,
@@ -367,7 +367,7 @@ def login_complete(request):
 @csrf_exempt
 def assertion(request):
     """
-    MojeID server connects here to propagate a response to the registration
+    mojeID server connects here to propagate a response to the registration
     """
     def _reject(request, error):
         """ Reject response """
@@ -422,7 +422,7 @@ def assertion(request):
             # And assume that server sent us a valid claimed_id
             #
             # Note that user might been deleted before this assertion is triggered
-            # Or the newly created MojeID account might been already associated
+            # Or the newly created mojeID account might been already associated
             # with a local account by the client
             #
             # Both of these cases are not considered as errors
@@ -432,7 +432,7 @@ def assertion(request):
 
 def top(request, template_name='openid/top.html'):
     """ The openid Endpoint
-        this page should be only accessible by MojeID server
+        this page should be only accessible by mojeID server
     """
     url = request.build_absolute_uri(reverse(xrds))
     title = getattr(settings, 'OPENID_APP_TITLE', 'OpenID Backend')

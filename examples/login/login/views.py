@@ -27,10 +27,10 @@ def display_user(request):
     """ Display existing user """
     return render(request, 'existing_user.html', dict(request.GET))
 
-# This overrides a part of the default MojeID login_complete logic
+# This overrides a part of the default mojeID login_complete logic
 @receiver(authenticate_user, dispatch_uid="mojeid_create_user")
 def authenticate_user(**kwargs):
-    """ Display user forms prefilled with data from MojeID """
+    """ Display user forms prefilled with data from mojeID """
     request = kwargs['request']
     openid_response = kwargs['openid_response']
     redirect_to = kwargs['redirect']

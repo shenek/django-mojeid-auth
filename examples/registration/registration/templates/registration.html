@@ -29,17 +29,17 @@
         <h3>Registration of an unlogged user.</h3>
         <p>
         User is unlogged so there are no informations to be passed back to the server.
-        The MojeID registration form is therefore not filled with any informations.
+        The mojeID registration form is therefore not filled with any informations.
         </p>
         <p>
         After the registration the user is not redirected back to this site.
-        Therefore user needs to log in using login via MojeID button to this server site.
+        Therefore user needs to log in using login via mojeID button to this server site.
         See examples/login to observe how the login works.
         </p>
         {% elif usecase == 2 %}
         <h3>Registration of an existing user</h3>
         <p>
-        User is logged in some information about the user can be useful during the MojeID registration.
+        User is logged in some information about the user can be useful during the mojeID registration.
         The use_for_registration parameter of MOJEID_ATTRIBUTES sets whether the attribute is used for the registration.
         The use_for_registration is by default set to True.
         </p>
@@ -48,15 +48,15 @@
         </p>
         <ol>
             <li>A client clicks on the registration link.</li>
-            <li>A new form is generated. This form contains parameters which are used to prefill MojeID registration form.</li>
-            <li>The form contains an automatic redirection to MojeID registration form. So client is redirected.</li>
-            <li>The registration form is properly filled and a new MojeID account is created and activated.</li>
-            <li>MojeID server connects to the openid endpoint of this site. (/openid/)</li>
+            <li>A new form is generated. This form contains parameters which are used to prefill mojeID registration form.</li>
+            <li>The form contains an automatic redirection to mojeID registration form. So client is redirected.</li>
+            <li>The registration form is properly filled and a new mojeID account is created and activated.</li>
+            <li>mojeID server connects to the openid endpoint of this site. (/openid/)</li>
             <li>It checks whether the https is used and whether the server certificate can be trusted (not self-signed + valid chain).</li>
             <li>It determines the xrds.xml path (from the meta x-xrds-location tag).</li>
             <li>It downloads and parses xrds.xml and determines the assertion url. (/openid/assertion/)</li>
             <li>It passes the information about registration to local site using POST to assertion url.</li>
-            <li>The local server associates the user who created registration request with MojeID account.</li>
+            <li>The local server associates the user who created registration request with mojeID account.</li>
         </ol>
         Prerequisities:
         <ul>
@@ -65,7 +65,7 @@
             <li>The SSL Certificate should have a valid trust chain (not self-signed)</li>
         </ul>
         {% elif usecase == 3 %}
-        <h3>Registration of an existing user who is already registered in MojeID</h3>
+        <h3>Registration of an existing user who is already registered in mojeID</h3>
         <p>
         Imagine a situation where a use clicks on registration link, but his username as nickname is already taken.
         </p>
@@ -81,7 +81,7 @@
             <li>
                 <p>
                     <b>Another user has the same nickname</b><br />
-                    The client should create a new MojeID account with another nickname.
+                    The client should create a new mojeID account with another nickname.
                     The procedure is the same as in the <a href='/?usecase=2'>previous usecase</a>.
                 </p>
             </li>
