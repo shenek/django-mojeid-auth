@@ -33,6 +33,7 @@ from django.http import HttpResponse
 from django.utils.html import escape
 from django.shortcuts import render
 from django.conf import settings
+
 from django_mojeid.auth import OpenIDBackend
 
 def login(request):
@@ -59,10 +60,6 @@ def index(request):
                       'extra': extra
                   }
     )
-
-def next_works(request):
-    return HttpResponse('?next= bit works. <a href="/">Home</a>')
-
 
 @login_required
 def require_authentication(request):

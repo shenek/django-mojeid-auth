@@ -33,12 +33,22 @@ from django.core.exceptions import FieldError, ImproperlyConfigured
 
 from openid.extensions import ax
 
+from django_mojeid.attribute_handlers import call_handler
 from django_mojeid.exceptions import RequiredAttributeNotReturned
 
 MOJEID_ENDPOINT_URL = 'https://mojeid.fred.nic.cz/endpoint/'
 MOJEID_REGISTRATION_URL = 'https://mojeid.fred.nic.cz/registration/endpoint/'
 
+class CustomHandler(object):
+    type = 'handler'
+
+    def __init__(self, attribute, name, required=True):
+        self.name = name
+        self.required = required
+        self.attribute = attribute
+
 class MojeIDAttribute(object):
+    type = 'attribute'
 
     def __init__(self, modelApp, modelClass, modelAttribute,
                  user_id_field_name='user_id', required=True,
@@ -75,8 +85,9 @@ class MojeIDAttribute(object):
         return self.model.objects.get(**packed)
 
     # This method could be overwritten using inheritance
-    def _get_value(self, response):
-        return response.getSingle(self.schema, None)
+    @classmethod
+    def _get_value(cls, response):
+        return response.getSingle(cls.schema, None)
 
     def set_model_value(self, id, value):
         record = self._get_record(id)
@@ -90,17 +101,19 @@ class MojeIDAttribute(object):
     def _get_model_value(self, id):
         return getattr(self._get_record(id), self.modelAttribute)
 
-    def generate_ax_attrinfo(self):
-        return ax.AttrInfo(self.schema, alias=self.code, required=self.required)
+    @classmethod
+    def generate_ax_attrinfo(cls, required):
+        return ax.AttrInfo(cls.schema, alias=cls.code, required=required)
 
-    def get_attribute_and_value(self, response):
-        value = self._get_value(response)
-        if self.required and value == None:
+    @classmethod
+    def get_value(cls, response, required):
+        value = cls._get_value(response)
+        if required and value == None:
             raise RequiredAttributeNotReturned(
                 "Required Attribute '%s' (%s) was not returned."
                 % (self.code, self.text)
             )
-        return (self.modelAttribute, value, )
+        return value
 
     def registration_form_attrs(self, id):
         # Return none if registration field is not present
@@ -131,6 +144,8 @@ class MojeIDAttribute(object):
         )
 
 class MojeIDBooleanAttribute(MojeIDAttribute):
+
+    @classmethod
     def _get_value(self, response):
         res = response.getSingle(self.schema, None)
         if res is None:

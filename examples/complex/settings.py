@@ -168,4 +168,5 @@ MOJEID_ATTRIBUTES = [
     mojeid.NickName('auth', 'User', 'username', 'pk', use_for_registration=False),
     mojeid.Student('example_app', 'UserExtraAttributes', 'student', 'user_id', updatable=True),
     mojeid.Phone('example_app', 'UserExtraAttributes', 'phone', 'user_id'),
+    mojeid.CustomHandler(mojeid.FullName, 'full_name_handler', True),
 ]

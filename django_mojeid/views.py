@@ -55,7 +55,7 @@ from openid.yadis.constants import YADIS_CONTENT_TYPE
 
 from django_mojeid.forms import OpenIDLoginForm
 from django_mojeid.models import UserOpenID
-from django_mojeid.mojeid import MOJEID_REGISTRATION_URL, MOJEID_ENDPOINT_URL
+from django_mojeid.mojeid import MOJEID_REGISTRATION_URL, MOJEID_ENDPOINT_URL, CustomHandler, MojeIDAttribute
 from django_mojeid.signals import user_login_report, trigger_error, authenticate_user, associate_user
 from django_mojeid.store import DjangoOpenIDStore
 from django_mojeid.exceptions import (
@@ -192,7 +192,10 @@ def login_begin(request, form_class=OpenIDLoginForm):
 
     fetch_request = ax.FetchRequest()
     for attribute in attributes:
-        fetch_request.add(attribute.generate_ax_attrinfo())
+        if attribute.type == 'attribute':
+            fetch_request.add(attribute.generate_ax_attrinfo(attribute.required))
+        elif attribute.type == 'handler':
+            fetch_request.add(attribute.attribute.generate_ax_attrinfo(attribute.required))
 
     if attributes:
         openid_request.addExtension(fetch_request)

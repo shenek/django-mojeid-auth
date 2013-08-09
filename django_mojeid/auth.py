@@ -43,6 +43,8 @@ from django_mojeid.exceptions import (
     MissingPhysicalMultiFactor,
     DuplicateUserViolation,
 )
+from django_mojeid.mojeid import CustomHandler, MojeIDAttribute
+from django_mojeid.attribute_handlers import call_handler
 
 class OpenIDBackend:
     """A backend that authenticates the user based on an OpenID response."""
@@ -168,12 +170,15 @@ class OpenIDBackend:
                pape.AUTH_MULTI_FACTOR_PHYSICAL not in pape_response.auth_policies:
                 raise MissingPhysicalMultiFactor()
 
+        # Run custom Attribute handler
+        OpenIDBackend.run_handlers(openid_response)
+
         return user
 
     @staticmethod
     def get_model_changes(openid_response, only_updatable=False):
 
-        attributes = getattr(settings, 'MOJEID_ATTRIBUTES', [])
+        attributes = [x for x in getattr(settings, 'MOJEID_ATTRIBUTES', []) if x.type == 'attribute']
 
         fetch_response = ax.FetchResponse.fromSuccessResponse(openid_response)
 
@@ -186,12 +191,25 @@ class OpenIDBackend:
         for attribute in attributes:
             if not attribute.model in res.keys():
                 res[attribute.model] = {'user_id_field_name': attribute.user_id_field_name}
-            key, val = attribute.get_attribute_and_value(fetch_response)
+            val = attribute.get_value(fetch_response, attribute.required)
 
             if val != None:
-                res[attribute.model][key] = val
+                res[attribute.model][attribute.modelAttribute] = val
 
         return res
+
+    @staticmethod
+    def run_handlers(openid_response):
+        handlers = [x for x in getattr(settings, 'MOJEID_ATTRIBUTES', []) if x.type == 'handler']
+
+        if not handlers:
+            return
+
+        fetch_response = ax.FetchResponse.fromSuccessResponse(openid_response)
+
+        for handler in handlers:
+            val = handler.attribute.get_value(fetch_response, handler.required)
+            call_handler(handler.name, val)
 
     def create_user_from_openid(self, openid_response):
         changes = OpenIDBackend.get_model_changes(openid_response)
