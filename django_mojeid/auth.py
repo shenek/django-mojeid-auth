@@ -43,7 +43,7 @@ from django_mojeid.exceptions import (
     MissingPhysicalMultiFactor,
     DuplicateUserViolation,
 )
-from django_mojeid.mojeid import CustomHandler, MojeIDAttribute
+from django_mojeid.mojeid import get_attributes
 from django_mojeid.attribute_handlers import call_handler
 
 class OpenIDBackend:
@@ -139,6 +139,8 @@ class OpenIDBackend:
         if openid_response is None:
             return None
 
+        attribute_set = kwargs.get('attribute_set', 'default')
+
         if openid_response.status != SUCCESS:
             return None
 
@@ -149,7 +151,7 @@ class OpenIDBackend:
                 claimed_id__exact=openid_response.identity_url)
         except UserOpenID.DoesNotExist:
             if getattr(settings, 'OPENID_CREATE_USERS', False):
-                user = self.create_user_from_openid(openid_response)
+                user = self.create_user_from_openid(openid_response, attribute_set)
                 new_user = True
         else:
             user_model = OpenIDBackend.get_user_model()
@@ -162,7 +164,7 @@ class OpenIDBackend:
             return None
 
         if not new_user:
-            self.update_user_from_openid(user.id, openid_response)
+            self.update_user_from_openid(user.id, openid_response, attribute_set)
 
         if getattr(settings, 'OPENID_PHYSICAL_MULTIFACTOR_REQUIRED', False):
             pape_response = pape.Response.fromSuccessResponse(openid_response)
@@ -171,14 +173,15 @@ class OpenIDBackend:
                 raise MissingPhysicalMultiFactor()
 
         # Run custom Attribute handler
-        OpenIDBackend.run_handlers(openid_response, user)
+        OpenIDBackend.run_handlers(openid_response, user, attribute_set)
 
         return user
 
     @staticmethod
-    def get_model_changes(openid_response, only_updatable=False):
+    def get_model_changes(openid_response, only_updatable=False,
+                          attribute_set='default'):
 
-        attributes = [x for x in getattr(settings, 'MOJEID_ATTRIBUTES', []) if x.type == 'attribute']
+        attributes = [x for x in get_attributes(attribute_set) if x.type == 'attribute']
 
         fetch_response = ax.FetchResponse.fromSuccessResponse(openid_response)
 
@@ -199,8 +202,8 @@ class OpenIDBackend:
         return res
 
     @staticmethod
-    def run_handlers(openid_response, user):
-        handlers = [x for x in getattr(settings, 'MOJEID_ATTRIBUTES', []) if x.type == 'handler']
+    def run_handlers(openid_response, user, attribute_set='default'):
+        handlers = [x for x in get_attributes(attribute_set) if x.type == 'handler']
 
         if not handlers:
             return
@@ -211,8 +214,8 @@ class OpenIDBackend:
             val = handler.attribute.get_value(fetch_response, handler.required)
             call_handler(handler.name, user, val)
 
-    def create_user_from_openid(self, openid_response):
-        changes = OpenIDBackend.get_model_changes(openid_response)
+    def create_user_from_openid(self, openid_response, attribute_set='default'):
+        changes = OpenIDBackend.get_model_changes(openid_response, attribute_set)
 
         user_model = OpenIDBackend.get_user_model()
 
@@ -244,8 +247,9 @@ class OpenIDBackend:
         return user
 
     @classmethod
-    def update_user_from_openid(self, user_id, openid_response):
-        changes = OpenIDBackend.get_model_changes(openid_response, only_updatable=True)
+    def update_user_from_openid(self, user_id, openid_response, attribute_set='default'):
+        changes = OpenIDBackend.get_model_changes(openid_response, only_updatable=True,
+                                                  attribute_set=attribute_set)
 
         user_model = OpenIDBackend.get_user_model()
 

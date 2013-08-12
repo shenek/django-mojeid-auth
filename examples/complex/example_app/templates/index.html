@@ -38,5 +38,10 @@
 {% endif %}
         </p>
         <p><a href="/private">This requires authentication</a></p>
+        <h2>Multiple mojeid attribute sets</h2>
+        registration 1: {% include "mojeid/_register.html" with attribute_set='default' %}<br />
+        registration 2: {% include "mojeid/_register.html" with attribute_set='other' %}<br />
+        login 1: {% include "mojeid/_login.html" with attribute_set='default' %}<br />
+        login 2: {% include "mojeid/_login.html" with attribute_set='other' %}<br />
     </body>
 </html>

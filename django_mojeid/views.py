@@ -55,7 +55,7 @@ from openid.yadis.constants import YADIS_CONTENT_TYPE
 
 from django_mojeid.forms import OpenIDLoginForm
 from django_mojeid.models import UserOpenID
-from django_mojeid.mojeid import MOJEID_REGISTRATION_URL, MOJEID_ENDPOINT_URL, CustomHandler, MojeIDAttribute
+from django_mojeid.mojeid import MOJEID_REGISTRATION_URL, MOJEID_ENDPOINT_URL, CustomHandler, MojeIDAttribute, get_attributes
 from django_mojeid.signals import user_login_report, trigger_error, authenticate_user, associate_user
 from django_mojeid.store import DjangoOpenIDStore
 from django_mojeid.exceptions import (
@@ -145,7 +145,8 @@ def parse_openid_response(request):
     current_url = request.build_absolute_uri()
 
     consumer = make_consumer(request)
-    return consumer.complete(dict(request.REQUEST.items()), current_url)
+    attribute_set = consumer.session.get('attribute_set', 'default')
+    return attribute_set, consumer.complete(dict(request.REQUEST.items()), current_url)
 
 def login_show(request, login_template='openid/login.html',
                associate_temlate='openid/associate.html',
@@ -169,7 +170,7 @@ def login_show(request, login_template='openid/login.html',
             }, context_instance=RequestContext(request))
 
 @require_POST
-def login_begin(request, form_class=OpenIDLoginForm):
+def login_begin(request, attribute_set='default', form_class=OpenIDLoginForm):
     """Begin an OpenID login request, possibly asking for an identity URL."""
     redirect_to = OpenIDBackend.get_redirect_to(request)
 
@@ -181,14 +182,17 @@ def login_begin(request, form_class=OpenIDLoginForm):
 
     error = None
     consumer = make_consumer(request)
+
+    # Set response handler (define the settings set)
+    consumer.session['attribute_set'] = attribute_set
+
     try:
         openid_request = consumer.begin(openid_url)
     except DiscoveryFailure, exc:
         return render_failure(request, errors.DiscoveryError(exc))
 
-    # Request some user details.  If the provider advertises support
-    # for attribute exchange, use that.
-    attributes = getattr(settings, 'MOJEID_ATTRIBUTES', [])
+    # Request some user details.
+    attributes = get_attributes(attribute_set)
 
     fetch_request = ax.FetchRequest()
     for attribute in attributes:
@@ -223,9 +227,9 @@ def login_begin(request, form_class=OpenIDLoginForm):
 
     return render_openid_request(request, openid_request, return_to)
 
-def registration(request, template_name='openid/registration_form.html',
-                login_complete_view='openid-complete',
-                form_class=OpenIDLoginForm):
+def registration(request, attribute_set='default',
+                 template_name='openid/registration_form.html',
+                 form_class=OpenIDLoginForm):
     """ Try to submit all the registration attributes for mojeID registration"""
 
     registration_url = getattr(settings, 'MOJEID_REGISTRATION_URL',
@@ -243,11 +247,11 @@ def registration(request, template_name='openid/registration_form.html',
     nonce.save()
 
     fields = []
-    attrs = getattr(settings, 'MOJEID_ATTRIBUTES', [])
+    attributes = [x for x in get_attributes(attribute_set) if x.type == 'attribute']
     # Append attributes to creation request if user is valid
     if user:
-        for attr in attrs:
-            form_attr = attr.registration_form_attrs_html(user_id)
+        for attribute in attributes:
+            form_attr = attribute.registration_form_attrs_html(user_id)
             if form_attr:
                 fields.append(form_attr)
 
@@ -265,7 +269,7 @@ def login_complete(request):
     redirect_to = sanitise_redirect_url(OpenIDBackend.get_redirect_to(request))
 
     # Get OpenID response and test whether it is valid
-    openid_response = parse_openid_response(request)
+    attribute_set, openid_response = parse_openid_response(request)
     if not openid_response:
         return render_failure(request, errors.EndpointError())
 
@@ -301,7 +305,7 @@ def login_complete(request):
 
                 # Perform a default action
                 user_new = OpenIDBackend.authenticate_using_all_backends(
-                    openid_response=openid_response)
+                    openid_response=openid_response, attribute_set=attribute_set)
                 if not user_new:
                     # Failed to create a user
                     return render_failure(request, errors.UnknownUser())

@@ -57,7 +57,8 @@ def index(request):
                   {
                       'user': user,
                       'association': OpenIDBackend.get_user_association(user),
-                      'extra': extra
+                      'extra': extra,
+                      'attribute_set': 'default',
                   }
     )
 

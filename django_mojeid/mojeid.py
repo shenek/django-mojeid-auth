@@ -29,15 +29,31 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+from django.conf import settings
 from django.core.exceptions import FieldError, ImproperlyConfigured
+from django.http import Http404
 
 from openid.extensions import ax
 
-from django_mojeid.attribute_handlers import call_handler
 from django_mojeid.exceptions import RequiredAttributeNotReturned
 
 MOJEID_ENDPOINT_URL = 'https://mojeid.fred.nic.cz/endpoint/'
 MOJEID_REGISTRATION_URL = 'https://mojeid.fred.nic.cz/registration/endpoint/'
+
+def get_attributes(attribute_set):
+
+    default = getattr(settings, 'MOJEID_ATTRIBUTES', [])
+    res = getattr(settings, 'MOJEID_ATTRIBUTES_SETS', {})
+
+    # MOJEID_ATTRIBUTES are default when present
+    if default:
+        res['default'] = default
+
+    try:
+        return res[attribute_set]
+    except KeyError:
+        raise Http404
+
 
 class CustomHandler(object):
     type = 'handler'

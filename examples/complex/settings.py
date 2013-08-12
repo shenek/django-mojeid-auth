@@ -150,8 +150,8 @@ OPENID_USE_AS_ADMIN_LOGIN = False
 MOJEID_USER_MODEL = ('auth', 'User', )
 
 # For production set the urls to actual mojeid server
-#MOJEID_ENDPOINT_URL = 'https://mojeid.cz/endpoint/'
-#MOJEID_REGISTRATION_URL = 'https://mojeid.cz/registration/endpoint/'
+MOJEID_ENDPOINT_URL = 'https://mojeid.cz/endpoint/'
+MOJEID_REGISTRATION_URL = 'https://mojeid.cz/registration/endpoint/'
 
 # Set a custom REALM (by deafult https://myweb.com/openid/)
 # Note that you need to include meta header which points to xrds.xml in MOJEID_REALM page
@@ -160,13 +160,19 @@ MOJEID_USER_MODEL = ('auth', 'User', )
 
 # Setting of mojeID attributes
 from django_mojeid import mojeid
-MOJEID_ATTRIBUTES = [
-    mojeid.Email('auth', 'User', 'email', 'pk'),
-    #mojeid.FullName(User, 'username', 'id'),
-    mojeid.FirstName('auth', 'User', 'first_name', 'pk'),
-    mojeid.LastName('auth', 'User', 'last_name', 'pk', updatable=True, required=False),
-    mojeid.NickName('auth', 'User', 'username', 'pk', use_for_registration=False),
-    mojeid.Student('example_app', 'UserExtraAttributes', 'student', 'user_id', updatable=True),
-    mojeid.Phone('example_app', 'UserExtraAttributes', 'phone', 'user_id'),
-    mojeid.CustomHandler(mojeid.FullName, 'full_name_handler', True),
-]
+MOJEID_ATTRIBUTES_SETS = {
+    'default': [
+        mojeid.Email('auth', 'User', 'email', 'pk'),
+        #mojeid.FullName(User, 'username', 'id'),
+        mojeid.FirstName('auth', 'User', 'first_name', 'pk'),
+        mojeid.LastName('auth', 'User', 'last_name', 'pk', updatable=True, required=False),
+        mojeid.NickName('auth', 'User', 'username', 'pk', use_for_registration=False),
+        mojeid.Student('example_app', 'UserExtraAttributes', 'student', 'user_id', updatable=True),
+        mojeid.Phone('example_app', 'UserExtraAttributes', 'phone', 'user_id'),
+        mojeid.CustomHandler(mojeid.FullName, 'full_name_handler', True),
+    ],
+    'other': [
+        mojeid.Email('auth', 'User', 'email', 'pk'),
+        mojeid.NickName('auth', 'User', 'username', 'pk'),
+    ]
+}
