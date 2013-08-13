@@ -146,17 +146,17 @@ LOGIN_REDIRECT_URL = '/'
 # Should django_auth_openid be used to sign into the admin interface?
 OPENID_USE_AS_ADMIN_LOGIN = False
 
-# Define the main user structure
-MOJEID_USER_MODEL = ('auth', 'User', )
-
 # For production set the urls to actual mojeid server
-MOJEID_ENDPOINT_URL = 'https://mojeid.cz/endpoint/'
-MOJEID_REGISTRATION_URL = 'https://mojeid.cz/registration/endpoint/'
+#MOJEID_ENDPOINT_URL = 'https://mojeid.cz/endpoint/'
+#MOJEID_REGISTRATION_URL = 'https://mojeid.cz/registration/endpoint/'
 
 # Set a custom REALM (by deafult https://myweb.com/openid/)
 # Note that you need to include meta header which points to xrds.xml in MOJEID_REALM page
 # (e.g. <meta http-equiv="x-xrds-location" content="https://myweb.com/openid/xrds.xml" />)
 # MOJEID_REALM = 'https://myweb.com/'
+
+# Define the main user structure
+MOJEID_USER_MODEL = ('auth', 'User', )
 
 # Setting of mojeID attributes
 from django_mojeid import mojeid
