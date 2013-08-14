@@ -162,7 +162,7 @@ def parse_openid_response(request):
 
 
 def login_show(request, login_template='openid/login.html',
-               associate_temlate='openid/associate.html',
+               associate_template='openid/associate.html',
                form_class=OpenIDLoginForm):
     """
     Render a sample template to show the login form.
@@ -174,7 +174,7 @@ def login_show(request, login_template='openid/login.html',
 
     user = OpenIDBackend.get_user_from_request(request)
 
-    template_name = associate_temlate if user else login_template
+    template_name = associate_template if user else login_template
 
     return render_to_response(
         template_name,
