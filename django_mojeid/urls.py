@@ -31,7 +31,8 @@ from django.conf.urls.defaults import *
 
 import views
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     url(r'^$', views.top, name='openid-top'),
     url(r'^xrds.xml$', views.xrds, name='openid-xrds'),
     url(r'^login/$', views.login_show, name='openid-login'),

@@ -46,6 +46,7 @@ from django_mojeid.exceptions import (
 from django_mojeid.mojeid import get_attributes
 from django_mojeid.attribute_handlers import call_handler
 
+
 class OpenIDBackend:
     """A backend that authenticates the user based on an OpenID response."""
 
@@ -196,7 +197,7 @@ class OpenIDBackend:
                 res[attribute.model] = {'user_id_field_name': attribute.user_id_field_name}
             val = attribute.get_value(fetch_response, attribute.required)
 
-            if val != None:
+            if val is not None:
                 res[attribute.model][attribute.modelAttribute] = val
 
         return res
@@ -229,7 +230,6 @@ class OpenIDBackend:
         except ValidationError, e:
             raise DuplicateUserViolation(", ".join(e.messages))
         user.save()
-
 
         # User created remove it from the dict
         del changes[user_model]

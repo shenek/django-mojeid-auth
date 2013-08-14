@@ -1,8 +1,10 @@
 
 _handlers = {}
 
+
 class HandlerNotFound(Exception):
     pass
+
 
 def register_handler(handler_name):
 
@@ -20,6 +22,7 @@ def register_handler(handler_name):
         return wrapped_function
 
     return function_wrapper
+
 
 def call_handler(handler_name, *args, **kwargs):
     try:

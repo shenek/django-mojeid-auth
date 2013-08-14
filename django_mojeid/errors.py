@@ -1,3 +1,5 @@
+
+
 class GeneralError(object):
     http_status = 500
     name = 'general'
@@ -5,6 +7,7 @@ class GeneralError(object):
 
     def __repr__(self):
         return self.text
+
 
 class DiscoveryError(GeneralError):
     http_status = 404
@@ -17,14 +20,17 @@ class DiscoveryError(GeneralError):
     def __repr__(self):
         return "%s: %s" % (self.text, str(self.exception.message))
 
+
 class EndpointError(GeneralError):
     name = 'endpoint'
     text = 'This is an OpenID relying party endpoint.'
+
 
 class UnknownUser(GeneralError):
     http_status = 404
     name = 'unknown_user'
     text = 'Unknown User'
+
 
 class DisabledAccount(GeneralError):
     http_status = 403
@@ -37,6 +43,7 @@ class DisabledAccount(GeneralError):
     def __repr__(self):
         return "%s for User with id=%d" % (self.text, self.user.id)
 
+
 class AuthenticationFailed(GeneralError):
     http_status = 403
     name = 'auth_failed'
@@ -47,6 +54,7 @@ class AuthenticationFailed(GeneralError):
 
     def __repr__(self):
         return "%s: %s" % (self.text, str(self.exception.message))
+
 
 class OpenIDAuthenticationFailed(GeneralError):
     http_status = 403
@@ -65,9 +73,11 @@ class OpenIDAuthenticationCanceled(GeneralError):
     name = 'openid_auth_cancelled'
     text = 'OpenID Authentication Cancelled'
 
+
 class OpenIDUnknownResponseType(GeneralError):
     name = 'openid_unknown'
     text = 'OpenID Unknown Response Type'
+
     def __init__(self, openid_response):
         self.openid_response = openid_response
 

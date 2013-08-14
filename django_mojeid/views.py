@@ -55,8 +55,19 @@ from openid.yadis.constants import YADIS_CONTENT_TYPE
 
 from django_mojeid.forms import OpenIDLoginForm
 from django_mojeid.models import UserOpenID
-from django_mojeid.mojeid import MOJEID_REGISTRATION_URL, MOJEID_ENDPOINT_URL, CustomHandler, MojeIDAttribute, get_attributes
-from django_mojeid.signals import user_login_report, trigger_error, authenticate_user, associate_user
+from django_mojeid.mojeid import (
+    MOJEID_REGISTRATION_URL,
+    MOJEID_ENDPOINT_URL,
+    CustomHandler,
+    MojeIDAttribute,
+    get_attributes
+)
+from django_mojeid.signals import (
+    user_login_report,
+    trigger_error,
+    authenticate_user,
+    associate_user
+)
 from django_mojeid.store import DjangoOpenIDStore
 from django_mojeid.exceptions import (
     RequiredAttributeNotReturned,
@@ -70,6 +81,7 @@ from auth import OpenIDBackend
 from models import Nonce
 from mojeid import Assertion
 
+
 def sanitise_redirect_url(redirect_to):
     """Sanitise the redirection URL."""
     # Light security check -- make sure redirect_to isn't garbage.
@@ -78,8 +90,7 @@ def sanitise_redirect_url(redirect_to):
         is_valid = False
     elif '//' in redirect_to:
         # Allow the redirect URL to be external if it's a permitted domain
-        allowed_domains = getattr(settings,
-            "ALLOWED_EXTERNAL_OPENID_REDIRECT_DOMAINS", [])
+        allowed_domains = getattr(settings, "ALLOWED_EXTERNAL_OPENID_REDIRECT_DOMAINS", [])
         s, netloc, p, q, f = urlsplit(redirect_to)
         # allow it if netloc is blank or if the domain is allowed
         if netloc:
@@ -121,8 +132,9 @@ def render_openid_request(request, openid_request, return_to):
     # Render a form wich will redirect the client
     else:
         form_html = openid_request.htmlMarkup(realm, return_to,
-            form_tag_attrs={'id': 'openid_message'})
+                                              form_tag_attrs={'id': 'openid_message'})
         return HttpResponse(form_html, content_type='text/html;charset=UTF-8')
+
 
 def render_failure(request, error, template_name='openid/failure.html'):
     """Render an error page to the user."""
@@ -135,7 +147,7 @@ def render_failure(request, error, template_name='openid/failure.html'):
 
     # No response to signal - render default page
     data = render_to_string(template_name, {'message': str(error)},
-        context_instance=RequestContext(request))
+                            context_instance=RequestContext(request))
     return HttpResponse(data, status=error.http_status)
 
 
@@ -147,6 +159,7 @@ def parse_openid_response(request):
     consumer = make_consumer(request)
     attribute_set = consumer.session.get('attribute_set', 'default')
     return attribute_set, consumer.complete(dict(request.REQUEST.items()), current_url)
+
 
 def login_show(request, login_template='openid/login.html',
                associate_temlate='openid/associate.html',
@@ -163,11 +176,16 @@ def login_show(request, login_template='openid/login.html',
 
     template_name = associate_temlate if user else login_template
 
-    return render_to_response(template_name, {
+    return render_to_response(
+        template_name,
+        {
             'form': login_form,
             'action': reverse('openid-init'),
             OpenIDBackend.get_redirect_field_name(): redirect_to
-            }, context_instance=RequestContext(request))
+        },
+        context_instance=RequestContext(request)
+    )
+
 
 @require_POST
 def login_begin(request, attribute_set='default', form_class=OpenIDLoginForm):
@@ -227,6 +245,7 @@ def login_begin(request, attribute_set='default', form_class=OpenIDLoginForm):
 
     return render_openid_request(request, openid_request, return_to)
 
+
 def registration(request, attribute_set='default',
                  template_name='openid/registration_form.html',
                  form_class=OpenIDLoginForm):
@@ -256,12 +275,17 @@ def registration(request, attribute_set='default',
                 fields.append(form_attr)
 
     # Render the redirection template
-    return render_to_response(template_name, {
+    return render_to_response(
+        template_name,
+        {
             'fields': fields,
             'action': registration_url,
             'realm': realm,
             'nonce': nonce.registration_nonce,
-            }, context_instance=RequestContext(request))
+        },
+        context_instance=RequestContext(request)
+    )
+
 
 @csrf_exempt
 def login_complete(request):
@@ -374,6 +398,7 @@ def login_complete(request):
                                success=False)
         return render_failure(request, OpenIDUnknownResponseType(openid_response))
 
+
 @csrf_exempt
 def assertion(request):
     """
@@ -440,15 +465,19 @@ def assertion(request):
 
     return _accept(request)
 
+
 def top(request, template_name='openid/top.html'):
     """ The openid Endpoint
         this page should be only accessible by mojeID server
     """
     url = request.build_absolute_uri(reverse(xrds))
     title = getattr(settings, 'OPENID_APP_TITLE', 'OpenID Backend')
-    return render_to_response(template_name, { 'url': url, 'title': title },
-                              context_instance=RequestContext(request)
-                             )
+    return render_to_response(
+        template_name,
+        {'url': url, 'title': title},
+        context_instance=RequestContext(request)
+    )
+
 
 def xrds(request, template_name='openid/xrds.xml'):
     """ Render xrds file
@@ -456,12 +485,17 @@ def xrds(request, template_name='openid/xrds.xml'):
     """
     return_to_url = request.build_absolute_uri(reverse(login_complete))
     assertion_url = request.build_absolute_uri(reverse(assertion))
-    return render_to_response(template_name,
-                              {'return_to_url': return_to_url,
-                               'assertion_url': assertion_url},
-                              context_instance=RequestContext(request),
-                              content_type=YADIS_CONTENT_TYPE
-                             )
+    return render_to_response(
+        template_name,
+        {
+            'return_to_url': return_to_url,
+            'assertion_url': assertion_url
+        },
+        context_instance=RequestContext(request),
+        content_type=YADIS_CONTENT_TYPE
+    )
+
+
 @require_POST
 def disassociate(request):
     """
