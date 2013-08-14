@@ -66,6 +66,10 @@ class CustomHandler(object):
 class MojeIDAttribute(object):
     type = 'attribute'
 
+    code = None
+    schema = None
+    text = None
+
     def __init__(self, modelApp, modelClass, modelAttribute,
                  user_id_field_name='user_id', required=True,
                  updatable=False, use_for_registration=True):
@@ -124,10 +128,10 @@ class MojeIDAttribute(object):
     @classmethod
     def get_value(cls, response, required):
         value = cls._get_value(response)
-        if required and value == None:
+        if required and value is None:
             raise RequiredAttributeNotReturned(
                 "Required Attribute '%s' (%s) was not returned."
-                % (self.code, self.text)
+                % (cls.code, cls.text)
             )
         return value
 
@@ -138,7 +142,7 @@ class MojeIDAttribute(object):
 
         value = self._get_model_value(id)
         # No value present
-        if value == None:
+        if value is None:
             return None
 
         return {'name': self.registration_field, 'label': self.text.decode('utf-8'), 'value': value}
