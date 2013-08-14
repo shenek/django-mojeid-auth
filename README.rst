@@ -17,7 +17,7 @@ Basic Installation
    It can also be found in most Linux distributions packaged as *python-openid*.
    Version 2.2.0 or later will be needed.
 
-#) Add 'django_mojeid_auth' to INSTALLED_APPS for your application in your *settings.py*.
+#) Add 'django_mojeid' to INSTALLED_APPS for your application in your *settings.py*.
 
    At a minimum, you'll need the following in there::
 
@@ -45,7 +45,7 @@ Basic Installation
 
         urlpatterns = patterns('',
             ...
-            (r'^openid/', include('django_mojeid_auth.urls')),
+            (r'^openid/', include('django_mojeid.urls')),
             ...
         )
 
