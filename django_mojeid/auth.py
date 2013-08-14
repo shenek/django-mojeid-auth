@@ -170,7 +170,7 @@ class OpenIDBackend:
         if getattr(settings, 'OPENID_PHYSICAL_MULTIFACTOR_REQUIRED', False):
             pape_response = pape.Response.fromSuccessResponse(openid_response)
             if pape_response is None or \
-               pape.AUTH_MULTI_FACTOR_PHYSICAL not in pape_response.auth_policies:
+                    pape.AUTH_MULTI_FACTOR_PHYSICAL not in pape_response.auth_policies:
                 raise MissingPhysicalMultiFactor()
 
         # Run custom Attribute handler
@@ -250,8 +250,6 @@ class OpenIDBackend:
     def update_user_from_openid(self, user_id, openid_response, attribute_set='default'):
         changes = OpenIDBackend.get_model_changes(openid_response, only_updatable=True,
                                                   attribute_set=attribute_set)
-
-        user_model = OpenIDBackend.get_user_model()
 
         for model, kwargs in changes.iteritems():
             foreign_key_name = kwargs['user_id_field_name']

@@ -28,7 +28,6 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import re
 import urllib
 
 from urlparse import urlsplit, urldefrag
@@ -49,7 +48,7 @@ except ImportError:
 from openid.consumer.consumer import (
     Consumer, SUCCESS, CANCEL, FAILURE)
 from openid.consumer.discover import DiscoveryFailure
-from openid.extensions import sreg, ax, pape
+from openid.extensions import ax, pape
 from openid.kvform import dictToKV
 from openid.yadis.constants import YADIS_CONTENT_TYPE
 
@@ -58,8 +57,6 @@ from django_mojeid.models import UserOpenID
 from django_mojeid.mojeid import (
     MOJEID_REGISTRATION_URL,
     MOJEID_ENDPOINT_URL,
-    CustomHandler,
-    MojeIDAttribute,
     get_attributes
 )
 from django_mojeid.signals import (
@@ -70,7 +67,6 @@ from django_mojeid.signals import (
 )
 from django_mojeid.store import DjangoOpenIDStore
 from django_mojeid.exceptions import (
-    RequiredAttributeNotReturned,
     DjangoOpenIDException,
     IdentityAlreadyClaimed,
 )
@@ -198,7 +194,6 @@ def login_begin(request, attribute_set='default', form_class=OpenIDLoginForm):
     if login_form.is_valid():
         openid_url = login_form.cleaned_data['openid_identifier']
 
-    error = None
     consumer = make_consumer(request)
 
     # Set response handler (define the settings set)
@@ -396,7 +391,7 @@ def login_complete(request):
                                username=openid_response.identity_url,
                                method='openid',
                                success=False)
-        return render_failure(request, OpenIDUnknownResponseType(openid_response))
+        return render_failure(request, errors.OpenIDUnknownResponseType(openid_response))
 
 
 @csrf_exempt

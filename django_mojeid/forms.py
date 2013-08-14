@@ -42,7 +42,8 @@ class OpenIDLoginForm(forms.Form):
     def clean_openid_identifier(self):
         if 'openid_identifier' in self.cleaned_data:
             openid_identifier = self.cleaned_data['openid_identifier']
-            if xri.identifierScheme(openid_identifier) == 'XRI' \
-               and getattr(settings, 'OPENID_DISALLOW_INAMES', False):
+            if xri.identifierScheme(openid_identifier) == 'XRI' and \
+                    getattr(settings, 'OPENID_DISALLOW_INAMES', False):
                 raise forms.ValidationError(_('i-names are not supported'))
+
             return self.cleaned_data['openid_identifier']

@@ -32,7 +32,6 @@ from django.db import models
 import os
 import time
 import urllib
-import signals
 
 
 class Nonce(models.Model):
