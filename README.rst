@@ -251,10 +251,43 @@ But you can still send the report in these functions.
 
 To see both functions in action see *examples/login* and *examples/association*
 
+Multiple MOJEID_ATTRIBUTES sets
+-------------------------------
+Imagine a situation where you have two kinds of users
+
+- Ordinary users (last name, email)
+- Premium users (full name, email, phone)
+
+And you want to get a different sets of mojeID attributes for each of these groups.
+
+To do so you need to replace *MOJEID_ATTRIBUTES* with *MOJEID_ATTRIBUTES_SETS* having following structure::
+
+    MOJEID_ATTRIBUTES_SETS = {
+        'default': [
+            mojeid.LastName('auth', 'User', 'last_name', 'pk'),
+            mojeid.Email('auth', 'User', 'email', 'pk'),
+        ],
+        'premium': [
+            mojeid.FullName(User, 'username', 'id'),
+            mojeid.Email('auth', 'User', 'email', 'pk'),
+            mojeid.Phone('example_app', 'UserExtraAttributes', 'phone', 'user_id'),
+        ]
+    }
+
+Now the user will be asked for *default* attribute set when he opens */openid/initiate/* or */openid/initiate/default* and for *premium* attribute set when he opens */openid/initiate/premium*.
+
+The urls in the templates will look as follows::
+
+    ...
+    {% url 'openid-init' attribute_set='default' %}
+    ...
+    {% url 'openid-init' attribute_set='premium' %}
+    ...
+
 Registration
 ------------
 To register an existing user to mojeID a registration form is generated and redirected to mojeid registration page.
-Only the attributes marked with use_for_registration=True are passed.
+Only the attributes marked with *use_for_registration=True* are passed.
 
 After the registration mojeID server tries to connect to the server and notify it that the registration work well and the existing user can be associated with mojeID account.
 This procedure is called Assertion.
