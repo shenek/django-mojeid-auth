@@ -198,6 +198,7 @@ def login_begin(request, attribute_set='default', form_class=OpenIDLoginForm):
 
     # Set response handler (define the settings set)
     consumer.session['attribute_set'] = attribute_set
+    request.session.save()
 
     try:
         openid_request = consumer.begin(openid_url)
