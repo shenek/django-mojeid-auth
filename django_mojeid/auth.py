@@ -247,7 +247,7 @@ class OpenIDBackend:
         return user
 
     @classmethod
-    def update_user_from_openid(self, user_id, openid_response, attribute_set='default'):
+    def update_user_from_openid(cls, user_id, openid_response, attribute_set='default'):
         changes = OpenIDBackend.get_model_changes(openid_response, only_updatable=True,
                                                   attribute_set=attribute_set)
 
