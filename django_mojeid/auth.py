@@ -65,6 +65,8 @@ class OpenIDBackend:
     def get_user_from_request(cls, request):
         """This method can be overwritten to implement custom user/session mechanizms
         currently it uses standard django.contrib.auth"""
+        if not hasattr(request, 'user') or not hasattr(request.user, 'is_authenticated'):
+            return None
         return request.user if request.user.is_authenticated() else None
 
     @classmethod
