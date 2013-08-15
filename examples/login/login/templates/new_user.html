@@ -6,6 +6,11 @@
             Creating users can be automatic. (default behaviour) <br/>
             Or a custom action can be triggered. (such as redirection to this page)
         </p>
+        <p>
+            Note that email (or username or ...) might be already used with another account.
+            The django_mojeid plugin doesn't check for these situations and would simply fail during the user creation.
+            If you want to deal with these situations differently you need to trigger a custom action and put our logic inside.
+        </p>
         <h3>Parameters from mojeID</h3>
         <table border="1">
             <tr>
