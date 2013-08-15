@@ -276,7 +276,7 @@ To do so you need to replace *MOJEID_ATTRIBUTES* with *MOJEID_ATTRIBUTES_SETS* h
 
 Now the user will be asked for *default* attribute set when he opens */openid/initiate/* or */openid/initiate/default* and for *premium* attribute set when he opens */openid/initiate/premium*.
 
-The urls in the templates will look as follows::
+The urls in templates would look as follows::
 
     ...
     {% url 'openid-init' attribute_set='default' %}

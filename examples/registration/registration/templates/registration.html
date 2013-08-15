@@ -64,6 +64,14 @@
             <li>Connection should be via SSL</li>
             <li>The SSL Certificate should have a valid trust chain (not self-signed)</li>
         </ul>
+        <p>
+            <i>
+                Note that if you participate in <a href=''>Incentive programme for web service providers</a>
+                you should also set your realm properly (MOJEID_REALM = 'https://myweb.com/') <br/>
+                and place meta tag &lt;meta http-equiv="x-xrds-location" content="https://myweb.com/openid/xrds.xml" /&gt;
+                on your top page.
+            </i>
+        </p>
         {% elif usecase == 3 %}
         <h3>Registration of an existing user who is already registered in mojeID</h3>
         <p>
