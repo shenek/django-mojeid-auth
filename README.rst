@@ -169,6 +169,28 @@ By default this view is quite ugly and when you want to integrate error messages
 
 Custom handlers
 ---------------
+The attribute which is obtained from mojeID server is usually used to update a part of an existing model.
+If we don't want to update a model we can create a *CustomHandler* structure instead of *MojeIDAttribute*.
+This handler is linked to a function which we choose.
+
+In *settings.py*::
+
+    MOJEID_ATTRIBUTES = [
+        ...
+        mojeid.CustomHandler(mojeid.FullName, 'full_name_handler', required=True),
+        ]
+
+Handler code::
+
+    from django_mojeid.attribute_handlers import register_handler
+
+    @register_handler('full_name_handler')
+    def print_fullname_to_console(user, full_name):
+        print '>>>', full_name, '<<< for user ', user
+
+
+Note that you need the handler code to be executed.
+A simple way to do so is to put the code inside some python file e.g. *handlers.py* and import it from *__init__.py* (*import handlers*).
 
 Login Reports
 -------------
