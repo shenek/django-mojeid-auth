@@ -171,13 +171,8 @@ To override the default OpenID login fail view it is necessary to respond to the
 This can be triggered e.g. when a user doesn't provide the required attributes from OpenID/mojeID server.
 By default this view is quite ugly and when you want to integrate error messages into your web app you are encouraged to respond to this signal.
 
-Overrride Authentication
-------------------------
-TBD
-
-Override Association
---------------------
-TBD
+Custom handlers
+---------------
 
 Login Reports
 -------------
@@ -194,6 +189,47 @@ It is also possible to log the OpenID login attempts thanks to user_login_report
             if not user_id:
                 username = kwargs.get('user_name', '')
             ...
+
+Override Authentication or Association
+---------------------------------------
+The basic logic of the authentication or association can be overwritten.
+This could be useful when we want just to obtain some attributes from mojeID without authenticating the user.
+*(For example we could obtain an up-to-date home address to ship our goods)*
+
+To override the authentication action you simply::
+
+    from django_mojeid.signals import authenticate_user
+
+    @receiver(authenticate_user, dispatch_uid="mojeid_create_user")
+    def authenticate(**kwargs):
+        request = kwargs['request']
+        openid_response = kwargs['openid_response']
+        redirect_to = kwargs['redirect']
+        ...
+        openid_attributes = OpenIDBackend.get_model_changes(openid_response)
+        ...
+        return redirect(url)
+
+You can override the association action in a similar way::
+
+    from django_mojeid.signals import associate_user
+
+    @receiver(associate_user, dispatch_uid="mojeid_associate_user")
+    def associate_user(**kwargs):
+        request = kwargs['request']
+        openid_response = kwargs['openid_response']
+        redirect_to = kwargs['redirect']
+        claimed_id = openid_response.endpoint.claimed_id
+        ...
+        openid_attributes = OpenIDBackend.get_model_changes(openid_response)
+        ...
+        return redirect(redirect_to)
+
+Both of these functions should return a *HttpResponse* object.
+Otherwise the default action is trigger after the execution.
+
+Note that no login reports are generated when you override these actions.
+But you can still send the report in these functions.
 
 Registration
 ------------
