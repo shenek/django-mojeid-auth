@@ -102,7 +102,7 @@
         <form action='{% url 'openid-disassociate' %}?next={{ request.get_full_path|urlencode }}' method='post'>
             {% csrf_token %}
             User associted with <b>{{ claimed_id }}</b>
-            <input type="submit" value="Disassociate"></input>
+            <input type="submit" value="Disassociate">
         </form>
         {% endif %}
         <div style='margin:30px;'>

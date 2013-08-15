@@ -151,7 +151,7 @@ class MojeIDAttribute(object):
 
     # This method could be overwritten using inheritance
     def _get_form_html_template(self):
-        return u'<label for="%s">%s</label><input type="text" name="%s" value="%s"></input>'
+        return u'<label for="%s">%s</label><input type="text" name="%s" value="%s">'
 
     def registration_form_attrs_html(self, id):
 

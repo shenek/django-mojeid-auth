@@ -2,8 +2,8 @@
     <head><title>mojeID sample</title></head>
     <body>
         <h1>Index</h1>
-        <p>
 {% if user %}
+        <p>
             You are signed in as <strong>{{ user.username }}</strong> ({{ user.get_full_name }})
             <a href="/logout?next=/">Sign out</a>
     {% if extra %}
@@ -13,6 +13,7 @@
             <br />
     {% endif %}
     {% if not association %}
+        </p>
         <p>
             {% include "openid/_associate.html" %}
         </p>
@@ -24,10 +25,11 @@
             Associated with: {{ association }}
             <form action='{% url 'openid-disassociate' %}' method='post'>
                 {% csrf_token %}
-                <input type="hidden" name="next" value="{{ request.get_full_path }}"></input>
-                <input type="submit" value="Disassociate"></input>
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <input type="submit" value="Disassociate">
             </form>
     {% endif %}
+        <p>
 {% else %}
         <p>
             {% include "openid/_login.html" %}
@@ -36,7 +38,6 @@
             {% include "mojeid/_login.html" %}
         </p>
 {% endif %}
-        </p>
         <p><a href="/private">This requires authentication</a></p>
         <h2>Multiple mojeid attribute sets</h2>
         registration 1: {% include "mojeid/_register.html" with attribute_set='default' %}<br />

@@ -1,11 +1,11 @@
 <div class='mojeid_login'>
     <form action='{% url 'openid-init' attribute_set=attribute_set %}' method='post'>
         {% csrf_token %}
-        <input type="hidden" name="next" value="{% if redirect %}{{ redirect }}{% else %}{{ request.get_full_path }}{% endif %}"></input>
+        <input type="hidden" name="next" value="{% if redirect %}{{ redirect }}{% else %}{{ request.get_full_path }}{% endif %}">
         <table>
             <tr>
                 <th colspan="2">
-                    <input type="image"  src="/static/mojeid/black_162x32.png"></input>
+                    <input type="image"  src="/static/mojeid/black_162x32.png">
                 </th>
             </tr>
             <tr>
