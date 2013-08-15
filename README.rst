@@ -5,12 +5,12 @@ This package provides integration between Django's authentication system and Ope
 It is a fork of https://launchpad.net/django-openid-auth
 
 The main purpose of this fork is to remove launchpad related stuff and add mojeID related stuff.
-mojeID is a czech openid implementation managed by `CZ.NIC z.s.p.o. <http://www.nic.cz/>`_
+mojeID is a Czech openid implementation managed by `CZ.NIC z.s.p.o. <http://www.nic.cz/>`_
 
 Basic Installation
 ------------------
 
-1) Install the Jan Rain Python OpenID library. 
+1) Install the Jan Rain Python OpenID library.
 
    It can be found at: http://openidenabled.com/python-openid/
 
@@ -41,7 +41,7 @@ Basic Installation
 
         OPENID_CREATE_USERS = True
 
-#) Hook up the login URLs to your application's urlconf with:: 
+#) Hook up the login urls to your application's urlconf with::
 
         urlpatterns = patterns('',
             ...
@@ -113,10 +113,6 @@ Note that it is necessary to include following meta tag to your realm page::
 
 The OpenID/mojeID servers will be looking for the xrds.xml file so you need set this tag.
 
-Examples
---------
-TBD in /examples/
-
 mojeID Attributes
 -----------------
 Where are defined
@@ -127,7 +123,7 @@ etc.
 External redirect domains
 -------------------------
 
-By default, redirecting back to an external URL after auth is forbidden.
+By default, redirecting back to an external URL after authentication is forbidden.
 To permit redirection to external URLs on a separate domain, define ALLOWED_EXTERNAL_OPENID_REDIRECT_DOMAINS in your settings.py file as a list of permitted domains::
 
     ALLOWED_EXTERNAL_OPENID_REDIRECT_DOMAINS = ['example.com', 'example.org']
@@ -143,7 +139,7 @@ If you require openid authentication into the admin application, add the followi
 
 It is worth noting that a user needs to be marked as a "staff user" to be able to access the admin interface.
 A new openid user will not normally be a "staff user".
-The easiest way to resolve this is to use traditional authentication (OPENID_USE_AS_ADMIN_LOGIN = False) to sign in as your first user with a password and authorise your openid user to be staff.
+The easiest way to resolve this is to use traditional authentication (OPENID_USE_AS_ADMIN_LOGIN = False) to sign in as your first user with a password and authorize your openid user to be staff.
 
 Require Physical Multi-Factor Authentication
 --------------------------------------------
@@ -231,6 +227,8 @@ Otherwise the default action is trigger after the execution.
 Note that no login reports are generated when you override these actions.
 But you can still send the report in these functions.
 
+To see both functions in action see *examples/login* and *examples/association*
+
 Registration
 ------------
 To register an existing user to mojeID a registration form is generated and redirected to mojeid registration page.
@@ -241,7 +239,7 @@ This procedure is called Assertion.
 
 Assertion
 ---------
-You need to have a public IP and a valid ssl certificate (not self-signed). You can test your certificat via "openssl s_client ...".
+You need to have a public IP and a valid ssl certificate (not self-signed). You can test your certificate via "openssl s_client ...".
 The procedure goes as follows:
 
 1) mojeID server connects to https://example.org/openid and gets addres of xrds.xml
@@ -267,8 +265,13 @@ URL map
     assertion url (see Assertion)
 **openid/xrds.xml**
     xrds.xml (see Assertion)
-**openid/disassociate**
+**openid/disassociate/**
     Removes association between current user and OpenID
+
+Examples
+--------
+TBD in /examples/
+
 
 Troubleshooting
 ---------------
