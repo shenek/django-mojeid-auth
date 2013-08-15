@@ -40,14 +40,14 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-if django_version >= "1.2": 
+if django_version >= "1.2":
     csrf_middleware = 'django.middleware.csrf.CsrfViewMiddleware'
     DATABASES = {
-                     'default': {
-                         'ENGINE': 'django.db.backends.sqlite3',
-                         'NAME': 'sqlite.db'
-                     }
-                 }
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'sqlite.db'
+        }
+    }
     TEMPLATE_LOADERS = (
         'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',
@@ -57,7 +57,7 @@ else:
     TEMPLATE_LOADERS = (
         'django.template.loaders.filesystem.load_template_source',
         'django.template.loaders.app_directories.load_template_source',
-     )
+    )
     DATABASE_ENGINE = 'sqlite3'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
     DATABASE_NAME = 'sqlite.db'             # Or path to database file if using sqlite3.
     DATABASE_USER = ''             # Not used with sqlite3.
@@ -108,7 +108,7 @@ MIDDLEWARE_CLASSES = (
 )
 
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
-TEMPLATE_CONTEXT_PROCESSORS+=('django.core.context_processors.request',)
+TEMPLATE_CONTEXT_PROCESSORS += ('django.core.context_processors.request', )
 
 ROOT_URLCONF = 'complex.urls'
 
@@ -147,8 +147,8 @@ LOGIN_REDIRECT_URL = '/'
 OPENID_USE_AS_ADMIN_LOGIN = False
 
 # For production set the urls to actual mojeid server
-#MOJEID_ENDPOINT_URL = 'https://mojeid.cz/endpoint/'
-#MOJEID_REGISTRATION_URL = 'https://mojeid.cz/registration/endpoint/'
+MOJEID_ENDPOINT_URL = 'https://mojeid.cz/endpoint/'
+MOJEID_REGISTRATION_URL = 'https://mojeid.cz/registration/endpoint/'
 
 # Set a custom REALM (by deafult https://myweb.com/openid/)
 # Note that you need to include meta header which points to xrds.xml in MOJEID_REALM page
@@ -174,5 +174,7 @@ MOJEID_ATTRIBUTES_SETS = {
     'other': [
         mojeid.Email('auth', 'User', 'email', 'pk'),
         mojeid.NickName('auth', 'User', 'username', 'pk'),
+        mojeid.CustomHandler(mojeid.Adult, 'adult_handler', required=True),
+        mojeid.CustomHandler(mojeid.Valid, 'valid_handler', required=True),
     ]
 }
