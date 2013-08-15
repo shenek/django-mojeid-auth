@@ -216,7 +216,7 @@ class OpenIDBackend:
             call_handler(handler.name, user, val)
 
     def create_user_from_openid(self, openid_response, attribute_set='default'):
-        changes = OpenIDBackend.get_model_changes(openid_response, attribute_set)
+        changes = OpenIDBackend.get_model_changes(openid_response, attribute_set=attribute_set)
 
         user_model = OpenIDBackend.get_user_model()
 
