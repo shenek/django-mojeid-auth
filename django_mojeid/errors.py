@@ -18,7 +18,7 @@ class DiscoveryError(GeneralError):
         self.exception = exception
 
     def __repr__(self):
-        return "%s: %s" % (self.text, str(self.exception.message))
+        return "%s: %s" % (self.text, str(self.exception))
 
 
 class EndpointError(GeneralError):
@@ -53,7 +53,7 @@ class AuthenticationFailed(GeneralError):
         self.exception = exception
 
     def __repr__(self):
-        return "%s: %s" % (self.text, str(self.exception.message))
+        return "%s: %s" % (self.text, str(self.exception))
 
 
 class OpenIDAuthenticationFailed(GeneralError):

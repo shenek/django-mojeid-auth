@@ -27,7 +27,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from django.conf.urls.defaults import *
+from django.conf.urls import patterns, include
 from django.contrib import admin
 
 import views
@@ -35,7 +35,8 @@ import views
 
 admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     (r'^$', views.index),
     (r'^login/$', views.login),
     (r'^openid/', include('django_mojeid.urls')),
