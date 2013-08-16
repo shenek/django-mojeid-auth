@@ -7,6 +7,9 @@
         <h3> Attributes </h3>
         {% if user_associated %}
         <p>This claimed id is already used! (with user {{ user_associated.username }})</p>
+        <p>
+        To disassociate you need to remove a database object of the <b>UserOpenID</b> model with <b>claimed_id</b> {{ claimed_id.0 }}.
+        </p>
         <table>
             <tr>
                 <th>Attribute</th><th>Current User</th><th>mojeID Attribute</th><th>Already associated</th>
@@ -26,6 +29,9 @@
         </table>
         {% else %}
         <p> Current user is already associated with: {{ claimed_associated.0 }} </p>
+        <p>
+        To disassociate you need to remove a database object of the <b>UserOpenID</b> model with <b>user_id</b>={{ user.id }}.
+        </p>
         <table>
             <tr>
                 <th>Attribute</th><th>Local Attribute</th><th>mojeID Attribute</th>
