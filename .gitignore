@@ -1,0 +1,7 @@
+.gitignore
+*.swp
+*.swo
+*.pyc
+*.db
+/MANIFEST
+/dist
