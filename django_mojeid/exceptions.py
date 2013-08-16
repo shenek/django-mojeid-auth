@@ -38,36 +38,28 @@ class RequiredAttributeNotReturned(DjangoOpenIDException):
 
 
 class IdentityAlreadyClaimed(DjangoOpenIDException):
+    message = "Another user already exists for your selected OpenID"
 
-    def __init__(self, message=None):
-        if message is None:
-            self.message = "Another user already exists for your selected OpenID"
-        else:
-            self.message = message
+    def __init__(self, message=message):
+        super(IdentityAlreadyClaimed, self).__init__(message)
 
 
 class DuplicateUserViolation(DjangoOpenIDException):
+    message = "Your user was already being used."
 
-    def __init__(self, message=None):
-        if message is None:
-            self.message = "Your user was already being used."
-        else:
-            self.message = message
+    def __init__(self, message=message):
+        super(DuplicateUserViolation, self).__init__(message)
 
 
 class MissingUsernameViolation(DjangoOpenIDException):
+    message = "No nickname given for your account."
 
-    def __init__(self, message=None):
-        if message is None:
-            self.message = "No nickname given for your account."
-        else:
-            self.message = message
+    def __init__(self, message=message):
+        super(MissingUsernameViolation, self).__init__(message)
 
 
 class MissingPhysicalMultiFactor(DjangoOpenIDException):
+    message = "Login requires physical multi-factor authentication."
 
-    def __init__(self, message=None):
-        if message is None:
-            self.message = "Login requires physical multi-factor authentication."
-        else:
-            self.message = message
+    def __init__(self, message=message):
+        super(MissingPhysicalMultiFactor, self).__init__(message)
