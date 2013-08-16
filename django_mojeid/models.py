@@ -94,4 +94,4 @@ class UserOpenID(models.Model):
         return urlparse.urldefrag(self.claimed_id)[0]
 
     def __unicode__(self):
-        return urlparse.urlparse(self.display_id).netloc
+        return self.name
