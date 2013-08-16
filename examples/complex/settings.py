@@ -147,8 +147,8 @@ LOGIN_REDIRECT_URL = '/'
 OPENID_USE_AS_ADMIN_LOGIN = False
 
 # For production set the urls to actual mojeid server
-MOJEID_ENDPOINT_URL = 'https://mojeid.cz/endpoint/'
-MOJEID_REGISTRATION_URL = 'https://mojeid.cz/registration/endpoint/'
+# MOJEID_ENDPOINT_URL = 'https://mojeid.cz/endpoint/'
+# MOJEID_REGISTRATION_URL = 'https://mojeid.cz/registration/endpoint/'
 
 # Set a custom REALM (by deafult https://myweb.com/openid/)
 # Note that you need to include meta header which points to xrds.xml in MOJEID_REALM page

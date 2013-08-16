@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # django-openid-auth -  OpenID integration for django.contrib.auth
 #
+# Copyright (C) 2009-2013 CZ.NIC z.s.p.o.
 # Copyright (C) 2009-2013 Canonical Ltd.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,36 +27,35 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-"""OpenID integration for django.contrib.auth
+"""mojeID integration for django
 
-A library that can be used to add OpenID support to Django applications.
+A library that can be used to add OpenID/mojeID support to Django applications.
 The library integrates with Django's built in authentication system, so
-most applications require minimal changes to support OpenID llogin. The
+most applications require minimal changes to support OpenID/mojeID login. The
 library also includes the following features:
-  * Basic user details are transferred from the OpenID server via the
-    Simple Registration extension or Attribute Exchange extension.
-  * can be configured to use a fixed OpenID server URL, for use in SSO.
-  * supports the launchpad.net teams extension to get team membership
-    info.
+  * Attribute Exchange extension.
+  * mojeID registration extension.
+  * authentication/association handlers.
 """
 
 from distutils.core import setup
 
 
 description, long_description = __doc__.split('\n\n', 1)
-VERSION = '0.5'
+VERSION = '0.1'
 
 setup(
-    name='django-openid-auth',
+    name='django-mojeid',
     version=VERSION,
-    author='Canonical Ltd',
+    author='CZ.NIC z.s.p.o.',
+    author_email='stepan.henek@nic.cz',
     description=description,
     long_description=long_description,
     license='BSD',
     platforms=['any'],
-    url='https://launchpad.net/django-openid-auth',
-    download_url=('http://launchpad.net/django-openid-auth/trunk/%s/+download'
-                  '/django-openid-auth-%s.tar.gz' % (VERSION, VERSION)),
+    url='https://gitlab.labs.nic.cz/django-mojeid-auth',
+    download_url=('https://gitlab.labs.nic.cz/django-mojeid-auth/repository/archive?ref=%s'
+                  % VERSION),
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
@@ -65,16 +65,15 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Topic :: Software Development :: Libraries :: Python Modules'
-        ],
+    ],
     packages=[
-        'django_openid_auth',
-        'django_openid_auth.management',
-        'django_openid_auth.management.commands',
-        'django_openid_auth.tests',
-        ],
+        'django_mojeid',
+        'django_mojeid.management',
+        'django_mojeid.management.commands',
+    ],
     package_data={
-        'django_openid_auth': ['templates/openid/*.html'],
-        },
-    provides=['django_openid_auth'],
-    requires=['django (>=1.1.2)', 'openid (>=2.2.0)'],
-    )
+        'django_mojeid': ['templates/*/*.html', 'static/*/*'],
+    },
+    provides=['django_mojeid'],
+    requires=['django (>=1.5.1)', 'openid (>=2.2.0)'],
+)
