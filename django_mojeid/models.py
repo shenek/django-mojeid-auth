@@ -31,7 +31,7 @@ from django.db import models
 
 import os
 import time
-import urllib
+import urlparse
 
 
 class Nonce(models.Model):
@@ -87,4 +87,4 @@ class UserOpenID(models.Model):
     display_id = models.TextField(max_length=2047)
 
     def __unicode__(self):
-        return urllib.urlparse(self.display_id).netloc
+        return urlparse.urlparse(self.display_id).netloc
