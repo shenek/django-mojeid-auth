@@ -264,12 +264,10 @@ class OpenIDBackend:
     def associate_openid_response(user, openid_response):
         """Associate an OpenID request with a user account."""
         # Check to see if this OpenID has already been claimed.
-        return OpenIDBackend.associate_openid(
-            user, openid_response.identity_url,
-            openid_response.endpoint.getDisplayIdentifier())
+        return OpenIDBackend.associate_openid(user, openid_response.identity_url)
 
     @staticmethod
-    def associate_openid(user, claimed_id, display_id):
+    def associate_openid(user, claimed_id):
         """Associate an OpenID with a user account."""
 
         from django_mojeid.models import UserOpenID
@@ -281,8 +279,7 @@ class OpenIDBackend:
         except UserOpenID.DoesNotExist:
             user_openid = UserOpenID(
                 user_id=user.id,
-                claimed_id=claimed_id,
-                display_id=display_id)
+                claimed_id=claimed_id)
             user_openid.save()
         else:
             if user_openid.user_id != user.id:

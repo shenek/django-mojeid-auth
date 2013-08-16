@@ -82,9 +82,16 @@ class Association(models.Model):
 
 
 class UserOpenID(models.Model):
-    user_id = models.IntegerField()
+    user_id = models.IntegerField(primary_key=True)
     claimed_id = models.TextField(max_length=2047, unique=True)
-    display_id = models.TextField(max_length=2047)
+
+    @property
+    def name(self):
+        return urlparse.urlparse(self.claimed_id).netloc
+
+    @property
+    def display_id(self):
+        return urlparse.urldefrag(self.claimed_id)[0]
 
     def __unicode__(self):
         return urlparse.urlparse(self.display_id).netloc

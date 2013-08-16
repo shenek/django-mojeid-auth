@@ -30,7 +30,7 @@
 
 import urllib
 
-from urlparse import urlsplit, urldefrag
+from urlparse import urlsplit
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -445,9 +445,8 @@ def assertion(request):
         user_model = OpenIDBackend.get_user_model()
         try:
             user = user_model.objects.get(pk=user_id)
-            display_id = urldefrag(claimed_id)[0]
             # Create association
-            OpenIDBackend.associate_openid(user, claimed_id, display_id)
+            OpenIDBackend.associate_openid(user, claimed_id)
         except (user_model.DoesNotExist, IdentityAlreadyClaimed):
             # Don't associte the user when the user doesn't exist or is already claimed
             # And assume that server sent us a valid claimed_id
