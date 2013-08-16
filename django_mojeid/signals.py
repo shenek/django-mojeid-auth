@@ -53,4 +53,4 @@ def delete_association(**kwargs):
     sender = kwargs['sender']
     user = kwargs['instance']
     if sender == user_model:
-        UserOpenID.objects.filter(user_id=user.id).delete()
+        UserOpenID.objects.filter(user_id=user.pk).delete()

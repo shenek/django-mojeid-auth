@@ -255,7 +255,7 @@ def registration(request, attribute_set='default',
                     request.build_absolute_uri(reverse(top)))
 
     user = OpenIDBackend.get_user_from_request(request)
-    user_id = user.id if user else None
+    user_id = user.pk if user else None
 
     # Create Nonce
     nonce = Nonce(server_url=realm, user_id=user_id)

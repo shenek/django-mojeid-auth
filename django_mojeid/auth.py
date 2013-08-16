@@ -86,7 +86,7 @@ class OpenIDBackend:
         if not user:
             return False
         from django_mojeid.models import UserOpenID
-        return UserOpenID.objects.filter(user_id=user.id).exists()
+        return UserOpenID.objects.filter(user_id=user.pk).exists()
 
     @classmethod
     def get_user_association(cls, user):
@@ -94,7 +94,7 @@ class OpenIDBackend:
         if not user:
             return None
         try:
-            association = UserOpenID.objects.get(user_id=user.id)
+            association = UserOpenID.objects.get(user_id=user.pk)
         except UserOpenID.DoesNotExist:
             association = None
 
@@ -167,7 +167,7 @@ class OpenIDBackend:
             return None
 
         if not new_user:
-            self.update_user_from_openid(user.id, openid_response, attribute_set)
+            self.update_user_from_openid(user.pk, openid_response, attribute_set)
 
         if getattr(settings, 'OPENID_PHYSICAL_MULTIFACTOR_REQUIRED', False):
             pape_response = pape.Response.fromSuccessResponse(openid_response)
@@ -240,7 +240,7 @@ class OpenIDBackend:
         for model, kwargs in changes.iteritems():
             foreign_key_name = kwargs['user_id_field_name']
             del kwargs['user_id_field_name']
-            kwargs[foreign_key_name] = user.id
+            kwargs[foreign_key_name] = user.pk
             m = model(**kwargs)
             m.save()
 
@@ -278,11 +278,11 @@ class OpenIDBackend:
                 claimed_id__exact=claimed_id)
         except UserOpenID.DoesNotExist:
             user_openid = UserOpenID(
-                user_id=user.id,
+                user_id=user.pk,
                 claimed_id=claimed_id)
             user_openid.save()
         else:
-            if user_openid.user_id != user.id:
+            if user_openid.user_id != user.pk:
                 raise IdentityAlreadyClaimed(
                     "The identity %s has already been claimed"
                     % claimed_id)

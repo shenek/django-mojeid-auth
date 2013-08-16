@@ -41,7 +41,7 @@ class DisabledAccount(GeneralError):
         self.user = user
 
     def __repr__(self):
-        return "%s for User with id=%d" % (self.text, self.user.id)
+        return "%s for User with id=%d" % (self.text, self.user.pk)
 
 
 class AuthenticationFailed(GeneralError):
