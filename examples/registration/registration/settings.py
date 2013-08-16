@@ -78,7 +78,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    #'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -88,7 +88,7 @@ SECRET_KEY = '5svni#bo&r8f^%q!mm6ca5m)5#&y*ur_wg$wsi#*_pvp3#%_8-'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    #'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -178,10 +178,14 @@ OPENID_USE_AS_ADMIN_LOGIN = False
 # Define the main user structure
 MOJEID_USER_MODEL = ('auth', 'User', )
 
+# Set the attributes to be retrieved from OpenID server
 from django_mojeid import mojeid
 MOJEID_ATTRIBUTES = [
     mojeid.Email('auth', 'User', 'email', 'pk'),
     mojeid.NickName('auth', 'User', 'username', 'pk'),
+    # FirstName is related to django.contrib.auth.User model first_name attribute,
+    # the attribute containing user id is the attribute pk of django.contrib.auth.User
+    # first_name won't be used to prefill mojeID registration form
     mojeid.FirstName('auth', 'User', 'first_name', 'pk', use_for_registration=False),
     mojeid.LastName('auth', 'User', 'last_name', 'pk'),
 ]
