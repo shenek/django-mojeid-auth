@@ -182,6 +182,6 @@ MOJEID_ATTRIBUTES = [
     # email would be automaticaly updated whenever the user authenticates via OpenID
     mojeid.Email('auth', 'User', 'email', 'pk', updatable=True),
     mojeid.NickName('auth', 'User', 'username', 'pk'),
-    mojeid.FirstName('auth', 'User', 'first_name', 'pk', updatable=True),
+    mojeid.FirstName('auth', 'User', 'first_name', 'pk', updatable=True, required=False),
     mojeid.LastName('auth', 'User', 'last_name', 'pk', updatable=True),
 ]
