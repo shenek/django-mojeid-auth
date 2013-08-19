@@ -1,5 +1,5 @@
-Django mojeID/OpenID Authentication Support
-===========================================
+Django mojeID/OpenID Authentication
+===================================
 
 This package provides integration between Django's authentication system and OpenID authentication.
 It is a fork of https://launchpad.net/django-openid-auth
