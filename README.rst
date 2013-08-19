@@ -17,6 +17,8 @@ Basic Installation
    It can also be found in most Linux distributions packaged as *python-openid*.
    Version 2.2.0 or later will be needed.
 
+#) TBD install django_mojeid plugin.
+
 #) Add 'django_mojeid' to INSTALLED_APPS for your application in your *settings.py*.
 
    At a minimum, you'll need the following in there::
@@ -67,11 +69,11 @@ Basic Installation
 #) Set the MOJEID_ATTRIBUTES in your *settings.py* to determine which attributes of mojeid should be used::
 
         MOJEID_ATTRIBUTES = [
-            Email('auth', 'User', 'email', 'pk'),
-            FirstName('auth', 'User', 'first_name', 'pk'),
-            LastName('auth', 'User', 'last_name', 'pk', updatable=True, required=False),
-            NickName('auth', 'User', 'username', 'pk', use_for_registration=False),
-            Phone('example_app', 'UserExtraAttributes', 'phone', 'user_id'),
+            mojeid.Email('auth', 'User', 'email', 'pk'),
+            mojeid.FirstName('auth', 'User', 'first_name', 'pk'),
+            mojeid.LastName('auth', 'User', 'last_name', 'pk', updatable=True, required=False),
+            mojeid.NickName('auth', 'User', 'username', 'pk', use_for_registration=False),
+            mojeid.Phone('example_app', 'UserExtraAttributes', 'phone', 'user_id'),
             ]
 
    - First four parameters are mandatory. First parameter is an app name.
@@ -80,6 +82,8 @@ Basic Installation
    - required(=True) - fail authentication when this attr is not obtained from mojeid
    - updatable(=False) - update the attributes of the model after login
    - use_for_registration(=True) - prefill mojeid registration form with this attribute
+
+   For a complete list of attributes see *mojeid.py*.
 
 #) Sync your database to add all necessary tables::
 
@@ -112,13 +116,6 @@ Note that it is necessary to include following meta tag to your realm page::
     <meta http-equiv="x-xrds-location" content="https://myweb.com/openid/xrds.xml" />
 
 The OpenID/mojeID servers will be looking for the xrds.xml file so you need set this tag.
-
-mojeID Attributes
------------------
-Where are defined
-Types
-How are they used
-etc.
 
 External redirect domains
 -------------------------
@@ -321,11 +318,42 @@ URL map
 **openid/xrds.xml**
     xrds.xml (see Assertion)
 **openid/disassociate/**
-    Removes association between current user and OpenID
+    Removes the association between the logged user and OpenID
 
 Examples
 --------
-TBD in /examples/
+
+Login example
+_____________
+
+- how to use login template
+- how to create a new user from mojeID
+- how to log in an exsiting user from mojeID
+- how to override default mojeID authentication logic
+
+Associate example
+_________________
+
+- how to use associate template
+- how to associate an existing user
+- how to handle already associated user
+- how to override default mojeID association logic
+
+Registration example
+____________________
+
+- how to use registration template
+- how to prefill mojeID registration form
+- describes how does the registration procedure work
+- describes the requirements for the whole registration procedure
+
+Complex example
+_______________
+TBD
+
+Validate, Status, Adult example
+_______________________________
+TBD
 
 
 Troubleshooting
