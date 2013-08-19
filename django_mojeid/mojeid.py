@@ -600,9 +600,9 @@ class Student(MojeIDBooleanAttribute):
     text = 'Příznak – Student'
 
 
-class Valid(MojeIDBooleanAttribute):
+class Validated(MojeIDBooleanAttribute):
     # Probably not supported anymore
-    code = 'valid'
+    code = 'validated'
     schema = 'http://specs.nic.cz/attr/contact/valid'
     text = 'Příznak – Validace'
 

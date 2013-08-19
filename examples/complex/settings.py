@@ -175,6 +175,6 @@ MOJEID_ATTRIBUTES_SETS = {
         mojeid.Email('auth', 'User', 'email', 'pk'),
         mojeid.NickName('auth', 'User', 'username', 'pk'),
         mojeid.CustomHandler(mojeid.Adult, 'adult_handler', required=True),
-        mojeid.CustomHandler(mojeid.Valid, 'valid_handler', required=True),
+        mojeid.CustomHandler(mojeid.Validated, 'valid_handler', required=True),
     ]
 }
