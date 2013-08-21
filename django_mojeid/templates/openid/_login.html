@@ -1,7 +1,8 @@
 {% load i18n %}
+{% load static %}
 <style type="text/css">
 input.openid {
-    background: url('/static/openid/openid-16x16.gif') no-repeat;
+    background: url('{% static "openid/openid-16x16.gif" %}') no-repeat;
     background-position: 0 50%;
     padding-left: 16px;
 }

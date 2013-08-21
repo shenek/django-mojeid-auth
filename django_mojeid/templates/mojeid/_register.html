@@ -1,3 +1,4 @@
+{% load staticfiles %}
 <div class='mojeid_registration'>
-    <a href='{% url 'openid-registration' attribute_set=attribute_set %}'><img  src="/static/mojeid/zalozit_green_3D.png" alt='Založit účet mojeID' /></a>
+    <a href='{% url 'openid-registration' attribute_set=attribute_set %}'><img  src={% static "mojeid/zalozit_green_3D.png" %} alt='Založit účet mojeID' /></a>
 </div>

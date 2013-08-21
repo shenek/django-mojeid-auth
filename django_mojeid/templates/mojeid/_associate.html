@@ -1,3 +1,4 @@
+{% load staticfiles %}
 <div class='mojeid_associate'>
     <form action='{% url 'openid-init' attribute_set=attribute_set %}' method='post'>
         {% csrf_token %}
@@ -5,7 +6,7 @@
         <table>
             <tr>
                 <th colspan="2">
-                    <input type="image"  src="/static/mojeid/black_92x32.png">
+                    <input type="image"  src="{% static "mojeid/black_92x32.png" %}">
                 </th>
             </tr>
             <tr>

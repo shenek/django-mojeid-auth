@@ -1,11 +1,12 @@
 {% load i18n %}
+{% load static %}
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
 <title>Sign in with your OpenID</title>
 <style type="text/css">
 input.openid {
-    background: url('/static/openid/openid-16x16.gif') no-repeat;
+    background: url('{% static "openid/openid-16x16.gif" %}') no-repeat;
     background-position: 0 50%;
     padding-left: 16px;
 }
