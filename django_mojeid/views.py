@@ -304,6 +304,7 @@ def login_complete(request):
                 # Send a signal to obtain HttpResponse
                 resp = associate_user.send(sender=__name__, request=request,
                                            openid_response=openid_response,
+                                           attribute_set=attribute_set,
                                            redirect=redirect_to)
                 resp = [r[1] for r in resp if isinstance(r[1], HttpResponse)]
                 if resp:
@@ -317,6 +318,7 @@ def login_complete(request):
                 # Send a signal to obtain HttpResponse
                 resp = authenticate_user.send(sender=__name__, request=request,
                                               openid_response=openid_response,
+                                              attribute_set=attribute_set,
                                               redirect=redirect_to)
                 resp = [r[1] for r in resp if isinstance(r[1], HttpResponse)]
                 if resp:
