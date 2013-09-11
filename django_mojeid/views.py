@@ -57,7 +57,8 @@ from django_mojeid.models import UserOpenID
 from django_mojeid.mojeid import (
     MOJEID_REGISTRATION_URL,
     MOJEID_ENDPOINT_URL,
-    get_attributes
+    get_attributes,
+    get_filtered_attributes,
 )
 from django_mojeid.signals import (
     user_login_report,
@@ -205,8 +206,8 @@ def login_begin(request, attribute_set='default', form_class=OpenIDLoginForm):
     except DiscoveryFailure, exc:
         return render_failure(request, errors.DiscoveryError(exc))
 
-    # Request some user details.
-    attributes = get_attributes(attribute_set)
+    # Request user details.
+    attributes = get_filtered_attributes(attribute_set)
 
     fetch_request = ax.FetchRequest()
     for attribute in attributes:

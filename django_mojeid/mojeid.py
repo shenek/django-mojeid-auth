@@ -56,6 +56,24 @@ def get_attributes(attribute_set):
         raise Http404
 
 
+def get_filtered_attributes(attribute_set='defualt'):
+    """ Return attributes without duplicities """
+    attributes = get_attributes(attribute_set)
+
+    used_dict = {}
+    filtered_attributes = []
+    for attribute in attributes:
+        if attribute.code in used_dict:
+            if not filtered_attributes[used_dict[attribute.code]].required:
+                # required=true has higher priority
+                filtered_attributes[used_dict[attribute.code]] = attribute
+        else:
+            used_dict[attribute.code] = len(filtered_attributes)
+            filtered_attributes.append(attribute)
+
+    return filtered_attributes
+
+
 class CustomHandler(object):
     type = 'handler'
 
