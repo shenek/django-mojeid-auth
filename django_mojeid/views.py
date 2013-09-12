@@ -58,7 +58,7 @@ from django_mojeid.mojeid import (
     MOJEID_REGISTRATION_URL,
     MOJEID_ENDPOINT_URL,
     get_attributes,
-    get_filtered_attributes,
+    get_attribute_query,
 )
 from django_mojeid.signals import (
     user_login_report,
@@ -207,14 +207,11 @@ def login_begin(request, attribute_set='default', form_class=OpenIDLoginForm):
         return render_failure(request, errors.DiscoveryError(exc))
 
     # Request user details.
-    attributes = get_filtered_attributes(attribute_set)
+    attributes = get_attribute_query(attribute_set)
 
     fetch_request = ax.FetchRequest()
-    for attribute in attributes:
-        if attribute.type == 'attribute':
-            fetch_request.add(attribute.generate_ax_attrinfo(attribute.required))
-        elif attribute.type == 'handler':
-            fetch_request.add(attribute.attribute.generate_ax_attrinfo(attribute.required))
+    for attribute, required in attributes:
+        fetch_request.add(attribute.generate_ax_attrinfo(required))
 
     if attributes:
         openid_request.addExtension(fetch_request)
