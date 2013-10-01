@@ -46,27 +46,33 @@
         <p>
         Overall registration procedure has several steps:
         </p>
-        <ol>
+        <ul>
             <li>A client clicks on the registration link.</li>
             <li>A new form is generated. This form contains parameters which are used to prefill mojeID registration form.</li>
-            <li>The form contains an automatic redirection to mojeID registration form. So client is redirected.</li>
+            <li>The form contains an automatic redirection to mojeID registration form. So the client is redirected.</li>
             <li>The registration form is properly filled and a new mojeID account is created and activated.</li>
+        </ul>
+            Next steps are <b>optional</b>.
+            The procedure described below ensures that a user is automatically created after the registration on mojeid.cz site.
+            When the following procedure is not performed user has to be created manually. 
+            <i>(e.g. by clicking on "Create from mojeid" button)</i>
+        <ul>
             <li>mojeID server connects to the openid endpoint of this site. (/openid/)</li>
             <li>It checks whether the https is used and whether the server certificate can be trusted (not self-signed + valid chain).</li>
             <li>It determines the xrds.xml path (from the meta x-xrds-location tag).</li>
             <li>It downloads and parses xrds.xml and determines the assertion url. (/openid/assertion/)</li>
             <li>It passes the information about registration to local site using POST to assertion url.</li>
             <li>The local server associates the user who created registration request with mojeID account.</li>
-        </ol>
-        Prerequisities:
+        </ul>
+        Prerequisities for the <b>optional</b> part:
         <ul>
             <li>Server with a valid public address.</li>
-            <li>Connection should be via SSL</li>
-            <li>The SSL Certificate should have a valid trust chain (not self-signed)</li>
+            <li>Connection should be via SSL (no self-signed certificates)</li>
+            <li>The SSL Certificate's trust chain should be set properly</li>
         </ul>
         <p>
             <i>
-                Note that if you participate in <a href=''>Incentive programme for web service providers</a>
+                Note that if you participate in <a href='http://www.mojeid.cz/page/877/incentive-programme-for-web-service-providers/'>Incentive programme for web service providers</a>
                 you should also set your realm properly (MOJEID_REALM = 'https://myweb.com/') <br/>
                 and place meta tag &lt;meta http-equiv="x-xrds-location" content="https://myweb.com/openid/xrds.xml" /&gt;
                 on your top page.
