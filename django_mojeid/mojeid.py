@@ -47,7 +47,7 @@ def get_attributes(attribute_set):
     res = getattr(settings, 'MOJEID_ATTRIBUTES_SETS', {})
 
     # MOJEID_ATTRIBUTES are default when present
-    if default:
+    if default or not res:
         res['default'] = default
 
     try:
