@@ -119,7 +119,7 @@ class OpenIDBackend:
         from django.contrib.auth import login as auth_login
 
         # skip when the user is not authenticated (=AnonymousUser)
-        if not user.is_authenticated():
+        if not user or not user.is_authenticated():
             return
 
         # Set backend if it is not set
