@@ -286,3 +286,11 @@ class OpenIDBackend:
                     % claimed_id)
 
         return user_openid
+
+    @classmethod
+    def get_user(cls, user_id):
+        try:
+            user_model = get_user_model()
+            return user_model.objects.get(pk=user_id)
+        except user_model.DoesNotExist:
+            return None
