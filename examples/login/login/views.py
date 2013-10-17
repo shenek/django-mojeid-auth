@@ -1,10 +1,11 @@
-from django.contrib.auth import logout
+from django.contrib.auth import logout, get_user
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.dispatch import receiver
 from django.shortcuts import render, redirect
 from django.http import QueryDict
+
 
 from django_mojeid.auth import OpenIDBackend
 from django_mojeid.models import UserOpenID
@@ -40,8 +41,9 @@ def authenticate_user(**kwargs):
         # Authenticate user
         user_openid = UserOpenID.objects.get(
             claimed_id__exact=openid_response.identity_url)
-        user = OpenIDBackend.get_user(user_openid.user_id)
-        OpenIDBackend.associate_user_with_session(request, user)
+        user = get_user(user_openid.user_id)
+        if OpenIDBackend.is_user_authenticated(user):
+            OpenIDBackend.associate_user_with_session(request, user)
 
         # Update all updatable attributes
         #attrs = OpenIDBackend.update_user_from_openid(user_id, openid_response)

@@ -54,14 +54,6 @@ class OpenIDBackend:
     supports_anonymous_user = True
 
     @classmethod
-    def get_user(cls, user_id):
-        try:
-            user_model = get_user_model()
-            return user_model.objects.get(pk=user_id)
-        except user_model.DoesNotExist:
-            return None
-
-    @classmethod
     def get_user_from_request(cls, request):
         """This method can be overwritten to implement custom user/session mechanizms
         currently it uses standard django.contrib.auth"""
@@ -125,10 +117,16 @@ class OpenIDBackend:
         """This method can be overwritten to implement custom user/session mechanizms
         currently it uses standard django.contrib.auth"""
         from django.contrib.auth import login as auth_login
+
+        # skip when the user is not authenticated (=AnonymousUser)
+        if not user.is_authenticated():
+            return
+
         # Set backend if it is not set
         if not hasattr(user, 'backend'):
             setattr(user, 'backend', 'django_mojeid.auth.OpenIDBackend')
-        return auth_login(request, user)
+
+        auth_login(request, user)
 
     def authenticate(self, **kwargs):
         """Authenticate the user based on an OpenID response."""
