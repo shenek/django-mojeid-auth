@@ -155,9 +155,6 @@ OPENID_USE_AS_ADMIN_LOGIN = False
 # (e.g. <meta http-equiv="x-xrds-location" content="https://myweb.com/openid/xrds.xml" />)
 # MOJEID_REALM = 'https://myweb.com/'
 
-# Define the main user structure
-MOJEID_USER_MODEL = ('auth', 'User', )
-
 # Setting of mojeID attributes
 from django_mojeid import mojeid
 MOJEID_ATTRIBUTES_SETS = {

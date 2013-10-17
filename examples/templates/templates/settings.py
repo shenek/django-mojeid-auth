@@ -171,9 +171,6 @@ LOGIN_REDIRECT_URL = '/'
 # Should django_auth_openid be used to sign into the admin interface?
 OPENID_USE_AS_ADMIN_LOGIN = False
 
-# Define the main user structure
-MOJEID_USER_MODEL = ('auth', 'User', )
-
 # Set the attributes to be retrieved from OpenID server
 #from django_mojeid import mojeid
 MOJEID_ATTRIBUTES = [

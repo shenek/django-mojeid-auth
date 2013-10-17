@@ -29,8 +29,8 @@
 
 from django.db.models.signals import post_delete
 from django.dispatch import Signal, receiver
+from django.contrib.auth import get_user_model
 
-from auth import OpenIDBackend
 
 user_login_report = Signal(providing_args=[
     'request', 'username', 'user_id', 'method', 'success'])
@@ -42,7 +42,7 @@ authenticate_user = Signal(providing_args=['request', 'openid_response', 'redire
 associate_user = Signal(providing_args=['request', 'openid_response', 'redirect'])
 
 # Fetch the delete user
-user_model = OpenIDBackend.get_user_model()
+user_model = get_user_model()
 
 
 @receiver(post_delete, sender=user_model, dispatch_uid='user_delete')

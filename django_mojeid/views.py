@@ -71,6 +71,7 @@ from django_mojeid.exceptions import (
     DjangoOpenIDException,
     IdentityAlreadyClaimed,
 )
+from django.contrib.auth import get_user_model
 
 import errors
 
@@ -293,7 +294,7 @@ def login_complete(request):
 
     # Check whether the user is already logged in
     user_orig = OpenIDBackend.get_user_from_request(request)
-    user_model = OpenIDBackend.get_user_model()
+    user_model = get_user_model()
 
     if openid_response.status == SUCCESS:
 
@@ -442,7 +443,7 @@ def assertion(request):
         nonce.delete()
 
         # Fetch the user
-        user_model = OpenIDBackend.get_user_model()
+        user_model = get_user_model()
         try:
             user = user_model.objects.get(pk=user_id)
             # Create association

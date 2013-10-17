@@ -59,13 +59,6 @@ Basic Installation
    This will allow pages that use the standard @login_required
    decorator to be redirected to defined login page.
 
-#) Set the MOJEID_USER_MODEL in your *settings.py* to specify the user model::
-
-        MOJEID_USER_MODEL = ('auth', 'User', )
-
-
-   This will force app to use standard django.contrib.auth.User model for authentication
-
 #) Set the MOJEID_ATTRIBUTES in your *settings.py* to determine which attributes of mojeid should be used::
 
         MOJEID_ATTRIBUTES = [

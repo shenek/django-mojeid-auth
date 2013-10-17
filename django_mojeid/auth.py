@@ -32,8 +32,8 @@
 __metaclass__ = type
 
 from django.conf import settings
-from django.db.models.loading import get_model
 from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
 
 from openid.consumer.consumer import SUCCESS
 from openid.extensions import ax, pape
@@ -56,7 +56,7 @@ class OpenIDBackend:
     @classmethod
     def get_user(cls, user_id):
         try:
-            user_model = OpenIDBackend.get_user_model()
+            user_model = get_user_model()
             return user_model.objects.get(pk=user_id)
         except user_model.DoesNotExist:
             return None
@@ -157,7 +157,7 @@ class OpenIDBackend:
                 user = self.create_user_from_openid(openid_response, attribute_set)
                 new_user = True
         else:
-            user_model = OpenIDBackend.get_user_model()
+            user_model = get_user_model()
             try:
                 user = user_model.objects.get(pk=user_openid.user_id)
             except user_model.DoesNotExist:
@@ -220,7 +220,7 @@ class OpenIDBackend:
     def create_user_from_openid(self, openid_response, attribute_set='default'):
         changes = OpenIDBackend.get_model_changes(openid_response, attribute_set=attribute_set)
 
-        user_model = OpenIDBackend.get_user_model()
+        user_model = get_user_model()
 
         # Id will be generated no need to set this field
         del changes[user_model]['user_id_field_name']
@@ -288,8 +288,3 @@ class OpenIDBackend:
                     % claimed_id)
 
         return user_openid
-
-    @staticmethod
-    def get_user_model():
-        app_name, model_name = getattr(settings, 'MOJEID_USER_MODEL')
-        return get_model(app_name, model_name)
