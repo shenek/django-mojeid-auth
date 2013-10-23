@@ -678,3 +678,9 @@ class Assertion:
         MISSING_CLAIMED_ID = 'Claimed ID is missing.'
         MISSING_NONCE = 'Registration nonce is missing.'
         INVALID_NONCE = 'Registration nonce is invalid.'
+
+# OpenID logging to django debug
+import logging
+logger = logging.getLogger('openid')
+from openid import oidutil
+oidutil.log = logger.warn
