@@ -53,8 +53,8 @@ setup(
     long_description=long_description,
     license='BSD',
     platforms=['any'],
-    url='https://gitlab.labs.nic.cz/django-mojeid-auth',
-    download_url=('https://gitlab.labs.nic.cz/django-mojeid-auth/repository/archive?ref=%s'
+    url='https://gitlab.labs.nic.cz/labs/django-mojeid-auth',
+    download_url=('https://gitlab.labs.nic.cz/labs/django-mojeid-auth/repository/archive?ref=%s'
                   % VERSION),
     classifiers=[
         'Development Status :: 4 - Beta',
