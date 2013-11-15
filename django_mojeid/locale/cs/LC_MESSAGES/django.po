@@ -1,0 +1,467 @@
+# django-mojeid
+# Copyright (C) 2013 CZ.NIC, z.s.p.o.
+# This file is distributed under the same license as the django-mojeid package.
+# Stepan Henek <stepan.henek@nic.cz>, 2013.
+#
+
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-11-15 11:26+0100\n"
+"PO-Revision-Date: 2013-11-15 15:00+0100\n"
+"Last-Translator: Stepan Henek <stepan.henek@nic.cz>\n"
+"Language-Team: Czech <>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+
+#: admin.py:46
+#, python-format
+msgid "%d expired nonces removed"
+msgstr "%d prošlých noncí bylo odstraněno"
+
+#: admin.py:47
+msgid "Clean up expired nonces"
+msgstr "Úklid prošlých noncí"
+
+#: admin.py:61
+#, python-format
+msgid "%d expired associations removed"
+msgstr "%d prošlých párování odstraněno"
+
+#: admin.py:62
+msgid "Clean up expired associations"
+msgstr "Úklid prošlých párování"
+
+#: admin.py:83
+#, python-format
+msgid "User %s does not have admin access."
+msgstr "Uživatel %s nemá administrátorská oprávnění."
+
+#: admin.py:85
+#, python-format
+msgid "Unknown Error: %s"
+msgstr "Neznámá chyba: %s"
+
+#: attribute_handlers.py:32
+#, python-format
+msgid "Handler with name %s was not found."
+msgstr "Reakce se jménem %s nebyla nalezena."
+
+#: auth.py:286
+#, python-format
+msgid "The identity %s has already been claimed"
+msgstr "Identita %s je již zabrána."
+
+#: errors.py:7
+msgid "General OpenID error."
+msgstr "Obecná chyba OpenID"
+
+#: errors.py:16
+msgid "OpenID discovery error"
+msgstr "OpenID Chyba při objevování"
+
+#: errors.py:27
+msgid "This is an OpenID relying party endpoint."
+msgstr "Toto je koncový bod OpenID."
+
+#: errors.py:33
+msgid "Unknown User"
+msgstr "Neznámý uživatel"
+
+#: errors.py:39
+msgid "Disabled Account"
+msgstr "Účet byl zablokován"
+
+#: errors.py:51
+msgid "Authentication Failed"
+msgstr "Autentifikace selhala"
+
+#: errors.py:63
+msgid "OpenID authentication failed"
+msgstr "OpenID autentifikace selhala"
+
+#: errors.py:75
+msgid "OpenID Authentication Cancelled"
+msgstr "OpenID autentifikace byla zrušena"
+
+#: errors.py:80
+msgid "OpenID Unknown Response Type"
+msgstr "OpenID neznámý typ odpovědi"
+
+#: exceptions.py:43
+msgid "Another user already exists for your selected OpenID"
+msgstr "Pro vámi zvolené OpenID uživatel již existuje"
+
+#: exceptions.py:50
+msgid "Your user was already being used."
+msgstr "Vámi zvolené uživatelské jméno bylo již použito."
+
+#: exceptions.py:57
+msgid "No nickname given for your account."
+msgstr "Pro váš účet nebyl zvoleno uživatelské jméno."
+
+#: exceptions.py:64
+msgid "Login requires physical multi-factor authentication."
+msgstr "Přihlášení vyžaduje fyzickou multifaktorovou autentifikaci."
+
+#: forms.py:47
+msgid "i-names are not supported"
+msgstr "i-names nejsou podporovány"
+
+#: mojeid.py:118
+#, python-format
+msgid "Model '%(model)s' from App '%(app)s' does not exist."
+msgstr "Model '%(model)s' z Applikace '%(app)s' neexistuje."
+
+#: mojeid.py:140
+#, python-format
+msgid "Cannot resolve keyword '%(model)s' into field. Choices are: %(choices)s"
+msgstr "Není možné najít pole '%(model)s'. Možnosti jsou: %(choices)s"
+
+#: mojeid.py:158
+#, python-format
+msgid "Required Attribute '%(code)s' (%(text)s) was not returned."
+msgstr "Požadovaný attribute '%(code)s' (%(text)s) nebyl v odpovědi."
+
+#: mojeid.py:205
+msgid "Birth Date"
+msgstr "Datum Narození"
+
+#: mojeid.py:212
+msgid "Full Name"
+msgstr "Celé jméno"
+
+#: mojeid.py:218
+msgid "First Name"
+msgstr "Jméno"
+
+#: mojeid.py:225
+msgid "Last Name"
+msgstr "Příjmení"
+
+#: mojeid.py:232
+msgid "Nick Name"
+msgstr "Přezdívka"
+
+#: mojeid.py:239
+msgid "Company"
+msgstr "Jméno společnosti"
+
+#: mojeid.py:246
+msgid "Home Address – Street"
+msgstr "Domácí adresa – Ulice"
+
+#: mojeid.py:253
+msgid "Home Address – Street2"
+msgstr "Domácí adresa – Ulice2"
+
+#: mojeid.py:260
+msgid "Home Address – Street3"
+msgstr "Domácí adresa – Ulice3"
+
+#: mojeid.py:267
+msgid "Home Address – City"
+msgstr "Domácí adresa – Město"
+
+#: mojeid.py:274
+msgid "Home Address – State"
+msgstr "Domácí adresa – Stát"
+
+#: mojeid.py:281 mojeid.py:288
+msgid "Home Address – Country"
+msgstr "Domácí adresa – Země"
+
+#: mojeid.py:295
+msgid "Billing Address – Street"
+msgstr "Faktur. adresa – Ulice"
+
+#: mojeid.py:302
+msgid "Billing Address – Street2"
+msgstr "Faktur. adresa – Ulice2"
+
+#: mojeid.py:309
+msgid "Billing Address – Street3"
+msgstr "Faktur. adresa – Ulice3"
+
+#: mojeid.py:316
+msgid "Billing Address – City"
+msgstr "Faktur. adresa – Město"
+
+#: mojeid.py:323
+msgid "Billing Address – State"
+msgstr "Faktur. adresa – Stát"
+
+#: mojeid.py:330
+msgid "Billing Address – Country"
+msgstr "Faktur. adresa – Země"
+
+#: mojeid.py:337
+msgid "Billing Address – Postal Code"
+msgstr "Faktur. adresa – PSČ"
+
+#: mojeid.py:344
+msgid "Shipping Address – Street"
+msgstr "Doruč. adresa – Ulice"
+
+#: mojeid.py:351
+msgid "Shipping Address – Street2"
+msgstr "Doruč. adresa – Ulice2"
+
+#: mojeid.py:358
+msgid "Shipping Address – Street3"
+msgstr "Doruč. adresa – Ulice3"
+
+#: mojeid.py:365
+msgid "Shipping Address – City"
+msgstr "Doruč. adresa – Město"
+
+#: mojeid.py:372
+msgid "Shipping Address – State"
+msgstr "Doruč. adresa – Stát"
+
+#: mojeid.py:379
+msgid "Shipping Address – Country"
+msgstr "Doruč. adresa – Země"
+
+#: mojeid.py:386
+msgid "Shipping Address – Postal Code"
+msgstr "Doruč. adresa – PSČ"
+
+#: mojeid.py:393
+msgid "Mailing Address – Street"
+msgstr "Koresp. adresa – Ulice"
+
+#: mojeid.py:400
+msgid "Mailing Address – Street2"
+msgstr "Koresp. adresa – Ulice2"
+
+#: mojeid.py:407
+msgid "Mailing Address – Street3"
+msgstr "Koresp. adresa – Ulice3"
+
+#: mojeid.py:414
+msgid "Mailing Address – City"
+msgstr "Koresp. adresa – Město"
+
+#: mojeid.py:421
+msgid "Mailing Address – State"
+msgstr "Koresp. adresa – Stát"
+
+#: mojeid.py:428
+msgid "Mailing Address – Country"
+msgstr "Koresp. adresa – Země"
+
+#: mojeid.py:435
+msgid "Mailing Address – Postal Code"
+msgstr "Koresp. adresa – PSČ"
+
+#: mojeid.py:442
+msgid "Phone – Default"
+msgstr "Telefon – Hlavní"
+
+#: mojeid.py:449
+msgid "Phone – Home"
+msgstr "Telefon – Domácí"
+
+#: mojeid.py:456
+msgid "Phone – Work"
+msgstr "Telefon – Pracovní"
+
+#: mojeid.py:463
+msgid "Phone – Mobile"
+msgstr "Telefon – Mobil"
+
+#: mojeid.py:470
+msgid "Fax"
+msgstr "Telefon – Fax"
+
+#: mojeid.py:476
+msgid "Email – Default"
+msgstr "Email – Hlavní"
+
+#: mojeid.py:483
+msgid "Email – Notify"
+msgstr "Email – Notifikační"
+
+#: mojeid.py:490
+msgid "Email – Other"
+msgstr "Email – Další"
+
+#: mojeid.py:497
+msgid "URL – Default"
+msgstr "URL – Hlavní"
+
+#: mojeid.py:504
+msgid "URL – Blog"
+msgstr "URL – Blog"
+
+#: mojeid.py:511
+msgid "URL – Personal"
+msgstr "URL – Osobní"
+
+#: mojeid.py:518
+msgid "URL – Work"
+msgstr ""
+
+#: mojeid.py:525
+msgid "URL – RSS"
+msgstr "URL – Pracovní"
+
+#: mojeid.py:532
+msgid "URL – Facebook"
+msgstr "URL – Facebook"
+
+#: mojeid.py:539
+msgid "URL – Twitter"
+msgstr "URL – Twitter"
+
+#: mojeid.py:546
+msgid "URL – LinkedIN"
+msgstr "URL – LinkedIN"
+
+#: mojeid.py:553
+msgid "IM – ICQ"
+msgstr "IM – ICQ"
+
+#: mojeid.py:560
+msgid "IM – Jabber"
+msgstr "IM – Jabber"
+
+#: mojeid.py:567
+msgid "IM – Skype"
+msgstr "IM – Skype"
+
+#: mojeid.py:574
+msgid "IM – Google Talk"
+msgstr "IM – Google Talk"
+
+#: mojeid.py:581
+msgid "IM – Windows Live"
+msgstr "IM – Windows Live"
+
+#: mojeid.py:588
+msgid "Identifier – VAT Identification Number"
+msgstr "Identifikátor – ICO"
+
+#: mojeid.py:595
+msgid "Identifier – VAT registration Number"
+msgstr "Identifikátor – DIC"
+
+#: mojeid.py:602
+msgid "Identifier – ID Card"
+msgstr "Identifikátor – OP"
+
+#: mojeid.py:609
+msgid "Identifier – Passport"
+msgstr "Identifikátor – PAS"
+
+#: mojeid.py:616
+msgid "Identifier – MPSV"
+msgstr "Identifikátor – MPSV"
+
+#: mojeid.py:623
+msgid "Flag – Student"
+msgstr "Příznak – Student"
+
+#: mojeid.py:630
+msgid "Flag – Validation"
+msgstr "Příznak – Validace"
+
+#: mojeid.py:637
+msgid "Account State"
+msgstr "Stav účtu"
+
+#: mojeid.py:643
+msgid "Flag – Adult"
+msgstr "Příznak – Starší 18 let"
+
+#: mojeid.py:649
+msgid "Image (base64)"
+msgstr "Obrázek (base64)"
+
+#: mojeid.py:670
+#, python-format
+msgid "class %(class)s has no attribute '%(attr)s'"
+msgstr "třída %(class)s nemá atribut '%(attr)s'"
+
+#: mojeid.py:676
+msgid "Bad request."
+msgstr "Špatný požadavek."
+
+#: mojeid.py:677
+msgid "Status is missing."
+msgstr "Chybí status."
+
+#: mojeid.py:678
+msgid "Status is invalid."
+msgstr "Staus je neplatný."
+
+#: mojeid.py:679
+msgid "Claimed ID is missing."
+msgstr "Požadované ID chybí."
+
+#: mojeid.py:680
+msgid "Registration nonce is missing."
+msgstr "Registrační nonce chybí."
+
+#: mojeid.py:681
+msgid "Registration nonce is invalid."
+msgstr "Registrační nonce je neplatná."
+
+#: templates/mojeid/_associate.html:15 templates/mojeid/_login.html:15
+msgid "Why mojeID?"
+msgstr "Proč mojeID?"
+
+#: templates/mojeid/_associate.html:18 templates/mojeid/_login.html:18
+#: templates/mojeid/_register.html:4
+msgid "Create a mojeID account"
+msgstr "Nový účet mojeID"
+
+#: templates/openid/_associate.html:13
+msgid "Associate with OpenID:"
+msgstr "Spáruj s OpenId"
+
+#: templates/openid/_associate.html:15 templates/openid/associate.html:36
+msgid "Associate"
+msgstr "Spáruj"
+
+#: templates/openid/_login.html:13 templates/openid/associate.html:32
+#: templates/openid/login.html:32
+msgid "OpenID:"
+msgstr "OpenID:"
+
+#: templates/openid/_login.html:15 templates/openid/login.html:36
+msgid "Sign in"
+msgstr "Přihlásit"
+
+#: templates/openid/associate.html:18 templates/openid/login.html:18
+msgid "Please correct errors below:"
+msgstr "Prosím opravte následující chyby:"
+
+#: templates/openid/associate.html:30
+msgid "Associate with Your OpenID"
+msgstr "Spáruj s Vaším OpenID"
+
+#: templates/openid/failure.html:6 templates/openid/failure.html.py:9
+msgid "OpenID failed"
+msgstr "OpenID selhalo"
+
+#: templates/openid/login.html:6 templates/openid/login.html.py:16
+msgid "Sign in with your OpenID"
+msgstr "Příhlásit přes Vaše OpenID"
+
+#: templates/openid/login.html:30
+msgid "Sign In Using Your OpenID"
+msgstr "Prihlásit přes Vaše OpenID"
+
+#: templates/openid/login.html:43
+msgid "Registration"
+msgstr "Registrace"
+
+#: templates/openid/top.html:12
+msgid "This is"
+msgstr "Tohle je"

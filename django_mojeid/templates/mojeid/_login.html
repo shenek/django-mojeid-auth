@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% load i18n %}
 <div class='mojeid_login'>
     <form action='{% url 'openid-init' attribute_set=attribute_set %}' method='post'>
         {% csrf_token %}
@@ -11,10 +12,10 @@
             </tr>
             <tr>
                 <td>
-                    <a href='{% if why_my_id_url %}{{ why_my_id_url }}{% else %}http://www.mojeid.cz/page/805/vyhody-mojeid/{% endif %}'>Proč mojeID?</a>
+                    <a href='{% if why_my_id_url %}{{ why_my_id_url }}{% else %}http://www.mojeid.cz/page/805/vyhody-mojeid/{% endif %}'>{% trans "Why mojeID?" %}</a>
                 </td>
                 <td>
-                    <a href='{% url 'openid-registration' %}'>Založit účet mojeID</a>
+                    <a href='{% url 'openid-registration' %}'>{% trans "Create a mojeID account" %}</a>
                 </td>
             </tr>
         </table>

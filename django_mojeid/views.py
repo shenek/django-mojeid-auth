@@ -144,7 +144,7 @@ def render_failure(request, error, template_name='openid/failure.html'):
         return resp[0][1]
 
     # No response to signal - render default page
-    data = render_to_string(template_name, {'message': str(error)},
+    data = render_to_string(template_name, {'message': error.msg},
                             context_instance=RequestContext(request))
     return HttpResponse(data, status=error.http_status)
 

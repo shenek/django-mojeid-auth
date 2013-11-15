@@ -3,7 +3,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-<title>Sign in with your OpenID</title>
+<title>{% trans "Sign in with your OpenID" %}</title>
 <style type="text/css">
 input.openid {
     background: url('{% static "openid/openid-16x16.gif" %}') no-repeat;
@@ -13,7 +13,7 @@ input.openid {
 </style>
 </head>
 <body>
-<h1>Sign in with your OpenID</h1>
+<h1>{% trans "Sign in with your OpenID" %}</h1>
 {% if form.errors %}
 <p class="errors">{% trans "Please correct errors below:" %}<br />
     {% if form.openid_identifier.errors %}
@@ -40,6 +40,6 @@ input.openid {
  {% endif %}
     </fieldset>
 </form>
-<a href={% url 'openid-registration' %}>Registration</a>
+<a href={% url 'openid-registration' %}>{% trans "Registration" %}</a>
 </body>
 </html>

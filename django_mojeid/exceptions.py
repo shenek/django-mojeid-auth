@@ -28,6 +28,8 @@
 
 """Exception classes thrown by OpenID Authentication and Validation."""
 
+from django.utils.translation import ugettext_lazy as _
+
 
 class DjangoOpenIDException(Exception):
     pass
@@ -38,28 +40,28 @@ class RequiredAttributeNotReturned(DjangoOpenIDException):
 
 
 class IdentityAlreadyClaimed(DjangoOpenIDException):
-    message = "Another user already exists for your selected OpenID"
+    message = _("Another user already exists for your selected OpenID")
 
     def __init__(self, message=message):
         super(IdentityAlreadyClaimed, self).__init__(message)
 
 
 class DuplicateUserViolation(DjangoOpenIDException):
-    message = "Your user was already being used."
+    message = _("Your user was already being used.")
 
     def __init__(self, message=message):
         super(DuplicateUserViolation, self).__init__(message)
 
 
 class MissingUsernameViolation(DjangoOpenIDException):
-    message = "No nickname given for your account."
+    message = _("No nickname given for your account.")
 
     def __init__(self, message=message):
         super(MissingUsernameViolation, self).__init__(message)
 
 
 class MissingPhysicalMultiFactor(DjangoOpenIDException):
-    message = "Login requires physical multi-factor authentication."
+    message = _("Login requires physical multi-factor authentication.")
 
     def __init__(self, message=message):
         super(MissingPhysicalMultiFactor, self).__init__(message)

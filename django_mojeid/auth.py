@@ -34,6 +34,7 @@ __metaclass__ = type
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
+from django.utils.translation import ugettext_lazy as _
 
 from openid.consumer.consumer import SUCCESS
 from openid.extensions import ax, pape
@@ -282,7 +283,7 @@ class OpenIDBackend:
         else:
             if user_openid.user_id != user.pk:
                 raise IdentityAlreadyClaimed(
-                    "The identity %s has already been claimed"
+                    _("The identity %s has already been claimed")
                     % claimed_id)
 
         return user_openid

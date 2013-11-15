@@ -32,6 +32,8 @@
 from django.conf import settings
 from django.core.exceptions import FieldError, ImproperlyConfigured
 from django.http import Http404
+from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext
 
 from openid.extensions import ax
 
@@ -114,8 +116,8 @@ class MojeIDAttribute(object):
             # set the model
             self._model = get_model(self.modelApp, self.modelClass)
             if not self._model:
-                raise ImproperlyConfigured("Model '%s' from App '%s' does not exist."
-                                           % (self.modelClass, self.modelApp))
+                raise ImproperlyConfigured(_("Model '%(model)s' from App '%(app)s' does not exist.")
+                                           % {'model': self.modelClass, 'app': self.modelApp})
         return self._model
 
     # This method could be overwritten using inheritance
@@ -136,8 +138,8 @@ class MojeIDAttribute(object):
     def set_model_value(self, id, value):
         record = self._get_record(id)
         if not hasattr(record, self.modelAttribute):
-            raise FieldError("Cannot resolve keyword '%s' into field. Choices are: %s"
-                             % (self.modelAttribute, ", ".join(record._meta._name_map.keys())))
+            raise FieldError(_("Cannot resolve keyword '%(model)s' into field. Choices are: %(choices)s")
+                             % {"model": self.modelAttribute, "choices": ", ".join(record._meta._name_map.keys())})
         self._set(record, self.modelAttribute, value)
         record.save()
 
@@ -154,8 +156,8 @@ class MojeIDAttribute(object):
         value = cls._get_value(response)
         if required and value is None:
             raise RequiredAttributeNotReturned(
-                "Required Attribute '%s' (%s) was not returned."
-                % (cls.code, cls.text)
+                ugettext("Required Attribute '%(code)s' (%(text)s) was not returned.")
+                % {"code": unicode(cls.code), "text": unicode(cls.text)}
             )
         return value
 
@@ -201,451 +203,451 @@ class MojeIDBooleanAttribute(MojeIDAttribute):
 class BirthDate(MojeIDAttribute):
     code = 'birthdate'
     schema = 'http://axschema.org/birthDate'
-    text = 'Datum Narození'
+    text = _(u'Birth Date')  # 'Datum Narození'
     registration_field = 'birth_date'
 
 
 class FullName(MojeIDAttribute):
     code = 'fullname'
     schema = 'http://axschema.org/namePerson'
-    text = 'Celé jméno'
+    text = _(u'Full Name')  # 'Celé jméno'
 
 
 class FirstName(MojeIDAttribute):
     code = 'firstname'
     schema = 'http://axschema.org/namePerson/first'
-    text = 'Jméno'
+    text = _(u'First Name')  # 'Jméno'
     registration_field = 'first_name'
 
 
 class LastName(MojeIDAttribute):
     code = 'lastname'
     schema = 'http://axschema.org/namePerson/last'
-    text = 'Příjmení'
+    text = _(u'Last Name')  # 'Příjmení'
     registration_field = 'last_name'
 
 
 class NickName(MojeIDAttribute):
     code = 'nick'
     schema = 'http://axschema.org/namePerson/friendly'
-    text = 'Přezdívka'
+    text = _(u'Nick Name')  # 'Přezdívka'
     registration_field = 'username'
 
 
 class Company(MojeIDAttribute):
     code = 'company'
     schema = 'http://axschema.org/company/name'
-    text = 'Jméno společnosti'
+    text = _(u'Company')  # 'Jméno společnosti'
     registration_field = 'organization'
 
 
 class HomeAddress(MojeIDAttribute):
     code = 'h_address'
     schema = 'http://axschema.org/contact/postalAddress/home'
-    text = 'Domácí adresa – Ulice'
+    text = _(u'Home Address – Street')  # 'Domácí adresa – Ulice'
     registration_field = 'address__default__street1'
 
 
 class HomeAddress2(MojeIDAttribute):
     code = 'h_address2'
     schema = 'http://axschema.org/contact/postalAddressAdditional/home'
-    text = 'Domácí adresa – Ulice2'
+    text = _(u'Home Address – Street2')  # 'Domácí adresa – Ulice2'
     registration_field = 'address__default__street2'
 
 
 class HomeAddress3(MojeIDAttribute):
     code = 'h_address3'
     schema = 'http://specs.nic.cz/attr/addr/main/street3'
-    text = 'Domácí adresa – Ulice3'
+    text = _(u'Home Address – Street3')  # 'Domácí adresa – Ulice3'
     registration_field = 'address__default__street3'
 
 
 class HomeCity(MojeIDAttribute):
     code = 'h_city'
     schema = 'http://axschema.org/contact/city/home'
-    text = 'Domácí adresa – Město'
+    text = _(u'Home Address – City')  # 'Domácí adresa – Město'
     registration_field = 'address__default__city'
 
 
 class HomeState(MojeIDAttribute):
     code = 'h_state'
     schema = 'http://axschema.org/contact/state/home'
-    text = 'Domácí adresa – Stát'
+    text = _(u'Home Address – State')  # 'Domácí adresa – Stát'
     registration_field = 'address__default__state'
 
 
 class HomeCountry(MojeIDAttribute):
     code = 'h_country'
     schema = 'http://axschema.org/contact/country/home'
-    text = 'Domácí adresa – Země'
+    text = _(u'Home Address – Country')  # 'Domácí adresa – Země'
     registration_field = 'address__default__country'
 
 
 class HomePostCode(MojeIDAttribute):
     code = 'h_postcode'
     schema = 'http://axschema.org/contact/postalCode/home'
-    text = 'Domácí adresa – PSČ'
+    text = _(u'Home Address – Country')  # 'Domácí adresa – PSČ'
     registration_field = 'address__default__postal_code'
 
 
 class BillingAddress(MojeIDAttribute):
     code = 'b_address'
     schema = 'http://specs.nic.cz/attr/addr/bill/street'
-    text = 'Faktur. adresa – Ulice'
+    text = _(u'Billing Address – Street')  # 'Faktur. adresa – Ulice'
     registration_field = 'address__billing__street1'
 
 
 class BillingAddress2(MojeIDAttribute):
     code = 'b_address2'
     schema = 'http://specs.nic.cz/attr/addr/bill/street2'
-    text = 'Faktur. adresa – Ulice2'
+    text = _(u'Billing Address – Street2')  # 'Faktur. adresa – Ulice2'
     registration_field = 'address__billing__street2'
 
 
 class BillingAddress3(MojeIDAttribute):
     code = 'b_address3'
     schema = 'http://specs.nic.cz/attr/addr/bill/street3'
-    text = 'Faktur. adresa – Ulice3'
+    text = _(u'Billing Address – Street3')  # 'Faktur. adresa – Ulice3'
     registration_field = 'address__billing__street3'
 
 
 class BillingCity(MojeIDAttribute):
     code = 'b_city'
     schema = 'http://specs.nic.cz/attr/addr/bill/city'
-    text = 'Faktur. adresa – Město'
+    text = _(u'Billing Address – City')  # 'Faktur. adresa – Město'
     registration_field = 'address__billing__city'
 
 
 class BillingState(MojeIDAttribute):
     code = 'b_state'
     schema = 'http://specs.nic.cz/attr/addr/bill/sp'
-    text = 'Faktur. adresa – Stát'
+    text = _(u'Billing Address – State')  # 'Faktur. adresa – Stát'
     registration_field = 'address__billing__state'
 
 
 class BillingCountry(MojeIDAttribute):
     code = 'b_country'
     schema = 'http://specs.nic.cz/attr/addr/bill/cc'
-    text = 'Faktur. adresa – Země'
+    text = _(u'Billing Address – Country')  # 'Faktur. adresa – Země'
     registration_field = 'address__billing__country'
 
 
 class BillingPostCode(MojeIDAttribute):
     code = 'b_postcode'
     schema = 'http://specs.nic.cz/attr/addr/bill/pc'
-    text = 'Faktur. adresa – PSČ'
+    text = _(u'Billing Address – Postal Code')  # 'Faktur. adresa – PSČ'
     registration_field = 'address__billing__postal_code'
 
 
 class ShippingAddress(MojeIDAttribute):
     code = 's_address'
     schema = 'http://specs.nic.cz/attr/addr/ship/street'
-    text = 'Doruč. adresa – Ulice'
+    text = _(u'Shipping Address – Street')  # 'Doruč. adresa – Ulice'
     registration_field = 'address__shipping__street1'
 
 
 class ShippingAddress2(MojeIDAttribute):
     code = 's_address2'
     schema = 'http://specs.nic.cz/attr/addr/ship/street2'
-    text = 'Doruč. adresa – Ulice2'
+    text = _(u'Shipping Address – Street2')  # 'Doruč. adresa – Ulice2'
     registration_field = 'address__shipping__street2'
 
 
 class ShippingAddress3(MojeIDAttribute):
     code = 's_address3'
     schema = 'http://specs.nic.cz/attr/addr/ship/street3'
-    text = 'Doruč. adresa – Ulice3'
+    text = _(u'Shipping Address – Street3')  # 'Doruč. adresa – Ulice3'
     registration_field = 'address__shipping__street3'
 
 
 class ShippingCity(MojeIDAttribute):
     code = 's_city'
     schema = 'http://specs.nic.cz/attr/addr/ship/city'
-    text = 'Doruč. adresa – Město'
+    text = _(u'Shipping Address – City')  # 'Doruč. adresa – Město'
     registration_field = 'address__shipping__city'
 
 
 class ShippingState(MojeIDAttribute):
     code = 's_state'
     schema = 'http://specs.nic.cz/attr/addr/ship/sp'
-    text = 'Doruč. adresa – Stát'
+    text = _(u'Shipping Address – State')  # 'Doruč. adresa – Stát'
     registration_field = 'address__shipping__state'
 
 
 class ShippingCountry(MojeIDAttribute):
     code = 's_country'
     schema = 'http://specs.nic.cz/attr/addr/ship/cc'
-    text = 'Doruč. adresa – Země'
+    text = _(u'Shipping Address – Country')  # 'Doruč. adresa – Země'
     registration_field = 'address__shipping__country'
 
 
 class ShippingPostCode(MojeIDAttribute):
     code = 's_postcode'
     schema = 'http://specs.nic.cz/attr/addr/ship/pc'
-    text = 'Doruč. adresa – PSČ'
+    text = _(u'Shipping Address – Postal Code')  # 'Doruč. adresa – PSČ'
     registration_field = 'address__shipping__postal_code'
 
 
 class MailingAddress(MojeIDAttribute):
     code = 'm_address'
     schema = 'http://specs.nic.cz/attr/addr/mail/street'
-    text = 'Koresp. adresa – Ulice'
+    text = _(u'Mailing Address – Street')  # 'Koresp. adresa – Ulice'
     registration_field = 'address__mailing__street1'
 
 
 class MailingAddress2(MojeIDAttribute):
     code = 'm_address2'
     schema = 'http://specs.nic.cz/attr/addr/mail/street2'
-    text = 'Koresp. adresa – Ulice2'
+    text = _(u'Mailing Address – Street2')  # 'Koresp. adresa – Ulice2'
     registration_field = 'address__mailing__street2'
 
 
 class MailingAddress3(MojeIDAttribute):
     code = 'm_address3'
     schema = 'http://specs.nic.cz/attr/addr/mail/street3'
-    text = 'Koresp. adresa – Ulice3'
+    text = _(u'Mailing Address – Street3')  # 'Koresp. adresa – Ulice3'
     registration_field = 'address__mailing__street3'
 
 
 class MailingCity(MojeIDAttribute):
     code = 'm_city'
     schema = 'http://specs.nic.cz/attr/addr/mail/city'
-    text = 'Koresp. adresa – Město'
+    text = _(u'Mailing Address – City')  # 'Koresp. adresa – Město'
     registration_field = 'address__mailing__city'
 
 
 class MailingState(MojeIDAttribute):
     code = 'm_state'
     schema = 'http://specs.nic.cz/attr/addr/mail/sp'
-    text = 'Koresp. adresa – Stát'
+    text = _(u'Mailing Address – State')  # 'Koresp. adresa – Stát'
     registration_field = 'address__mailing__state'
 
 
 class MailingCountry(MojeIDAttribute):
     code = 'm_country'
     schema = 'http://specs.nic.cz/attr/addr/mail/cc'
-    text = 'Koresp. adresa – Země'
+    text = _(u'Mailing Address – Country')  # 'Koresp. adresa – Země'
     registration_field = 'address__mailing__country'
 
 
 class MailingPostCode(MojeIDAttribute):
     code = 'm_postcode'
     schema = 'http://specs.nic.cz/attr/addr/mail/pc'
-    text = 'Koresp. adresa – PSČ'
+    text = _(u'Mailing Address – Postal Code')  # 'Koresp. adresa – PSČ'
     registration_field = 'address__mailing__postal_code'
 
 
 class Phone(MojeIDAttribute):
     code = 'phone'
     schema = 'http://axschema.org/contact/phone/default'
-    text = 'Telefon – Hlavní'
+    text = _(u'Phone – Default')  # 'Telefon – Hlavní'
     registration_field = 'phone__default__number'
 
 
 class PhoneHome(MojeIDAttribute):
     code = 'phone_home'
     schema = 'http://axschema.org/contact/phone/home'
-    text = 'Telefon – Domácí'
+    text = _(u'Phone – Home')  # 'Telefon – Domácí'
     registration_field = 'phone__home__number'
 
 
 class PhoneWork(MojeIDAttribute):
     code = 'phone_work'
     schema = 'http://axschema.org/contact/phone/business'
-    text = 'Telefon – Pracovní'
+    text = _(u'Phone – Work')  # 'Telefon – Pracovní'
     registration_field = 'phone__office__number'
 
 
 class PhoneMobile(MojeIDAttribute):
     code = 'phone_mobile'
     schema = 'http://axschema.org/contact/phone/cell'
-    text = 'Telefon – Mobil'
+    text = _(u'Phone – Mobile')  # 'Telefon – Mobil'
     registration_field = 'phone__mobile__number'
 
 
 class Fax(MojeIDAttribute):
     code = 'fax'
     schema = 'http://axschema.org/contact/phone/fax'
-    text = 'Telefon – Fax'
+    text = _(u'Fax')  # 'Telefon – Fax'
 
 
 class Email(MojeIDAttribute):
     code = 'email'
     schema = 'http://axschema.org/contact/email'
-    text = 'Email – Hlavní'
+    text = _(u'Email – Default')  # 'Email – Hlavní'
     registration_field = 'email__default__email'
 
 
 class Email2(MojeIDAttribute):
     code = 'email2'
     schema = 'http://specs.nic.cz/attr/email/notify'
-    text = 'Email – Notifikační'
+    text = _(u'Email – Notify')  # 'Email – Notifikační'
     registration_field = 'email__notify__email'
 
 
 class Email3(MojeIDAttribute):
     code = 'email3'
     schema = 'http://specs.nic.cz/attr/email/next'
-    text = 'Email – Další'
+    text = _(u'Email – Other')  # 'Email – Další'
     registration_field = 'email__next__email'
 
 
 class Url(MojeIDAttribute):
     code = 'url'
     schema = 'http://axschema.org/contact/web/default'
-    text = 'URL – Hlavní'
+    text = _(u'URL – Default')  # 'URL – Hlavní'
     registration_field = 'urladdress__main__url'
 
 
 class Blog(MojeIDAttribute):
     code = 'blog'
     schema = 'http://axschema.org/contact/web/blog'
-    text = 'URL – Blog'
+    text = _(u'URL – Blog')  # 'URL – Blog'
     registration_field = 'urladdress__blog__url'
 
 
 class Url2(MojeIDAttribute):
     code = 'url2'
     schema = 'http://specs.nic.cz/attr/url/personal'
-    text = 'URL – Osobní'
+    text = _(u'URL – Personal')  # 'URL – Osobní'
     registration_field = 'urladdress__personal__url'
 
 
 class Url3(MojeIDAttribute):
     code = 'url3'
     schema = 'http://specs.nic.cz/attr/url/work'
-    text = 'URL – Pracovní'
+    text = _(u'URL – Work')  # 'URL – Pracovní'
     registration_field = 'urladdress__office__url'
 
 
 class RSS(MojeIDAttribute):
     code = 'rss'
     schema = 'http://specs.nic.cz/attr/url/rss'
-    text = 'URL – RSS'
+    text = _(u'URL – RSS')  # 'URL – RSS'
     registration_field = 'urladdress__rss__url'
 
 
 class Facebook(MojeIDAttribute):
     code = 'fb'
     schema = 'http://specs.nic.cz/attr/url/facebook'
-    text = 'URL – Facebook'
+    text = _(u'URL – Facebook')  # 'URL – Facebook'
     registration_field = 'urladdress__facebook__url'
 
 
 class Twitter(MojeIDAttribute):
     code = 'twitter'
     schema = 'http://specs.nic.cz/attr/url/twitter'
-    text = 'URL – Twitter'
+    text = _(u'URL – Twitter')  # 'URL – Twitter'
     registration_field = 'urladdress__twitter__url'
 
 
 class LinkedIn(MojeIDAttribute):
     code = 'linkedin'
     schema = 'http://specs.nic.cz/attr/url/linkedin'
-    text = 'URL – LinkedIN'
+    text = _(u'URL – LinkedIN')  # 'URL – LinkedIN'
     registration_field = 'urladdress__linkedin__url'
 
 
 class ICQ(MojeIDAttribute):
     code = 'icq'
     schema = 'http://axschema.org/contact/IM/ICQ'
-    text = 'IM – ICQ'
+    text = _(u'IM – ICQ')  # 'IM – ICQ'
     registration_field = 'imaccount__icq__username'
 
 
 class Jabber(MojeIDAttribute):
     code = 'jabber'
     schema = 'http://axschema.org/contact/IM/Jabber'
-    text = 'IM – Jabber'
+    text = _(u'IM – Jabber')  # 'IM – Jabber'
     registration_field = 'imaccount__jabber__username'
 
 
 class Skype(MojeIDAttribute):
     code = 'skype'
     schema = 'http://axschema.org/contact/IM/Skype'
-    text = 'IM – Skype'
+    text = _(u'IM – Skype')  # 'IM – Skype'
     registration_field = 'imaccount__skype__username'
 
 
 class GoogleTalk(MojeIDAttribute):
     code = 'gtalk'
     schema = 'http://specs.nic.cz/attr/im/google_talk'
-    text = 'IM – Google Talk'
+    text = _(u'IM – Google Talk')  # 'IM – Google Talk'
     registration_field = 'imaccount__google_talk__username'
 
 
 class WindowsLive(MojeIDAttribute):
     code = 'wlive'
     schema = 'http://specs.nic.cz/attr/im/windows_live'
-    text = 'IM – Windows Live'
+    text = _(u'IM – Windows Live')  # 'IM – Windows Live'
     registration_field = 'imaccout__windows_live__username'
 
 
 class ICO(MojeIDAttribute):
     code = 'vat_id'
     schema = 'http://specs.nic.cz/attr/contact/ident/vat_id'
-    text = 'Identifikátor – ICO'
+    text = _(u'Identifier – VAT Identification Number')  # 'Identifikátor – ICO'
     registration_field = 'vat_id_num'
 
 
 class DIC(MojeIDAttribute):
     code = 'vat'
     schema = 'http://specs.nic.cz/attr/contact/vat'
-    text = 'Identifikátor – DIC'
+    text = _(u'Identifier – VAT registration Number')  # 'Identifikátor – DIC'
     registration_field = 'vat_reg_num'
 
 
 class IdentityCard(MojeIDAttribute):
     code = 'op'
     schema = 'http://specs.nic.cz/attr/contact/ident/card'
-    text = 'Identifikátor – OP'
+    text = _(u'Identifier – ID Card')  # 'Identifikátor – OP'
     registration_field = 'id_card_num'
 
 
 class Passport(MojeIDAttribute):
     code = 'pas'
     schema = 'http://specs.nic.cz/attr/contact/ident/pass'
-    text = 'Identifikátor – PAS'
+    text = _(u'Identifier – Passport')  # 'Identifikátor – PAS'
     registration_field = 'passport_num'
 
 
 class MPSV(MojeIDAttribute):
     code = 'mpsv'
     schema = 'http://specs.nic.cz/attr/contact/ident/ssn'
-    text = 'Identifikátor – MPSV'
+    text = _(u'Identifier – MPSV')  # 'Identifikátor – MPSV'
     registration_field = 'ssn_id_num'
 
 
 class Student(MojeIDBooleanAttribute):
     code = 'student'
     schema = 'http://specs.nic.cz/attr/contact/student'
-    text = 'Příznak – Student'
+    text = _(u'Flag – Student')  # 'Příznak – Student'
 
 
 class Validated(MojeIDBooleanAttribute):
     # Probably not supported anymore
     code = 'validated'
     schema = 'http://specs.nic.cz/attr/contact/valid'
-    text = 'Příznak – Validace'
+    text = _(u'Flag – Validation')  # 'Příznak – Validace'
 
 
 class Status(MojeIDAttribute):
     # Probably not supported anymore
     code = 'status'
     schema = 'http://specs.nic.cz/attr/contact/status'
-    text = 'Stav účtu'
+    text = _(u'Account State')  # 'Stav účtu'
 
 
 class Adult(MojeIDBooleanAttribute):
     code = 'adult'
     schema = 'http://specs.nic.cz/attr/contact/adult'
-    text = 'Příznak – Starší 18 let'
+    text = _(u'Flag – Adult')  # 'Příznak – Starší 18 let'
 
 
 class Image(MojeIDAttribute):
     code = 'image'
     schema = 'http://specs.nic.cz/attr/contact/image'
-    text = 'Obrázek (base64)'
+    text = _(u'Image (base64)')  # 'Obrázek (base64)'
 
 
 class Assertion:
@@ -666,18 +668,18 @@ class Assertion:
 
             def __getattr__(self, name):
                 if name not in self._codes:
-                    raise AttributeError("class %s has no attribute '%s'" %
-                                         (self.__name__, name))
+                    raise AttributeError(_("class %(class)s has no attribute '%(attr)s'") %
+                                         {"class": self.__name__, "attr": name})
                 return name
 
     #Error strings
     class ErrorString:
-        BAD_REQUEST = 'Bad request.'
-        MISSING_STATUS = 'Status is missing.'
-        INVALID_STATUS = 'Status is invalid.'
-        MISSING_CLAIMED_ID = 'Claimed ID is missing.'
-        MISSING_NONCE = 'Registration nonce is missing.'
-        INVALID_NONCE = 'Registration nonce is invalid.'
+        BAD_REQUEST = _('Bad request.')
+        MISSING_STATUS = _('Status is missing.')
+        INVALID_STATUS = _('Status is invalid.')
+        MISSING_CLAIMED_ID = _('Claimed ID is missing.')
+        MISSING_NONCE = _('Registration nonce is missing.')
+        INVALID_NONCE = _('Registration nonce is invalid.')
 
 # OpenID logging to django debug
 import logging

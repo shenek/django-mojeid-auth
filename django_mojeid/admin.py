@@ -30,6 +30,8 @@
 
 from django.conf import settings
 from django.contrib import admin
+from django.utils.translation import ugettext_lazy as _
+
 from django_mojeid.models import Nonce, Association, UserOpenID
 from django_mojeid.store import DjangoOpenIDStore
 
@@ -41,8 +43,8 @@ class NonceAdmin(admin.ModelAdmin):
     def cleanup_nonces(self, request, queryset):
         store = DjangoOpenIDStore()
         count = store.cleanupNonces()
-        self.message_user(request, "%d expired nonces removed" % count)
-    cleanup_nonces.short_description = "Clean up expired nonces"
+        self.message_user(request, _("%d expired nonces removed") % count)
+    cleanup_nonces.short_description = _("Clean up expired nonces")
 
 admin.site.register(Nonce, NonceAdmin)
 
@@ -56,8 +58,8 @@ class AssociationAdmin(admin.ModelAdmin):
     def cleanup_associations(self, request, queryset):
         store = DjangoOpenIDStore()
         count = store.cleanupAssociations()
-        self.message_user(request, "%d expired associations removed" % count)
-    cleanup_associations.short_description = "Clean up expired associations"
+        self.message_user(request, _("%d expired associations removed") % count)
+    cleanup_associations.short_description = _("Clean up expired associations")
 
 admin.site.register(Association, AssociationAdmin)
 
@@ -78,9 +80,9 @@ if getattr(settings, 'OPENID_USE_AS_ADMIN_LOGIN', False):
         if request.user.is_authenticated():
             if not request.user.is_staff:
                 return views.default_render_failure(
-                    request, "User %s does not have admin access."
+                    request, _("User %s does not have admin access.")
                     % request.user.username)
-            assert error_message, "Unknown Error: %s" % error_message
+            assert error_message, _("Unknown Error: %s") % error_message
         else:
             # Redirect to openid login path,
             return HttpResponseRedirect(

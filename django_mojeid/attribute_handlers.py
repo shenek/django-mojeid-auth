@@ -1,3 +1,4 @@
+from django.utils.translation import ugettext_lazy as _
 
 _handlers = {}
 
@@ -28,4 +29,4 @@ def call_handler(handler_name, *args, **kwargs):
     try:
         _handlers[handler_name](*args, **kwargs)
     except KeyError:
-        raise HandlerNotFound('Handler with name %s was not found.' % handler_name)
+        raise HandlerNotFound(_('Handler with name %s was not found.') % handler_name)
