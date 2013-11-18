@@ -125,7 +125,7 @@ msgstr "Není možné najít pole '%(model)s'. Možnosti jsou: %(choices)s"
 #: mojeid.py:158
 #, python-format
 msgid "Required Attribute '%(code)s' (%(text)s) was not returned."
-msgstr "Požadovaný attribute '%(code)s' (%(text)s) nebyl v odpovědi."
+msgstr "Požadovaný attribut '%(code)s' (%(text)s) nebyl v odpovědi."
 
 #: mojeid.py:205
 msgid "Birth Date"
