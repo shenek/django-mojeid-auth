@@ -163,7 +163,7 @@ def login_show(request, login_template='openid/login.html',
                associate_template='openid/associate.html',
                form_class=OpenIDLoginForm):
     """
-    Render a sample template to show the login form.
+    Render a template to show the login/associate form form.
     """
 
     redirect_to = OpenIDBackend.get_redirect_to(request)

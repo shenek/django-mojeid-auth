@@ -27,6 +27,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+from django.conf import settings
 from django.conf.urls import patterns, url
 
 import views
@@ -35,12 +36,16 @@ urlpatterns = patterns(
     '',
     url(r'^$', views.top, name='openid-top'),
     url(r'^xrds.xml$', views.xrds, name='openid-xrds'),
-    url(r'^login/$', views.login_show, name='openid-login'),
-    url(r'^registration/$', views.registration, name='openid-registration'),
-    url(r'^registration/(?P<attribute_set>\w*)$', views.registration, name='openid-registration'),
     url(r'^disassociate/$', views.disassociate, name='openid-disassociate'),
     url(r'^initiate/$', views.login_begin, name='openid-init'),
     url(r'^initiate/(?P<attribute_set>\w*)$', views.login_begin, name='openid-init'),
     url(r'^complete/$', views.login_complete, name='openid-complete'),
-    url(r'^assertion/$', views.assertion, name='openid-assertion'),
 )
+
+if getattr(settings, 'USE_MOJEID_REGISTRATION_URLS', True):
+    urlpatterns += patterns(
+        '',
+        url(r'^registration/$', views.registration, name='openid-registration'),
+        url(r'^registration/(?P<attribute_set>\w*)$', views.registration, name='openid-registration'),
+        url(r'^assertion/$', views.assertion, name='openid-assertion'),
+    )
