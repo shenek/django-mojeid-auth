@@ -1,5 +1,6 @@
 {% load staticfiles %}
 {% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <div class='mojeid_associate'>
     <form action='{% url 'openid-init' attribute_set=attribute_set %}' method='post'>
         {% csrf_token %}
@@ -7,7 +8,11 @@
         <table>
             <tr>
                 <th colspan="2">
+                    {% if LANGUAGE_CODE == "en" %}
+                    <input type="image"  src="{% static "mojeid/black_92x32_en.png" %}">
+                    {% else %}
                     <input type="image"  src="{% static "mojeid/black_92x32.png" %}">
+                    {% endif %}
                 </th>
             </tr>
             <tr>
