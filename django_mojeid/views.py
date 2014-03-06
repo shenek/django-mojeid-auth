@@ -44,6 +44,7 @@ try:
     from django.views.decorators.csrf import csrf_exempt
 except ImportError:
     from django.contrib.csrf.middleware import csrf_exempt
+from django.utils.translation import get_language, activate as activate_lang
 
 from openid.consumer.consumer import (
     Consumer, SUCCESS, CANCEL, FAILURE)
@@ -156,7 +157,9 @@ def parse_openid_response(request):
 
     consumer = make_consumer(request)
     attribute_set = consumer.session.get('attribute_set', 'default')
-    return attribute_set, consumer.complete(dict(request.REQUEST.items()), current_url)
+    lang = consumer.session.get('stored_lang', 'en')
+    return attribute_set, lang, consumer.complete(dict(request.REQUEST.items()),
+                                                  current_url)
 
 
 def login_show(request, login_template='openid/login.html',
@@ -200,6 +203,9 @@ def login_begin(request, attribute_set='default', form_class=OpenIDLoginForm):
 
     # Set response handler (define the settings set)
     consumer.session['attribute_set'] = attribute_set
+
+    # Set the language
+    consumer.session['stored_lang'] = request.POST.get('lang', get_language())
     request.session.save()
 
     try:
@@ -288,7 +294,11 @@ def login_complete(request):
     redirect_to = sanitise_redirect_url(OpenIDBackend.get_redirect_to(request))
 
     # Get OpenID response and test whether it is valid
-    attribute_set, openid_response = parse_openid_response(request)
+    attribute_set, lang, openid_response = parse_openid_response(request)
+
+    # Set language
+    activate_lang(lang)
+
     if not openid_response:
         return render_failure(request, errors.EndpointError())
 

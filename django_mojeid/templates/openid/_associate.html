@@ -1,5 +1,6 @@
 {% load i18n %}
 {% load static %}
+{% get_current_language as LANGUAGE_CODE %}
 <style type="text/css">
 input.openid {
     background: url('{% static "openid/openid-16x16.gif" %}') no-repeat;
@@ -10,6 +11,7 @@ input.openid {
 <form action='{% url 'openid-init' %}' method='post'>
     {% csrf_token %}
     <input type="hidden" name="next" value="{% if redirect %}{{ redirect }}{% else %}{{ request.get_full_path }}{% endif %}">
+    <input type="hidden" name="lang" value="{{ LANGUAGE_CODE }}">
     <label for="id_openid_identifier">{% trans "Associate with OpenID:" %}</label><br />
     <input class="required openid" id="id_openid_identifier" maxlength="255" name="openid_identifier" type="text"><br />
     <input name="bsignin" type="submit" value="{% trans "Associate" %}">

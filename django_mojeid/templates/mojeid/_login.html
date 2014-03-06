@@ -5,6 +5,7 @@
     <form action='{% url 'openid-init' attribute_set=attribute_set %}' method='post'>
         {% csrf_token %}
         <input type="hidden" name="next" value="{% if redirect %}{{ redirect }}{% else %}{{ request.get_full_path }}{% endif %}">
+        <input type="hidden" name="lang" value="{{ LANGUAGE_CODE }}">
         <table>
             <tr>
                 <th colspan="2">
