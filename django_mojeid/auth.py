@@ -183,7 +183,8 @@ class OpenIDBackend:
     def get_model_changes(openid_response, only_updatable=False,
                           attribute_set='default'):
 
-        attributes = [x for x in get_attributes(attribute_set) if x.type == 'attribute']
+        attributes = [x for x in get_attributes(attribute_set)
+                      if x.type in ['attribute', 'internal']]
 
         fetch_response = ax.FetchResponse.fromSuccessResponse(openid_response)
 
@@ -196,7 +197,8 @@ class OpenIDBackend:
         for attribute in attributes:
             if not attribute.model in res.keys():
                 res[attribute.model] = {'user_id_field_name': attribute.user_id_field_name}
-            val = attribute.get_value(fetch_response, attribute.required)
+            val = attribute.get_value(fetch_response, attribute.required,
+                                      openid_response=openid_response)
 
             if val is not None:
                 res[attribute.model][attribute.modelAttribute] = val
@@ -213,7 +215,7 @@ class OpenIDBackend:
         fetch_response = ax.FetchResponse.fromSuccessResponse(openid_response)
 
         for handler in handlers:
-            val = handler.attribute.get_value(fetch_response, handler.required)
+            val = handler.attribute.get_value(fetch_response, handler.required, openid_response)
             call_handler(handler.name, user, val)
 
     def create_user_from_openid(self, openid_response, attribute_set='default'):

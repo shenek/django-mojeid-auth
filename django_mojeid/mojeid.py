@@ -29,6 +29,8 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+from urlparse import urlparse
+
 from django.conf import settings
 from django.core.exceptions import FieldError, ImproperlyConfigured
 from django.http import Http404
@@ -66,6 +68,10 @@ def get_attribute_query(attribute_set='defualt'):
     filtered_attributes = []
     for attribute in attributes:
 
+        # Skip for the Internal attributes
+        if attribute.type == 'internal':
+            continue
+
         required = attribute.required
         attribute = attribute.attribute if attribute.type == 'handler' else attribute
 
@@ -89,23 +95,19 @@ class CustomHandler(object):
         self.attribute = attribute
 
 
-class MojeIDAttribute(object):
-    type = 'attribute'
+class Attribute(object):
+    type = 'abstract'
 
-    code = None
-    schema = None
     text = None
 
     def __init__(self, modelApp, modelClass, modelAttribute,
-                 user_id_field_name='user_id', required=True,
-                 updatable=False, use_for_registration=True):
+                 user_id_field_name='user_id', required=True, updatable=False):
         self.modelClass = modelClass
         self.modelApp = modelApp
         self.modelAttribute = modelAttribute
         self.user_id_field_name = user_id_field_name
         self.required = required
         self.updatable = updatable
-        self.use_for_registration = use_for_registration
         self._model = None
 
     @property
@@ -116,8 +118,9 @@ class MojeIDAttribute(object):
             # set the model
             self._model = get_model(self.modelApp, self.modelClass)
             if not self._model:
-                raise ImproperlyConfigured(_("Model '%(model)s' from App '%(app)s' does not exist.")
-                                           % {'model': self.modelClass, 'app': self.modelApp})
+                raise ImproperlyConfigured(
+                    _("Model '%(model)s' from App '%(app)s' does not exist.") %
+                    {'model': self.modelClass, 'app': self.modelApp})
         return self._model
 
     # This method could be overwritten using inheritance
@@ -130,16 +133,19 @@ class MojeIDAttribute(object):
         packed = {self.user_id_field_name: id}
         return self.model.objects.get(**packed)
 
-    # This method could be overwritten using inheritance
+    # This needs to be overwritten using inheritance
     @classmethod
     def _get_value(cls, response):
-        return response.getSingle(cls.schema, None)
+        return None
 
     def set_model_value(self, id, value):
         record = self._get_record(id)
         if not hasattr(record, self.modelAttribute):
-            raise FieldError(_("Cannot resolve keyword '%(model)s' into field. Choices are: %(choices)s")
-                             % {"model": self.modelAttribute, "choices": ", ".join(record._meta._name_map.keys())})
+            raise FieldError(
+                _("Cannot resolve keyword '%(model)s' into field. "
+                  "Choices are: %(choices)s") %
+                {"model": self.modelAttribute,
+                 "choices": ", ".join(record._meta._name_map.keys())})
         self._set(record, self.modelAttribute, value)
         record.save()
 
@@ -147,12 +153,30 @@ class MojeIDAttribute(object):
     def _get_model_value(self, id):
         return getattr(self._get_record(id), self.modelAttribute)
 
+
+class MojeIDAttribute(Attribute):
+    type = 'attribute'
+
+    code = None
+    schema = None
+
+    def __init__(self, modelApp, modelClass, modelAttribute,
+                 user_id_field_name='user_id', required=True,
+                 updatable=False, use_for_registration=True):
+        self.use_for_registration = use_for_registration
+        super(MojeIDAttribute, self).__init__(modelApp, modelClass, modelAttribute,
+                                              user_id_field_name, required, updatable)
+
+    @classmethod
+    def _get_value(cls, response):
+        return response.getSingle(cls.schema, None)
+
     @classmethod
     def generate_ax_attrinfo(cls, required):
         return ax.AttrInfo(cls.schema, alias=cls.code, required=required)
 
     @classmethod
-    def get_value(cls, response, required):
+    def get_value(cls, response, required, openid_response=None):
         value = cls._get_value(response)
         if required and value is None:
             raise RequiredAttributeNotReturned(
@@ -648,6 +672,36 @@ class Image(MojeIDAttribute):
     code = 'image'
     schema = 'http://specs.nic.cz/attr/contact/image'
     text = _(u'Image (base64)')  # 'Obrázek (base64)'
+
+
+class InteralAttribute(Attribute):
+    type = 'internal'
+
+    @classmethod
+    def get_value(cls, response, required, openid_response):
+        value = cls._get_value(openid_response)
+        if required and value is None:
+            raise RequiredAttributeNotReturned(
+                ugettext("Required Internal Attribute (%(text)s) was not returned.")
+                % {"code": unicode(cls.code), "text": unicode(cls.text)}
+            )
+        return value
+
+
+class DisplayID(InteralAttribute):
+    text = _(u'ID to display')
+
+    @classmethod
+    def _get_value(cls, response):
+        return urlparse(response.getDisplayIdentifier()).netloc
+
+
+class LoginID(InteralAttribute):
+    text = _(u'mojeID login')
+
+    @classmethod
+    def _get_value(cls, response):
+        return str(urlparse(response.getDisplayIdentifier()).netloc).split(".", 1)[0]
 
 
 class Assertion:

@@ -203,9 +203,9 @@ MOJEID_ATTRIBUTES_SETS = {
     'default': [
         mojeid.Email('auth', 'User', 'email', 'pk'),
         #mojeid.FullName(User, 'username', 'id'),
-        mojeid.FirstName('auth', 'User', 'first_name', 'pk'),
+        mojeid.FirstName('auth', 'User', 'first_name', 'pk', use_for_registration=False),
         mojeid.LastName('auth', 'User', 'last_name', 'pk', updatable=True, required=False),
-        mojeid.NickName('auth', 'User', 'username', 'pk', use_for_registration=False),
+        mojeid.LoginID('auth', 'User', 'username', 'pk'),
         mojeid.Student('example_app', 'UserExtraAttributes', 'student', 'user_id', updatable=True),
         mojeid.Phone('example_app', 'UserExtraAttributes', 'phone', 'user_id'),
         mojeid.CustomHandler(mojeid.FullName, 'full_name_handler', required=True),
