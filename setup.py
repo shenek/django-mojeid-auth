@@ -72,8 +72,9 @@ setup(
         'django_mojeid.management.commands',
     ],
     package_data={
-        'django_mojeid': ['templates/*/*.html', 'static/*/*'],
+        'django_mojeid': ['templates/*/*.html', 'static/*/*', 'locale/*/*/*'],
     },
     provides=['django_mojeid'],
     requires=['django (>=1.5.1)', 'openid (>=2.2.0)'],
 )
+
