@@ -351,8 +351,17 @@ TBD
 
 Troubleshooting
 ---------------
+
 TBD
 
 Localhost related stuff
 
 SSL certificate verificiation via openssl
+
+Django 1.6
+_________
+Django 1.6 can't serialize openid.yadis.manager.YadisServiceManager objects.
+It uses JSONSerializer which is not compatible with Yadis objects.
+As a workaround you cat use pickle serializer instead::
+
+    SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
