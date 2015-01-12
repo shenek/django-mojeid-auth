@@ -40,10 +40,7 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 from django.http import Http404
-try:
-    from django.views.decorators.csrf import csrf_exempt
-except ImportError:
-    from django.contrib.csrf.middleware import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import get_language, activate as activate_lang
 
 from openid.consumer.consumer import (
@@ -76,9 +73,9 @@ from django.contrib.auth import get_user_model
 
 import errors
 
-from auth import OpenIDBackend
-from models import Nonce
-from mojeid import Assertion
+from django_mojeid.auth import OpenIDBackend
+from django_mojeid.models import Nonce
+from django_mojeid.mojeid import Assertion
 
 
 def sanitise_redirect_url(redirect_to):
