@@ -30,7 +30,7 @@
 from django.conf.urls import patterns, include
 from django.contrib import admin
 
-import views
+from example_app import views
 
 
 admin.autodiscover()

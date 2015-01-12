@@ -186,3 +186,5 @@ MOJEID_ATTRIBUTES = [
     mojeid.FirstName('auth', 'User', 'first_name', 'pk', use_for_registration=False),
     mojeid.LastName('auth', 'User', 'last_name', 'pk'),
 ]
+
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
