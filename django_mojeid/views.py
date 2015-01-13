@@ -76,7 +76,7 @@ import errors
 from django_mojeid.auth import OpenIDBackend
 from django_mojeid.models import Nonce
 from django_mojeid.mojeid import Assertion
-
+from django_mojeid.settings import mojeid_settings
 
 def sanitise_redirect_url(redirect_to):
     """Sanitise the redirection URL."""
@@ -187,7 +187,7 @@ def login_show(request, login_template='openid/login.html',
 
 @require_POST
 def login_begin(request, attribute_set='default', form_class=OpenIDLoginForm):
-    """Begin an OpenID login request, possibly asking for an identity URL."""
+    """Begin an MojeID login request."""
     redirect_to = OpenIDBackend.get_redirect_to(request)
 
     openid_url = getattr(settings, 'MOJEID_ENDPOINT_URL', MOJEID_ENDPOINT_URL)
@@ -219,14 +219,17 @@ def login_begin(request, attribute_set='default', form_class=OpenIDLoginForm):
 
     if attributes:
         openid_request.addExtension(fetch_request)
-
-    if getattr(settings, 'OPENID_PHYSICAL_MULTIFACTOR_REQUIRED', False):
-        preferred_auth = [
-            pape.AUTH_MULTI_FACTOR_PHYSICAL,
-        ]
-        pape_request = pape.Request(preferred_auth_policies=preferred_auth)
+    
+    if mojeid_settings.MOJEID_LOGIN_METHOD != 'ANY':
+        # set authentication method to OTP or CERT
+        if mojeid_settings.MOJEID_LOGIN_METHOD == "OTP":
+            auth_method = pape.AUTH_MULTI_FACTOR
+        else: # mojeid_settings.MOJEID_LOGIN_METHOD == "CERT":
+            auth_method = pape.AUTH_PHISHING_RESISTANT
+        
+        pape_request = pape.Request(preferred_auth_policies=[auth_method])
         openid_request.addExtension(pape_request)
-
+    
     # Construct the request completion URL, including the page we
     # should redirect to.
     return_to = request.build_absolute_uri(reverse(login_complete))

@@ -131,15 +131,16 @@ It is worth noting that a user needs to be marked as a "staff user" to be able t
 A new openid user will not normally be a "staff user".
 The easiest way to resolve this is to use traditional authentication (OPENID_USE_AS_ADMIN_LOGIN = False) to sign in as your first user with a password and authorize your openid user to be staff.
 
-Require Physical Multi-Factor Authentication
+Require Particular Authentication Type
 --------------------------------------------
 
-If your users should use a physical multi-factor authentication method, such as RSA tokens or YubiKey, add the following setting::
+If your users should use an OTP or ssl certificate authentication method, set
+the following setting:
 
-    OPENID_PHYSICAL_MULTIFACTOR_REQUIRED = True
+    MOJEID_LOGIN_METHOD
 
-If the user's OpenID provider supports the PAPE extension and provides the Physical Multifactor authentication policy, this will
-cause the OpenID login to fail if the user does not provide valid physical authentication to the provider.
+in your settings.py to one of the "ANY" (default), "CERT", "OTP" and
+that method will be required by MojeID to login.
 
 Override Login Failure Handling
 -------------------------------
