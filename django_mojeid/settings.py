@@ -7,7 +7,7 @@ from django.core.exceptions import ImproperlyConfigured
 MOJEID_LOGIN_METHOD = "ANY"
 MOJEID_ENDPOINT_URL = 'https://mojeid.fred.nic.cz/endpoint/'
 MOJEID_REGISTRATION_URL = 'https://mojeid.fred.nic.cz/registration/endpoint/'
-
+MOJEID_MAX_AUTH_AGE = None
 
 class Settings(object):
     def __getattr__(self, name):
@@ -25,6 +25,11 @@ class Settings(object):
             raise ImproperlyConfigured("Invalid MOJEID_LOGIN_METHOD '%s'"
                                         % attr)
         
+        if name == 'MOJEID_MAX_AUTH_AGE' and not (
+                attr is None or
+                (isinstance(attr, int) and attr >= 0)):
+            raise ImproperlyConfigured("MOJEID_MAX_AUTH_AGE must be "
+                                       "a positive integer (>= 0) or None")
         return attr
 
 mojeid_settings = Settings()

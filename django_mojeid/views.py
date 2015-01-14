@@ -185,7 +185,10 @@ def login_begin(request, attribute_set='default'):
         else: # mojeid_settings.MOJEID_LOGIN_METHOD == "CERT":
             auth_method = pape.AUTH_PHISHING_RESISTANT
         
-        pape_request = pape.Request(preferred_auth_policies=[auth_method])
+        pape_request = pape.Request(
+                preferred_auth_policies=[auth_method],
+                max_auth_age=mojeid_settings.MOJEID_MAX_AUTH_AGE,
+        )
         openid_request.addExtension(pape_request)
     
     # Construct the request completion URL, including the page we

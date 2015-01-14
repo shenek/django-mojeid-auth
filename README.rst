@@ -142,6 +142,23 @@ the following setting:
 in your settings.py to one of the "ANY" (default), "CERT", "OTP" and
 that method will be required by MojeID to login.
 
+Limit the validity period of past authentication
+------------------------------------------------
+
+By setting
+
+    MOJEID_MAX_AUTH_AGE = *<int>*
+
+in your *settings.py* you can specify the validity time (in seconds)
+of a MojeID login.
+
+If the end user has not actively authenticated to the OP within the number of
+seconds specified in a manner fitting the requested policies, the OP should
+request the end user to actively reauthenticate and not rely on a browser cookie
+from a previous authentication.
+
+See `openid pape max_auth_age <http://openid.net/specs/openid-provider-authentication-policy-extension-1_0.html#anchor8>`_ for more info.
+
 Override Login Failure Handling
 -------------------------------
 To override the default OpenID login fail view it is necessary to respond to the signal trigger_error::
@@ -360,7 +377,7 @@ Localhost related stuff
 SSL certificate verificiation via openssl
 
 Django 1.6
-_________
+__________
 Django 1.6 can't serialize openid.yadis.manager.YadisServiceManager objects.
 It uses JSONSerializer which is not compatible with Yadis objects.
 As a workaround you cat use pickle serializer instead::
