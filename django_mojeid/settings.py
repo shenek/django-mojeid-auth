@@ -5,6 +5,9 @@ from django.core.exceptions import ImproperlyConfigured
 # defaults
 
 MOJEID_LOGIN_METHOD = "ANY"
+MOJEID_ENDPOINT_URL = 'https://mojeid.fred.nic.cz/endpoint/'
+MOJEID_REGISTRATION_URL = 'https://mojeid.fred.nic.cz/registration/endpoint/'
+
 
 class Settings(object):
     def __getattr__(self, name):
