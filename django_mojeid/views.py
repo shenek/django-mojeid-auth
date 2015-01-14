@@ -178,15 +178,18 @@ def login_begin(request, attribute_set='default'):
     if attributes:
         openid_request.addExtension(fetch_request)
     
-    if mojeid_settings.MOJEID_LOGIN_METHOD != 'ANY':
+    if mojeid_settings.MOJEID_LOGIN_METHOD != 'ANY' or \
+            mojeid_settings.MOJEID_MAX_AUTH_AGE is not None:
         # set authentication method to OTP or CERT
         if mojeid_settings.MOJEID_LOGIN_METHOD == "OTP":
-            auth_method = pape.AUTH_MULTI_FACTOR
-        else: # mojeid_settings.MOJEID_LOGIN_METHOD == "CERT":
-            auth_method = pape.AUTH_PHISHING_RESISTANT
+            auth_method = [pape.AUTH_MULTI_FACTOR]
+        elif mojeid_settings.MOJEID_LOGIN_METHOD == "CERT":
+            auth_method = [pape.AUTH_PHISHING_RESISTANT]
+        else:
+            auth_method = None
         
         pape_request = pape.Request(
-                preferred_auth_policies=[auth_method],
+                preferred_auth_policies=auth_method,
                 max_auth_age=mojeid_settings.MOJEID_MAX_AUTH_AGE,
         )
         openid_request.addExtension(pape_request)
