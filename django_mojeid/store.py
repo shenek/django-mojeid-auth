@@ -34,6 +34,8 @@ from openid.association import Association as OIDAssociation
 from openid.store.interface import OpenIDStore
 from openid.store.nonce import SKEW
 
+from django.db.models import F
+
 from django_mojeid.models import Association, Nonce
 
 
@@ -124,8 +126,8 @@ class DjangoOpenIDStore(OpenIDStore):
 
     def cleanupAssociations(self):
         now = int(time.time())
-        expired = Association.objects.extra(
-            where=['issued + lifetime < %d' % now])
+        expired = Association.objects.filter(
+            issued__lt=(int(time.time()) - F('lifetime')))
         count = expired.count()
         if count:
             expired.delete()
