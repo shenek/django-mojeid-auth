@@ -33,27 +33,32 @@ import urllib
 from urlparse import urlsplit
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.template.loader import render_to_string
-from django.views.decorators.http import require_POST
-from django.http import Http404
-from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import get_language, activate as activate_lang
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
-from openid.consumer.consumer import (
-    Consumer, SUCCESS, CANCEL, FAILURE)
+from openid.consumer.consumer import Consumer, SUCCESS, CANCEL, FAILURE
 from openid.consumer.discover import DiscoveryFailure
 from openid.extensions import ax, pape
 from openid.kvform import dictToKV
 from openid.yadis.constants import YADIS_CONTENT_TYPE
 
-from django_mojeid.forms import OpenIDLoginForm
-from django_mojeid.models import UserOpenID
-from django_mojeid.mojeid import get_attributes, get_attribute_query
+from django_mojeid import errors
+from django_mojeid.auth import OpenIDBackend
 
+from django_mojeid.exceptions import (
+    DjangoOpenIDException,
+    IdentityAlreadyClaimed,
+)
+from django_mojeid.models import Nonce, UserOpenID
+from django_mojeid.mojeid import Assertion, get_attributes, get_attribute_query
+from django_mojeid.settings import mojeid_settings
 from django_mojeid.signals import (
     user_login_report,
     trigger_error,
@@ -61,18 +66,7 @@ from django_mojeid.signals import (
     associate_user
 )
 from django_mojeid.store import DjangoOpenIDStore
-from django_mojeid.exceptions import (
-    DjangoOpenIDException,
-    IdentityAlreadyClaimed,
-)
-from django.contrib.auth import get_user_model
 
-import errors
-
-from django_mojeid.auth import OpenIDBackend
-from django_mojeid.models import Nonce
-from django_mojeid.mojeid import Assertion
-from django_mojeid.settings import mojeid_settings
 
 def sanitise_redirect_url(redirect_to):
     """Sanitise the redirection URL."""
@@ -155,34 +149,8 @@ def parse_openid_response(request):
                                                   current_url)
 
 
-def login_show(request, login_template='openid/login.html',
-               associate_template='openid/associate.html',
-               form_class=OpenIDLoginForm):
-    """
-    Render a template to show the login/associate form form.
-    """
-
-    redirect_to = OpenIDBackend.get_redirect_to(request)
-
-    login_form = form_class(request.POST or None)
-
-    user = OpenIDBackend.get_user_from_request(request)
-
-    template_name = associate_template if user else login_template
-
-    return render_to_response(
-        template_name,
-        {
-            'form': login_form,
-            'action': reverse('openid-init'),
-            OpenIDBackend.get_redirect_field_name(): redirect_to
-        },
-        context_instance=RequestContext(request)
-    )
-
-
 @require_POST
-def login_begin(request, attribute_set='default', form_class=OpenIDLoginForm):
+def login_begin(request, attribute_set='default'):
     """Begin an MojeID login request."""
     redirect_to = OpenIDBackend.get_redirect_to(request)
     
@@ -238,8 +206,7 @@ def login_begin(request, attribute_set='default', form_class=OpenIDLoginForm):
 
 
 def registration(request, attribute_set='default',
-                 template_name='openid/registration_form.html',
-                 form_class=OpenIDLoginForm):
+                 template_name='openid/registration_form.html'):
     """ Try to submit all the registration attributes for mojeID registration"""
     
     # Realm should be always something like 'https://example.org/openid/'
