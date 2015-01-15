@@ -57,7 +57,12 @@ from django_mojeid.exceptions import (
     IdentityAlreadyClaimed,
 )
 from django_mojeid.models import Nonce, UserOpenID
-from django_mojeid.mojeid import Assertion, get_attributes, get_attribute_query
+from django_mojeid.mojeid import (
+    Assertion,
+    get_attributes,
+    get_attribute_query,
+    create_service
+)
 from django_mojeid.settings import mojeid_settings
 from django_mojeid.signals import (
     user_login_report,
@@ -66,6 +71,9 @@ from django_mojeid.signals import (
     associate_user
 )
 from django_mojeid.store import DjangoOpenIDStore
+
+
+SESSION_ATTR_SET_KEY = 'mojeid_attr_set'
 
 
 def sanitise_redirect_url(redirect_to):
@@ -137,40 +145,26 @@ def render_failure(request, error, template_name='openid/failure.html'):
     return HttpResponse(data, status=error.http_status)
 
 
-def parse_openid_response(request):
-    """Parse an OpenID response from a Django request."""
-
-    current_url = request.build_absolute_uri()
-
-    consumer = make_consumer(request)
-    attribute_set = consumer.session.get('attribute_set', 'default')
-    lang = consumer.session.get('stored_lang', 'en')
-    return attribute_set, lang, consumer.complete(dict(request.REQUEST.items()),
-                                                  current_url)
-
-
 @require_POST
 def login_begin(request, attribute_set='default'):
     """Begin an MojeID login request."""
     redirect_to = OpenIDBackend.get_redirect_to(request)
+    #import pdb
+    #pdb.set_trace()
     
-    consumer = make_consumer(request)
-
-    # Set response handler (define the settings set)
-    consumer.session['attribute_set'] = attribute_set
-
-    # Set the language
-    consumer.session['stored_lang'] = request.POST.get('lang', get_language())
-    request.session.save()
-
+    consumer = Consumer({}, DjangoOpenIDStore())
+    
+    service = create_service()
     try:
-        openid_request = consumer.begin(mojeid_settings.MOJEID_ENDPOINT_URL)
-    except DiscoveryFailure, exc:
+        openid_request = consumer.beginWithoutDiscovery(service)
+    except DiscoveryFailure, exc: # TODO moze to hodit DiscoveryFailure ? nie nieco ine? povodne to bolo na begin()
         return render_failure(request, errors.DiscoveryError(exc))
 
     # Request user details.
     attributes = get_attribute_query(attribute_set)
-
+    # save settings set name for response handler
+    request.session[SESSION_ATTR_SET_KEY] = attribute_set
+    
     fetch_request = ax.FetchRequest()
     for attribute, required in attributes:
         fetch_request.add(attribute.generate_ax_attrinfo(required))
@@ -194,20 +188,9 @@ def login_begin(request, attribute_set='default'):
         )
         openid_request.addExtension(pape_request)
     
-    # Construct the request completion URL, including the page we
-    # should redirect to.
+    # Construct the request completion URL
     return_to = request.build_absolute_uri(reverse(login_complete))
-    if redirect_to:
-        if '?' in return_to:
-            return_to += '&'
-        else:
-            return_to += '?'
-        # Django gives us Unicode, which is great.  We must encode URI.
-        # urllib enforces str. We can't trust anything about the default
-        # encoding inside  str(foo) , so we must explicitly make foo a str.
-        return_to += urllib.urlencode(
-            {OpenIDBackend.get_redirect_field_name(): redirect_to.encode("UTF-8")})
-
+    
     return render_openid_request(request, openid_request, return_to)
 
 
@@ -252,13 +235,19 @@ def registration(request, attribute_set='default',
 def login_complete(request):
     # Get addres where to redirect after the login
     redirect_to = sanitise_redirect_url(OpenIDBackend.get_redirect_to(request))
-
+    #import pdb
+    #pdb.set_trace()
+    
     # Get OpenID response and test whether it is valid
-    attribute_set, lang, openid_response = parse_openid_response(request)
-
-    # Set language
-    activate_lang(lang)
-
+    attribute_set = request.session[SESSION_ATTR_SET_KEY]
+    del request.session[SESSION_ATTR_SET_KEY]
+    
+    mojeid_session = {
+        '_openid_consumer_last_token': create_service()
+    }
+    consumer = Consumer(mojeid_session, DjangoOpenIDStore())
+    openid_response = consumer.complete(dict(request.REQUEST.items()), request.build_absolute_uri()) # TODO HTTPFetchingError can be raised here (+sth. else maybe)
+    
     if not openid_response:
         return render_failure(request, errors.EndpointError())
 

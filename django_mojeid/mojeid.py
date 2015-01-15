@@ -3,7 +3,7 @@
 
 # django-mojeid - mojeID integration for django
 #
-# Copyright (C) 2013 CZ.NIC
+# Copyright (C) 2013-2015 CZ.NIC
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -35,15 +35,62 @@ from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
+from openid.consumer.discover import OpenIDServiceEndpoint
 from openid.extensions import ax
 
 from django_mojeid.exceptions import RequiredAttributeNotReturned
+from django_mojeid.settings import mojeid_settings
+
+
+mojeid_services = {
+    'testing': {
+        'url': "https://mojeid.fred.nic.cz/endpoint/",
+        'registration': 'https://mojeid.fred.nic.cz/registration/endpoint/',
+        'xrds': """<?xml version="1.0" encoding="UTF-8"?>
+<xrds:XRDS xmlns="xri://$xrd*($v*2.0)" xmlns:xrds="xri://$xrds">
+<XRD>
+<Service>
+    <Type>http://specs.openid.net/auth/2.0/server</Type>
+    <Type>http://specs.openid.net/extensions/pape/1.0</Type>
+    <Type>http://openid.net/extensions/sreg/1.1</Type>
+    <Type>http://openid.net/srv/ax/1.0</Type>
+    <URI>https://mojeid.fred.nic.cz/endpoint/</URI>
+</Service>
+</XRD>
+</xrds:XRDS>
+"""
+    },
+    'production': {
+        'url': "https://mojeid.cz/endpoint/",
+        'registration': 'https://mojeid.cz/registration/endpoint/',
+        'xrds': """<?xml version="1.0" encoding="UTF-8"?>
+<xrds:XRDS xmlns="xri://$xrd*($v*2.0)" xmlns:xrds="xri://$xrds">
+<XRD>
+<Service>
+    <Type>http://specs.openid.net/auth/2.0/server</Type>
+    <Type>http://specs.openid.net/extensions/pape/1.0</Type>
+    <Type>http://openid.net/extensions/sreg/1.1</Type>
+    <Type>http://openid.net/srv/ax/1.0</Type>
+    <URI>https://mojeid.cz/endpoint/</URI>
+</Service>
+</XRD>
+</xrds:XRDS>
+"""
+    }
+}
+
+
+def create_service():
+    endpoint_type = 'production' if mojeid_settings.MOJEID_INSTANCE_PRODUCTION \
+                    else 'testing'
+    defs = mojeid_services[endpoint_type]
+    return OpenIDServiceEndpoint.fromXRDS(defs['url'], defs['xrds'])[0]
 
 
 def get_attributes(attribute_set):
 
-    default = getattr(settings, 'MOJEID_ATTRIBUTES', [])
-    res = getattr(settings, 'MOJEID_ATTRIBUTES_SETS', {})
+    default = getattr(mojeid_settings, 'MOJEID_ATTRIBUTES', [])
+    res = getattr(mojeid_settings, 'MOJEID_ATTRIBUTES_SETS', {})
 
     # MOJEID_ATTRIBUTES are default when present
     if default or not res:

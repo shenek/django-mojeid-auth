@@ -5,8 +5,7 @@ from django.core.exceptions import ImproperlyConfigured
 # defaults
 
 MOJEID_LOGIN_METHOD = "ANY"
-MOJEID_ENDPOINT_URL = 'https://mojeid.fred.nic.cz/endpoint/'
-MOJEID_REGISTRATION_URL = 'https://mojeid.fred.nic.cz/registration/endpoint/'
+MOJEID_INSTANCE_PRODUCTION = False
 MOJEID_MAX_AUTH_AGE = None
 
 class Settings(object):
