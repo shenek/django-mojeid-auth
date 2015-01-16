@@ -100,27 +100,6 @@ def sanitise_redirect_url(redirect_to):
     return redirect_to
 
 
-def render_openid_request(request, openid_request, return_to):
-    """ Render an OpenID authentication request.
-        This request will automatically redirect client to OpenID server.
-    """
-
-    # Realm should be always something like 'https://example.org/openid/'
-    realm = getattr(settings, 'MOJEID_REALM',
-                    request.build_absolute_uri(reverse(top)))
-
-    # Directly redirect to the OpenID server
-    if openid_request.shouldSendRedirect():
-        redirect_url = openid_request.redirectURL(realm, return_to)
-        return HttpResponseRedirect(redirect_url)
-
-    # Render a form wich will redirect the client
-    else:
-        form_html = openid_request.htmlMarkup(realm, return_to,
-                                              form_tag_attrs={'id': 'openid_message'})
-        return HttpResponse(form_html, content_type='text/html;charset=UTF-8')
-
-
 def render_failure(request, error, template_name='openid/failure.html'):
     """Render an error page to the user."""
     # Render the response to trigger_error signal
@@ -184,7 +163,15 @@ def login_begin(request, attribute_set='default'):
     if redirect_to:
         request.session['next_page'] = redirect_to
     
-    return render_openid_request(request, openid_request, return_to)
+    # Realm should be always something like 'https://example.org/openid/'
+    realm = getattr(settings, 'MOJEID_REALM', None)
+    if not realm:
+        realm = request.build_absolute_uri(reverse(top))
+    
+    # we always use POST request
+    form_html = openid_request.htmlMarkup(
+            realm, return_to, form_tag_attrs={'id': 'openid_message'})
+    return HttpResponse(form_html, content_type='text/html; charset=UTF-8')
 
 
 def registration(request, attribute_set='default',
