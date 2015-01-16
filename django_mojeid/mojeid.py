@@ -87,6 +87,12 @@ def create_service():
     return OpenIDServiceEndpoint.fromXRDS(defs['url'], defs['xrds'])[0]
 
 
+def get_registration_url():
+    endpoint_type = 'production' if mojeid_settings.MOJEID_INSTANCE_PRODUCTION \
+                    else 'testing'
+    return mojeid_services[endpoint_type]['registration']
+
+
 def get_attributes(attribute_set):
 
     default = getattr(mojeid_settings, 'MOJEID_ATTRIBUTES', [])

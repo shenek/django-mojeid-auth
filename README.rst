@@ -84,11 +84,12 @@ Basic Installation
 
 #) Set the proper mojeID server.
 
-   By default all mojeID related actions are performed against the testing server https://mojeid.fred.nic.cz
-   To use the actual mojeID server you need to set two variables in your *settings.py*::
+   By default all mojeID related actions are performed against the testing
+   server *https://mojeid.fred.nic.cz* To use the production mojeID server you
+   need to set the following variable in your *settings.py*::
+   
+        MOJEID_INSTANCE_PRODUCTION = True
 
-        MOJEID_ENDPOINT_URL = 'https://mojeid.cz/endpoint/'
-        MOJEID_REGISTRATION_URL = 'https://mojeid.cz/registration/endpoint/'
 
 Realm
 -----
@@ -375,11 +376,3 @@ TBD
 Localhost related stuff
 
 SSL certificate verificiation via openssl
-
-Django 1.6
-__________
-Django 1.6 can't serialize openid.yadis.manager.YadisServiceManager objects.
-It uses JSONSerializer which is not compatible with Yadis objects.
-As a workaround you cat use pickle serializer instead::
-
-    SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'

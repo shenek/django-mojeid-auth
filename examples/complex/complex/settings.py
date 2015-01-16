@@ -198,5 +198,3 @@ MOJEID_ATTRIBUTES_SETS = {
         mojeid.CustomHandler(mojeid.Validated, 'valid_handler', required=True),
     ]
 }
-
-SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'

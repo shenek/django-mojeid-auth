@@ -176,5 +176,3 @@ OPENID_USE_AS_ADMIN_LOGIN = False
 MOJEID_ATTRIBUTES = [
     # When just make a simple authentication (no attribute is required)
 ]
-
-SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
