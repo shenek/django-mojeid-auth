@@ -167,13 +167,7 @@ class OpenIDBackend:
 
         if not new_user:
             self.update_user_from_openid(user.pk, openid_response, attribute_set)
-
-        if getattr(settings, 'OPENID_PHYSICAL_MULTIFACTOR_REQUIRED', False):
-            pape_response = pape.Response.fromSuccessResponse(openid_response)
-            if pape_response is None or \
-                    pape.AUTH_MULTI_FACTOR_PHYSICAL not in pape_response.auth_policies:
-                raise MissingPhysicalMultiFactor()
-
+        
         # Run custom Attribute handler
         OpenIDBackend.run_handlers(openid_response, user, attribute_set)
 

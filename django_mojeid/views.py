@@ -145,7 +145,6 @@ def login_begin(request, attribute_set='default'):
     
     # create consumer, start login process
     consumer = Consumer({}, DjangoOpenIDStore())
-    
     service = create_service()
     openid_request = consumer.beginWithoutDiscovery(service)
     
@@ -217,7 +216,7 @@ def registration(request, attribute_set='default',
         template_name,
         {
             'fields': fields,
-            'action': get_registration_url()
+            'action': get_registration_url(),
             'realm': realm,
             'nonce': nonce.registration_nonce,
         },
