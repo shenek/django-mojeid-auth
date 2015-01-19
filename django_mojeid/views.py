@@ -44,6 +44,7 @@ from django.views.decorators.http import require_POST
 
 from openid.consumer.consumer import Consumer, SUCCESS, CANCEL, FAILURE
 from openid.extensions import ax, pape
+from openid.fetchers import HTTPFetchingError
 from openid.kvform import dictToKV
 from openid.yadis.constants import YADIS_CONTENT_TYPE
 
@@ -221,7 +222,7 @@ def login_complete(request):
     if request.session.has_key('next_page'):
         del request.session['next_page']
     
-    if request.session.has_key('next_page'):
+    if request.session.has_key(SESSION_ATTR_SET_KEY):
         del request.session[SESSION_ATTR_SET_KEY]
     
     # Get OpenID response and test whether it is valid
@@ -229,10 +230,12 @@ def login_complete(request):
     consumer = Consumer(mojeid_session, DjangoOpenIDStore())
     mojeid_session[consumer._token_key] = create_service()
     
-    # TODO following can raise HTTPFetchingError (+ maybe other exceptions)
-    openid_response = consumer.complete(
-            dict(request.REQUEST.items()),
-            request.build_absolute_uri()) 
+    try:
+        openid_response = consumer.complete(
+                dict(request.REQUEST.items()),
+                request.build_absolute_uri())
+    except HTTPFetchingError:
+        return render_failure(request, errors.EndpointError())
     
     if not openid_response:
         return render_failure(request, errors.EndpointError())
