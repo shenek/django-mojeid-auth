@@ -28,9 +28,12 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import urllib
-
-from urlparse import urlsplit
+try:
+    # python3
+    from urllib.parse import urlsplit
+except ImportError:
+    # python2
+    from urlparse import urlsplit
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -105,11 +108,11 @@ def render_failure(request, error, template_name='openid/failure.html'):
     """Render an error page to the user."""
     # Render the response to trigger_error signal
     resp = trigger_error.send(sender=__name__, error=error, request=request)
-    resp = filter(lambda r: not r[1] is None and isinstance(r[1], HttpResponse), resp)
-    if resp:
-        # Return first valid response
-        return resp[0][1]
-
+    # Return first valid response
+    for r in resp:
+        if resp[1] is not None and isinstance(r[1], HttpResponse):
+            return r[1]
+    
     # No response to signal - render default page
     data = render_to_string(template_name, {'message': error.msg},
                             context_instance=RequestContext(request))
@@ -120,7 +123,7 @@ def render_failure(request, error, template_name='openid/failure.html'):
 def login_begin(request, attribute_set='default'):
     """Begin an MojeID login request."""
     
-    if request.session.has_key('next_page'):
+    if 'next_page' in request.session:
         del request.session['next_page']
     
     # create consumer, start login process
@@ -219,10 +222,10 @@ def login_complete(request):
     attribute_set = request.session.get(SESSION_ATTR_SET_KEY, 'default')
     
     # clean the session
-    if request.session.has_key('next_page'):
+    if 'next_page' in request.session:
         del request.session['next_page']
     
-    if request.session.has_key(SESSION_ATTR_SET_KEY):
+    if SESSION_ATTR_SET_KEY in request.session:
         del request.session[SESSION_ATTR_SET_KEY]
     
     # Get OpenID response and test whether it is valid
@@ -283,13 +286,13 @@ def login_complete(request):
                     return render_failure(request, errors.DisabledAccount(user_new))
                 # Create an association with the new user
                 OpenIDBackend.associate_user_with_session(request, user_new)
-        except DjangoOpenIDException, e:
+        except DjangoOpenIDException as e:
             # Something went wrong
             user_id = None
             try:
                 # Try to get user id
                 user_id = UserOpenID.objects.get(claimed_id=openid_response.identity_url).user_id
-            except UserOpenID.DoesNotExist, user_model.DoesNotExist:
+            except (UserOpenID.DoesNotExist, user_model.DoesNotExist):
                 # Report an error with identity_url
                 user_login_report.send(sender=__name__,
                                        request=request,
