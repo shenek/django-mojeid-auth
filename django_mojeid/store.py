@@ -27,7 +27,6 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import base64
 import time
 
 from openid.association import Association as OIDAssociation
@@ -52,12 +51,12 @@ class DjangoOpenIDStore(OpenIDStore):
             assoc = Association(
                 server_url=server_url,
                 handle=association.handle,
-                secret=base64.encodestring(association.secret),
+                secret=association.secret,
                 issued=association.issued,
                 lifetime=association.lifetime,
                 assoc_type=association.assoc_type)
         else:
-            assoc.secret = base64.encodestring(association.secret)
+            assoc.secret = association.secret
             assoc.issued = association.issued
             assoc.lifetime = association.lifetime
             assoc.assoc_type = association.assoc_type
@@ -74,7 +73,7 @@ class DjangoOpenIDStore(OpenIDStore):
         expired = []
         for assoc in assocs:
             association = OIDAssociation(
-                assoc.handle, base64.decodestring(assoc.secret), assoc.issued,
+                assoc.handle, assoc.secret, assoc.issued,
                 assoc.lifetime, assoc.assoc_type
             )
             if association.expiresIn == 0:
