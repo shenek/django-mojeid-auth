@@ -223,7 +223,7 @@ class MojeIDAttribute(object):
         if value is None:
             return None
 
-        return {'name': self.registration_field, 'label': self.text.decode('utf-8'), 'value': value}
+        return {'name': self.registration_field, 'label': self.text, 'value': value}
 
     # This method could be overwritten using inheritance
     def _get_form_html_template(self):

@@ -77,7 +77,7 @@ class DjangoOpenIDStore(OpenIDStore):
                 assoc.handle, base64.decodestring(assoc.secret), assoc.issued,
                 assoc.lifetime, assoc.assoc_type
             )
-            if association.getExpiresIn() == 0:
+            if association.expiresIn == 0:
                 expired.append(assoc)
             else:
                 associations.append((association.issued, association))
