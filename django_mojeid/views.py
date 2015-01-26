@@ -242,9 +242,6 @@ def login_complete(request):
         # if not using association and can't contact MojeID server
         return render_failure(request, errors.EndpointError())
     
-    if not openid_response:
-        return render_failure(request, errors.EndpointError())
-
     # Check whether the user is already logged in
     user_orig = OpenIDBackend.get_user_from_request(request)
     user_model = get_user_model()
