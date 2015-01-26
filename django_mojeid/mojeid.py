@@ -37,6 +37,7 @@ from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
+from openid.consumer.consumer import GenericConsumer
 from openid.consumer.discover import OpenIDServiceEndpoint
 from openid.extensions import ax
 
@@ -93,6 +94,16 @@ def get_registration_url():
     endpoint_type = 'production' if mojeid_settings.MOJEID_INSTANCE_PRODUCTION \
                     else 'testing'
     return mojeid_services[endpoint_type]['registration']
+
+
+class MojeIDConsumer(GenericConsumer):
+    def _verifyDiscoverySingle(self, endpoint, to_match):
+        """This function normally verifies that the result (obtained from
+        the mojeid server matches with xrds used in the beginning but as this
+        two are the same, we can skip this check (and thus avoid downloading
+        another xrds document from $username.mojeid.cz)
+        """
+        pass
 
 
 def get_attributes(attribute_set):

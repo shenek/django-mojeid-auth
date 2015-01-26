@@ -45,10 +45,11 @@ from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-from openid.consumer.consumer import Consumer, SUCCESS, CANCEL, FAILURE
+from openid.consumer.consumer import SUCCESS, CANCEL, FAILURE
 from openid.extensions import ax, pape
 from openid.fetchers import HTTPFetchingError
 from openid.kvform import dictToKV
+from openid.message import Message
 from openid.yadis.constants import YADIS_CONTENT_TYPE
 
 from django_mojeid import errors
@@ -64,7 +65,8 @@ from django_mojeid.mojeid import (
     get_attributes,
     get_attribute_query,
     get_registration_url,
-    create_service
+    create_service,
+    MojeIDConsumer
 )
 from django_mojeid.settings import mojeid_settings
 from django_mojeid.signals import (
@@ -127,9 +129,8 @@ def login_begin(request, attribute_set='default'):
         del request.session['next_page']
     
     # create consumer, start login process
-    consumer = Consumer({}, DjangoOpenIDStore())
-    service = create_service()
-    openid_request = consumer.beginWithoutDiscovery(service)
+    consumer = MojeIDConsumer(DjangoOpenIDStore())
+    openid_request = consumer.begin(create_service())
     
     # Request user details.
     attributes = get_attribute_query(attribute_set)
@@ -229,15 +230,16 @@ def login_complete(request):
         del request.session[SESSION_ATTR_SET_KEY]
     
     # Get OpenID response and test whether it is valid
-    mojeid_session = {}
-    consumer = Consumer(mojeid_session, DjangoOpenIDStore())
-    mojeid_session[consumer._token_key] = create_service()
+    
+    endpoint = create_service()
+    message = Message.fromPostArgs(request.REQUEST)
+    consumer = MojeIDConsumer(DjangoOpenIDStore())
     
     try:
-        openid_response = consumer.complete(
-                dict(request.REQUEST.items()),
-                request.build_absolute_uri())
+        openid_response = consumer.complete(message, endpoint,
+                                            request.build_absolute_uri())
     except HTTPFetchingError:
+        # if not using association and can't contact MojeID server
         return render_failure(request, errors.EndpointError())
     
     if not openid_response:
