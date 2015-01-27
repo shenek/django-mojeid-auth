@@ -37,9 +37,9 @@ from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 
-from openid.consumer.consumer import GenericConsumer
+from openid.consumer.consumer import GenericConsumer, FailureResponse, SUCCESS
 from openid.consumer.discover import OpenIDServiceEndpoint
-from openid.extensions import ax
+from openid.extensions import ax, pape
 
 from django_mojeid.exceptions import RequiredAttributeNotReturned
 from django_mojeid.settings import mojeid_settings
@@ -104,6 +104,30 @@ class MojeIDConsumer(GenericConsumer):
         another xrds document from $username.mojeid.cz)
         """
         pass
+    
+    def complete(self, message, endpoint, return_to):
+        response = super(MojeIDConsumer, self).complete(message, endpoint,
+                                                         return_to)
+        
+        if response.status != SUCCESS:
+            return result
+        
+        # check if pape login method is the required one
+        required_auth = \
+            {"OTP": pape.AUTH_MULTI_FACTOR,
+             "CERT": pape.AUTH_PHISHING_RESISTANT} \
+                .get(mojeid_settings.MOJEID_LOGIN_METHOD, None)
+        
+        if required_auth:
+            pape_response = pape.Response.fromSuccessResponse(response)
+            if required_auth not in pape_response.auth_policies:
+                return FailureResponse(endpoint, "Required authentication "
+                                       "method was not used.")
+        
+        # check if all required attributes are present
+        # TODO
+        
+        return response
 
 
 def get_attributes(attribute_set):
