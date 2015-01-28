@@ -10,14 +10,13 @@ mojeID is a Czech openid implementation managed by `CZ.NIC z.s.p.o. <http://www.
 Basic Installation
 ------------------
 
-1) Install the Jan Rain Python OpenID library.
+1) Install
+   run the following command from the top dir of the source package::
 
-   It can be found at: http://openidenabled.com/python-openid/
+        python setup.py install
 
-   It can also be found in most Linux distributions packaged as *python-openid*.
-   Version 2.2.0 or later will be needed.
-
-#) TBD install django_mojeid plugin.
+   it will automatically install all the dependencies, that means
+   python3-openid in case of python3 and python-openid in case of python2
 
 #) Add 'django_mojeid' to INSTALLED_APPS for your application in your *settings.py*.
 
