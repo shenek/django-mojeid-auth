@@ -112,7 +112,7 @@ def render_failure(request, error, template_name='openid/failure.html'):
     resp = trigger_error.send(sender=__name__, error=error, request=request)
     # Return first valid response
     for r in resp:
-        if resp[1] is not None and isinstance(r[1], HttpResponse):
+        if r[1] is not None and isinstance(r[1], HttpResponse):
             return r[1]
     
     # No response to signal - render default page

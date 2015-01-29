@@ -110,7 +110,7 @@ class MojeIDConsumer(GenericConsumer):
                                                          return_to)
         
         if response.status != SUCCESS:
-            return result
+            return response
         
         # check if pape login method is the required one
         required_auth = \
