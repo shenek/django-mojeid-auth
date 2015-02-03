@@ -1,6 +1,6 @@
-# django-openid-auth -  OpenID integration for django.contrib.auth
+# django-mojeid-auth -  MojeID integration for django.contrib.auth
 #
-# Copyright (C) 2013 CZ.NIC
+# Copyright (C) 2013-2015 CZ.NIC
 # Copyright (C) 2008-2013 Canonical Ltd.
 # Copyright (C) 2007 Simon Willison
 #
@@ -28,6 +28,8 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import time
+
 try:
     # python3
     from urllib.parse import urlsplit
@@ -46,10 +48,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from openid.consumer.consumer import SUCCESS, CANCEL, FAILURE
+from openid.cryptutil import randomString
 from openid.extensions import ax, pape
 from openid.fetchers import HTTPFetchingError
 from openid.kvform import dictToKV
 from openid.message import Message
+from openid.store.nonce import NONCE_CHARS
 from openid.yadis.constants import YADIS_CONTENT_TYPE
 
 from django_mojeid import errors
@@ -191,7 +195,8 @@ def registration(request, attribute_set='default',
     user_id = user.pk if user else None
 
     # Create Nonce
-    nonce = Nonce(server_url=realm, user_id=user_id)
+    nonce = Nonce(server_url=realm, user_id=user_id,
+                  timestamp=time.time(), salt=randomString(35, NONCE_CHARS))
     nonce.save()
 
     fields = []

@@ -52,18 +52,6 @@ class Nonce(models.Model):
     def __str__(self):
         return "Nonce: %s, %s" % (self.server_url, self.salt)
 
-    def __init__(self, *args, **kwargs):
-
-        # Generate default salt
-        if not 'salt' in kwargs:
-            kwargs['salt'] = os.urandom(30).encode('base64')[:-1]
-
-        # Set the timestamp if not present
-        if not 'timestamp' in kwargs:
-            kwargs['timestamp'] = time.time()
-
-        super(Nonce, self).__init__(*args, **kwargs)
-
     @property
     def registration_nonce(self):
         return "%d==%s" % (self.timestamp, self.salt)
