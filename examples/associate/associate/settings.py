@@ -164,10 +164,6 @@ OPENID_CREATE_USERS = True
 LOGIN_URL = '/'
 LOGIN_REDIRECT_URL = '/'
 
-# For production set the urls to actual mojeid server
-#MOJEID_ENDPOINT_URL = 'https://mojeid.cz/endpoint/'
-#MOJEID_REGISTRATION_URL = 'https://mojeid.cz/registration/endpoint/'
-
 # Should django_auth_openid be used to sign into the admin interface?
 OPENID_USE_AS_ADMIN_LOGIN = False
 

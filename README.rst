@@ -86,7 +86,7 @@ Basic Installation
    By default all mojeID related actions are performed against the testing
    server *https://mojeid.fred.nic.cz* To use the production mojeID server you
    need to set the following variable in your *settings.py*::
-   
+
         MOJEID_INSTANCE_PRODUCTION = True
 
 
@@ -98,7 +98,7 @@ Realm
 see http://openid.net/specs/openid-authentication-2_0-12.html#realms
 
 Realm is also used to identify the web from which the client was redirected to the mojeID registration page.
-Note that only the sites with properly set realm can participate in `Incentive programme for web service providers <http://www.mojeid.cz/page/877/motivacni-program-pro-poskytovatele-sluzeb/>`_.
+Note that only the sites with properly set realm can participate in `Incentive programme for web service providers <https://www.mojeid.cz/page/1864/motivacni-program/>`_.
 
 To set a realm you can simply place following line into *settings.py*::
 
@@ -135,7 +135,7 @@ Require Particular Authentication Type
 --------------------------------------------
 
 If your users should use an OTP or ssl certificate authentication method, set
-the following setting:
+the following setting::
 
     MOJEID_LOGIN_METHOD
 
@@ -145,7 +145,7 @@ that method will be required by MojeID to login.
 Limit the validity period of past authentication
 ------------------------------------------------
 
-By setting
+By setting::
 
     MOJEID_MAX_AUTH_AGE = *<int>*
 
@@ -186,7 +186,7 @@ In *settings.py*::
     MOJEID_ATTRIBUTES = [
         ...
         mojeid.CustomHandler(mojeid.FullName, 'full_name_handler', required=True),
-        ]
+    ]
 
 Handler code::
 
