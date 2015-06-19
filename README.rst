@@ -10,14 +10,13 @@ mojeID is a Czech openid implementation managed by `CZ.NIC z.s.p.o. <http://www.
 Basic Installation
 ------------------
 
-1) Install the Jan Rain Python OpenID library.
+1) Install
+   run the following command from the top dir of the source package::
 
-   It can be found at: http://openidenabled.com/python-openid/
+        python setup.py install
 
-   It can also be found in most Linux distributions packaged as *python-openid*.
-   Version 2.2.0 or later will be needed.
-
-#) TBD install django_mojeid plugin.
+   it will automatically install all the dependencies, that means
+   python3-openid in case of python3 and python-openid in case of python2
 
 #) Add 'django_mojeid' to INSTALLED_APPS for your application in your *settings.py*.
 
@@ -84,11 +83,12 @@ Basic Installation
 
 #) Set the proper mojeID server.
 
-   By default all mojeID related actions are performed against the testing server https://mojeid.fred.nic.cz
-   To use the actual mojeID server you need to set two variables in your *settings.py*::
+   By default all mojeID related actions are performed against the testing
+   server *https://mojeid.fred.nic.cz* To use the production mojeID server you
+   need to set the following variable in your *settings.py*::
+   
+        MOJEID_INSTANCE_PRODUCTION = True
 
-        MOJEID_ENDPOINT_URL = 'https://mojeid.cz/endpoint/'
-        MOJEID_REGISTRATION_URL = 'https://mojeid.cz/registration/endpoint/'
 
 Realm
 -----
@@ -131,15 +131,33 @@ It is worth noting that a user needs to be marked as a "staff user" to be able t
 A new openid user will not normally be a "staff user".
 The easiest way to resolve this is to use traditional authentication (OPENID_USE_AS_ADMIN_LOGIN = False) to sign in as your first user with a password and authorize your openid user to be staff.
 
-Require Physical Multi-Factor Authentication
+Require Particular Authentication Type
 --------------------------------------------
 
-If your users should use a physical multi-factor authentication method, such as RSA tokens or YubiKey, add the following setting::
+If your users should use an OTP or ssl certificate authentication method, set
+the following setting:
 
-    OPENID_PHYSICAL_MULTIFACTOR_REQUIRED = True
+    MOJEID_LOGIN_METHOD
 
-If the user's OpenID provider supports the PAPE extension and provides the Physical Multifactor authentication policy, this will
-cause the OpenID login to fail if the user does not provide valid physical authentication to the provider.
+in your settings.py to one of the "ANY" (default), "CERT", "OTP" and
+that method will be required by MojeID to login.
+
+Limit the validity period of past authentication
+------------------------------------------------
+
+By setting
+
+    MOJEID_MAX_AUTH_AGE = *<int>*
+
+in your *settings.py* you can specify the validity time (in seconds)
+of a MojeID login.
+
+If the end user has not actively authenticated to the OP within the number of
+seconds specified in a manner fitting the requested policies, the OP should
+request the end user to actively reauthenticate and not rely on a browser cookie
+from a previous authentication.
+
+See `openid pape max_auth_age <http://openid.net/specs/openid-provider-authentication-policy-extension-1_0.html#anchor8>`_ for more info.
 
 Override Login Failure Handling
 -------------------------------
@@ -357,11 +375,3 @@ TBD
 Localhost related stuff
 
 SSL certificate verificiation via openssl
-
-Django 1.6
-_________
-Django 1.6 can't serialize openid.yadis.manager.YadisServiceManager objects.
-It uses JSONSerializer which is not compatible with Yadis objects.
-As a workaround you cat use pickle serializer instead::
-
-    SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'

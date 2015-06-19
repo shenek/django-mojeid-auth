@@ -30,7 +30,7 @@
 from django.conf import settings
 from django.conf.urls import patterns, url
 
-import views
+from django_mojeid import views
 
 urlpatterns = patterns(
     '',

@@ -12,11 +12,8 @@
             <br />phone: {{ extra.phone }}
             <br />
     {% endif %}
+        </p>
     {% if not association %}
-        </p>
-        <p>
-            {% include "openid/_associate.html" %}
-        </p>
         <div>
             Associate with mojeID:
             {% include "mojeid/_associate.html" %}
@@ -29,11 +26,7 @@
                 <input type="submit" value="Disassociate">
             </form>
     {% endif %}
-        <p>
 {% else %}
-        <p>
-            {% include "openid/_login.html" %}
-        </p>
         <p>
             {% include "mojeid/_login.html" %}
         </p>

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# django-openid-auth -  OpenID integration for django.contrib.auth
+# django-mojeid-auth -  MojeID integration for django.contrib.auth
 #
-# Copyright (C) 2009-2013 CZ.NIC z.s.p.o.
+# Copyright (C) 2013-2015 CZ.NIC z.s.p.o.
 # Copyright (C) 2009-2013 Canonical Ltd.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,20 +29,28 @@
 # POSSIBILITY OF SUCH DAMAGE.
 """mojeID integration for django
 
-A library that can be used to add OpenID/mojeID support to Django applications.
+A library that can be used to add mojeID support to Django applications.
 The library integrates with Django's built in authentication system, so
-most applications require minimal changes to support OpenID/mojeID login. The
+most applications require minimal changes to support mojeID login. The
 library also includes the following features:
   * Attribute Exchange extension.
   * mojeID registration extension.
   * authentication/association handlers.
 """
 
-from distutils.core import setup
+import sys
+from setuptools import setup
+
+
+# openid dependency
+if sys.version_info[0] == 2:
+    openidver = ''
+else:
+    openidver = '3'
 
 
 description, long_description = __doc__.split('\n\n', 1)
-VERSION = '0.1'
+VERSION = '0.2'
 
 setup(
     name='django-mojeid',
@@ -72,9 +80,12 @@ setup(
         'django_mojeid.management.commands',
     ],
     package_data={
-        'django_mojeid': ['templates/*/*', 'static/*/*', 'locale/*/*/*'],
+        'django_mojeid': [
+            'templates/*/*', 'static/*/*', 'locale/*/LC_MESSAGES/*'
+        ],
     },
     provides=['django_mojeid'],
-    requires=['django (>=1.5.1)', 'openid (>=2.2.0)'],
+    requires=['django (>=1.6)', 'python%s_openid (>=2.2)' % openidver],
+    install_requires=['django>=1.6', 'python%s_openid>=2.2' % openidver],
 )
 

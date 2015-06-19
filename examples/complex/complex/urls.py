@@ -27,23 +27,21 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from django import forms
-from django.utils.translation import ugettext as _
-from django.conf import settings
+from django.conf.urls import patterns, include
+from django.contrib import admin
 
-from openid.yadis import xri
+from example_app import views
 
 
-class OpenIDLoginForm(forms.Form):
-    openid_identifier = forms.CharField(
-        max_length=255,
-        widget=forms.TextInput(attrs={'class': 'required openid'}))
+admin.autodiscover()
 
-    def clean_openid_identifier(self):
-        if 'openid_identifier' in self.cleaned_data:
-            openid_identifier = self.cleaned_data['openid_identifier']
-            if xri.identifierScheme(openid_identifier) == 'XRI' and \
-                    getattr(settings, 'OPENID_DISALLOW_INAMES', False):
-                raise forms.ValidationError(_('i-names are not supported'))
+urlpatterns = patterns(
+    '',
+    (r'^$', views.index),
+    (r'^login/$', views.login),
+    (r'^openid/', include('django_mojeid.urls')),
+    (r'^logout/$', 'django.contrib.auth.views.logout'),
+    (r'^private/$', views.require_authentication),
 
-            return self.cleaned_data['openid_identifier']
+    (r'^admin/', include(admin.site.urls)),
+)

@@ -1,6 +1,6 @@
-# django-openid-auth -  OpenID integration for django.contrib.auth
+# django-mojeid-auth -  MojeID integration for django.contrib.auth
 #
-# Copyright (C) 2013 CZ.NIC
+# Copyright (C) 2013-2015 CZ.NIC
 # Copyright (C) 2008-2013 Canonical Ltd.
 # Copyright (C) 2007 Simon Willison
 #
@@ -28,39 +28,51 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import urllib
+import time
 
-from urlparse import urlsplit
+try:
+    # python3
+    from urllib.parse import urlsplit
+except ImportError:
+    # python2
+    from urlparse import urlsplit
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.template.loader import render_to_string
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.http import Http404
-try:
-    from django.views.decorators.csrf import csrf_exempt
-except ImportError:
-    from django.contrib.csrf.middleware import csrf_exempt
-from django.utils.translation import get_language, activate as activate_lang
 
-from openid.consumer.consumer import (
-    Consumer, SUCCESS, CANCEL, FAILURE)
-from openid.consumer.discover import DiscoveryFailure
+from openid.consumer.consumer import SUCCESS, CANCEL, FAILURE
+from openid.cryptutil import randomString
 from openid.extensions import ax, pape
+from openid.fetchers import HTTPFetchingError
 from openid.kvform import dictToKV
+from openid.message import Message
+from openid.store.nonce import NONCE_CHARS
 from openid.yadis.constants import YADIS_CONTENT_TYPE
 
-from django_mojeid.forms import OpenIDLoginForm
-from django_mojeid.models import UserOpenID
+from django_mojeid import errors
+from django_mojeid.auth import OpenIDBackend
+
+from django_mojeid.exceptions import (
+    DjangoOpenIDException,
+    IdentityAlreadyClaimed,
+)
+from django_mojeid.models import Nonce, UserOpenID
 from django_mojeid.mojeid import (
-    MOJEID_REGISTRATION_URL,
-    MOJEID_ENDPOINT_URL,
+    Assertion,
     get_attributes,
     get_attribute_query,
+    get_registration_url,
+    create_service,
+    MojeIDConsumer
 )
+from django_mojeid.settings import mojeid_settings
 from django_mojeid.signals import (
     user_login_report,
     trigger_error,
@@ -68,17 +80,9 @@ from django_mojeid.signals import (
     associate_user
 )
 from django_mojeid.store import DjangoOpenIDStore
-from django_mojeid.exceptions import (
-    DjangoOpenIDException,
-    IdentityAlreadyClaimed,
-)
-from django.contrib.auth import get_user_model
 
-import errors
 
-from auth import OpenIDBackend
-from models import Nonce
-from mojeid import Assertion
+SESSION_ATTR_SET_KEY = 'mojeid_attr_set'
 
 
 def sanitise_redirect_url(redirect_to):
@@ -106,155 +110,83 @@ def sanitise_redirect_url(redirect_to):
     return redirect_to
 
 
-def make_consumer(request):
-    """Create an OpenID Consumer object for the given Django request."""
-    # Give the OpenID library its own space in the session object.
-    session = request.session.setdefault('OPENID', {})
-    store = DjangoOpenIDStore()
-    return Consumer(session, store)
-
-
-def render_openid_request(request, openid_request, return_to):
-    """ Render an OpenID authentication request.
-        This request will automatically redirect client to OpenID server.
-    """
-
-    # Realm should be always something like 'https://example.org/openid/'
-    realm = getattr(settings, 'MOJEID_REALM',
-                    request.build_absolute_uri(reverse(top)))
-
-    # Directly redirect to the OpenID server
-    if openid_request.shouldSendRedirect():
-        redirect_url = openid_request.redirectURL(realm, return_to)
-        return HttpResponseRedirect(redirect_url)
-
-    # Render a form wich will redirect the client
-    else:
-        form_html = openid_request.htmlMarkup(realm, return_to,
-                                              form_tag_attrs={'id': 'openid_message'})
-        return HttpResponse(form_html, content_type='text/html;charset=UTF-8')
-
-
 def render_failure(request, error, template_name='openid/failure.html'):
     """Render an error page to the user."""
     # Render the response to trigger_error signal
     resp = trigger_error.send(sender=__name__, error=error, request=request)
-    resp = filter(lambda r: not r[1] is None and isinstance(r[1], HttpResponse), resp)
-    if resp:
-        # Return first valid response
-        return resp[0][1]
-
+    # Return first valid response
+    for r in resp:
+        if r[1] is not None and isinstance(r[1], HttpResponse):
+            return r[1]
+    
     # No response to signal - render default page
     data = render_to_string(template_name, {'message': error.msg},
                             context_instance=RequestContext(request))
     return HttpResponse(data, status=error.http_status)
 
 
-def parse_openid_response(request):
-    """Parse an OpenID response from a Django request."""
-
-    current_url = request.build_absolute_uri()
-
-    consumer = make_consumer(request)
-    attribute_set = consumer.session.get('attribute_set', 'default')
-    lang = consumer.session.get('stored_lang', 'en')
-    return attribute_set, lang, consumer.complete(dict(request.REQUEST.items()),
-                                                  current_url)
-
-
-def login_show(request, login_template='openid/login.html',
-               associate_template='openid/associate.html',
-               form_class=OpenIDLoginForm):
-    """
-    Render a template to show the login/associate form form.
-    """
-
-    redirect_to = OpenIDBackend.get_redirect_to(request)
-
-    login_form = form_class(request.POST or None)
-
-    user = OpenIDBackend.get_user_from_request(request)
-
-    template_name = associate_template if user else login_template
-
-    return render_to_response(
-        template_name,
-        {
-            'form': login_form,
-            'action': reverse('openid-init'),
-            OpenIDBackend.get_redirect_field_name(): redirect_to
-        },
-        context_instance=RequestContext(request)
-    )
-
-
 @require_POST
-def login_begin(request, attribute_set='default', form_class=OpenIDLoginForm):
-    """Begin an OpenID login request, possibly asking for an identity URL."""
-    redirect_to = OpenIDBackend.get_redirect_to(request)
-
-    openid_url = getattr(settings, 'MOJEID_ENDPOINT_URL', MOJEID_ENDPOINT_URL)
-
-    login_form = form_class(data=request.POST)
-    if login_form.is_valid():
-        openid_url = login_form.cleaned_data['openid_identifier']
-
-    consumer = make_consumer(request)
-
-    # Set response handler (define the settings set)
-    consumer.session['attribute_set'] = attribute_set
-
-    # Set the language
-    consumer.session['stored_lang'] = request.POST.get('lang', get_language())
-    request.session.save()
-
-    try:
-        openid_request = consumer.begin(openid_url)
-    except DiscoveryFailure, exc:
-        return render_failure(request, errors.DiscoveryError(exc))
-
+def login_begin(request, attribute_set='default'):
+    """Begin an MojeID login request."""
+    
+    if 'next_page' in request.session:
+        del request.session['next_page']
+    
+    # create consumer, start login process
+    consumer = MojeIDConsumer(DjangoOpenIDStore())
+    openid_request = consumer.begin(create_service())
+    
     # Request user details.
     attributes = get_attribute_query(attribute_set)
-
+    # save settings set name for response handler
+    request.session[SESSION_ATTR_SET_KEY] = attribute_set
+    
     fetch_request = ax.FetchRequest()
     for attribute, required in attributes:
         fetch_request.add(attribute.generate_ax_attrinfo(required))
 
     if attributes:
         openid_request.addExtension(fetch_request)
-
-    if getattr(settings, 'OPENID_PHYSICAL_MULTIFACTOR_REQUIRED', False):
-        preferred_auth = [
-            pape.AUTH_MULTI_FACTOR_PHYSICAL,
-        ]
-        pape_request = pape.Request(preferred_auth_policies=preferred_auth)
-        openid_request.addExtension(pape_request)
-
-    # Construct the request completion URL, including the page we
-    # should redirect to.
-    return_to = request.build_absolute_uri(reverse(login_complete))
-    if redirect_to:
-        if '?' in return_to:
-            return_to += '&'
+    
+    if mojeid_settings.MOJEID_LOGIN_METHOD != 'ANY' or \
+            mojeid_settings.MOJEID_MAX_AUTH_AGE is not None:
+        # set authentication method to OTP or CERT
+        if mojeid_settings.MOJEID_LOGIN_METHOD == "OTP":
+            auth_method = [pape.AUTH_MULTI_FACTOR]
+        elif mojeid_settings.MOJEID_LOGIN_METHOD == "CERT":
+            auth_method = [pape.AUTH_PHISHING_RESISTANT]
         else:
-            return_to += '?'
-        # Django gives us Unicode, which is great.  We must encode URI.
-        # urllib enforces str. We can't trust anything about the default
-        # encoding inside  str(foo) , so we must explicitly make foo a str.
-        return_to += urllib.urlencode(
-            {OpenIDBackend.get_redirect_field_name(): redirect_to.encode("UTF-8")})
-
-    return render_openid_request(request, openid_request, return_to)
+            auth_method = None
+        
+        pape_request = pape.Request(
+                preferred_auth_policies=auth_method,
+                max_auth_age=mojeid_settings.MOJEID_MAX_AUTH_AGE,
+        )
+        openid_request.addExtension(pape_request)
+    
+    # Construct the request completion URL
+    return_to = request.build_absolute_uri(reverse(login_complete))
+    
+    # get 'next page' and save it to the session
+    redirect_to = sanitise_redirect_url(OpenIDBackend.get_redirect_to(request))
+    if redirect_to:
+        request.session['next_page'] = redirect_to
+    
+    # Realm should be always something like 'https://example.org/openid/'
+    realm = getattr(settings, 'MOJEID_REALM', None)
+    if not realm:
+        realm = request.build_absolute_uri(reverse(top))
+    
+    # we always use POST request
+    form_html = openid_request.htmlMarkup(
+            realm, return_to, form_tag_attrs={'id': 'openid_message'})
+    return HttpResponse(form_html, content_type='text/html; charset=UTF-8')
 
 
 def registration(request, attribute_set='default',
-                 template_name='openid/registration_form.html',
-                 form_class=OpenIDLoginForm):
+                 template_name='openid/registration_form.html'):
     """ Try to submit all the registration attributes for mojeID registration"""
-
-    registration_url = getattr(settings, 'MOJEID_REGISTRATION_URL',
-                               MOJEID_REGISTRATION_URL)
-
+    
     # Realm should be always something like 'https://example.org/openid/'
     realm = getattr(settings, 'MOJEID_REALM',
                     request.build_absolute_uri(reverse(top)))
@@ -263,7 +195,8 @@ def registration(request, attribute_set='default',
     user_id = user.pk if user else None
 
     # Create Nonce
-    nonce = Nonce(server_url=realm, user_id=user_id)
+    nonce = Nonce(server_url=realm, user_id=user_id,
+                  timestamp=time.time(), salt=randomString(35, NONCE_CHARS))
     nonce.save()
 
     fields = []
@@ -280,7 +213,7 @@ def registration(request, attribute_set='default',
         template_name,
         {
             'fields': fields,
-            'action': registration_url,
+            'action': get_registration_url(),
             'realm': realm,
             'nonce': nonce.registration_nonce,
         },
@@ -291,17 +224,29 @@ def registration(request, attribute_set='default',
 @csrf_exempt
 def login_complete(request):
     # Get addres where to redirect after the login
-    redirect_to = sanitise_redirect_url(OpenIDBackend.get_redirect_to(request))
-
+    redirect_to = sanitise_redirect_url(request.session.get('next_page'))
+    attribute_set = request.session.get(SESSION_ATTR_SET_KEY, 'default')
+    
+    # clean the session
+    if 'next_page' in request.session:
+        del request.session['next_page']
+    
+    if SESSION_ATTR_SET_KEY in request.session:
+        del request.session[SESSION_ATTR_SET_KEY]
+    
     # Get OpenID response and test whether it is valid
-    attribute_set, lang, openid_response = parse_openid_response(request)
-
-    # Set language
-    activate_lang(lang)
-
-    if not openid_response:
+    
+    endpoint = create_service()
+    message = Message.fromPostArgs(request.REQUEST)
+    consumer = MojeIDConsumer(DjangoOpenIDStore())
+    
+    try:
+        openid_response = consumer.complete(message, endpoint,
+                                            request.build_absolute_uri())
+    except HTTPFetchingError:
+        # if not using association and can't contact MojeID server
         return render_failure(request, errors.EndpointError())
-
+    
     # Check whether the user is already logged in
     user_orig = OpenIDBackend.get_user_from_request(request)
     user_model = get_user_model()
@@ -345,13 +290,13 @@ def login_complete(request):
                     return render_failure(request, errors.DisabledAccount(user_new))
                 # Create an association with the new user
                 OpenIDBackend.associate_user_with_session(request, user_new)
-        except DjangoOpenIDException, e:
+        except DjangoOpenIDException as e:
             # Something went wrong
             user_id = None
             try:
                 # Try to get user id
                 user_id = UserOpenID.objects.get(claimed_id=openid_response.identity_url).user_id
-            except UserOpenID.DoesNotExist, user_model.DoesNotExist:
+            except (UserOpenID.DoesNotExist, user_model.DoesNotExist):
                 # Report an error with identity_url
                 user_login_report.send(sender=__name__,
                                        request=request,

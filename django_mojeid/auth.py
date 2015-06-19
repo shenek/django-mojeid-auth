@@ -29,7 +29,7 @@
 
 """OpenID authentication"""
 
-__metaclass__ = type
+from __future__ import unicode_literals
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -167,13 +167,7 @@ class OpenIDBackend:
 
         if not new_user:
             self.update_user_from_openid(user.pk, openid_response, attribute_set)
-
-        if getattr(settings, 'OPENID_PHYSICAL_MULTIFACTOR_REQUIRED', False):
-            pape_response = pape.Response.fromSuccessResponse(openid_response)
-            if pape_response is None or \
-                    pape.AUTH_MULTI_FACTOR_PHYSICAL not in pape_response.auth_policies:
-                raise MissingPhysicalMultiFactor()
-
+        
         # Run custom Attribute handler
         OpenIDBackend.run_handlers(openid_response, user, attribute_set)
 
@@ -195,7 +189,7 @@ class OpenIDBackend:
             attributes = [x for x in attributes if x.updatable]
 
         for attribute in attributes:
-            if not attribute.model in res.keys():
+            if not attribute.model in res:
                 res[attribute.model] = {'user_id_field_name': attribute.user_id_field_name}
             val = attribute.get_value(fetch_response, attribute.required,
                                       openid_response=openid_response)
@@ -230,7 +224,7 @@ class OpenIDBackend:
         user = user_model(**changes[user_model])
         try:
             user.validate_unique()
-        except ValidationError, e:
+        except ValidationError as e:
             raise DuplicateUserViolation(", ".join(e.messages))
         user.save()
 
@@ -238,7 +232,7 @@ class OpenIDBackend:
         del changes[user_model]
 
         # Create other structures
-        for model, kwargs in changes.iteritems():
+        for model, kwargs in changes.items():
             foreign_key_name = kwargs['user_id_field_name']
             del kwargs['user_id_field_name']
             kwargs[foreign_key_name] = user.pk
@@ -254,7 +248,7 @@ class OpenIDBackend:
         changes = OpenIDBackend.get_model_changes(openid_response, only_updatable=True,
                                                   attribute_set=attribute_set)
 
-        for model, kwargs in changes.iteritems():
+        for model, kwargs in changes.items():
             foreign_key_name = kwargs['user_id_field_name']
             del kwargs['user_id_field_name']
             model.objects.filter(**{foreign_key_name: user_id}).update(**kwargs)

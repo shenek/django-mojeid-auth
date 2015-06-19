@@ -27,33 +27,30 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+from __future__ import unicode_literals
+
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 
 import os
 import time
-import urlparse
+try:
+    # python3
+    from urllib.parse import urlparse, urldefrag
+except ImportError:
+    # python2
+    from urlparse import urlparse, urldefrag
 
 
+@python_2_unicode_compatible
 class Nonce(models.Model):
     user_id = models.IntegerField(null=True)
     server_url = models.CharField(max_length=2047)
     timestamp = models.IntegerField()
     salt = models.CharField(max_length=40)
 
-    def __unicode__(self):
-        return u"Nonce: %s, %s" % (self.server_url, self.salt)
-
-    def __init__(self, *args, **kwargs):
-
-        # Generate default salt
-        if not 'salt' in kwargs:
-            kwargs['salt'] = os.urandom(30).encode('base64')[:-1]
-
-        # Set the timestamp if not present
-        if not 'timestamp' in kwargs:
-            kwargs['timestamp'] = time.time()
-
-        super(Nonce, self).__init__(*args, **kwargs)
+    def __str__(self):
+        return "Nonce: %s, %s" % (self.server_url, self.salt)
 
     @property
     def registration_nonce(self):
@@ -69,29 +66,31 @@ class Nonce(models.Model):
         return cls.objects.get(timestamp=timestamp, salt=salt)
 
 
+@python_2_unicode_compatible
 class Association(models.Model):
     server_url = models.TextField(max_length=2047)
     handle = models.CharField(max_length=255)
-    secret = models.TextField(max_length=255)  # Stored base64 encoded
+    secret = models.BinaryField(max_length=255)
     issued = models.IntegerField()
     lifetime = models.IntegerField()
     assoc_type = models.TextField(max_length=64)
 
-    def __unicode__(self):
-        return u"Association: %s, %s" % (self.server_url, self.handle)
+    def __str__(self):
+        return "Association: %s, %s" % (self.server_url, self.handle)
 
 
+@python_2_unicode_compatible
 class UserOpenID(models.Model):
     user_id = models.IntegerField(primary_key=True)
     claimed_id = models.TextField(max_length=2047, unique=True)
 
     @property
     def name(self):
-        return urlparse.urlparse(self.claimed_id).netloc
+        return urlparse(self.claimed_id).netloc
 
     @property
     def display_id(self):
-        return urlparse.urldefrag(self.claimed_id)[0]
+        return urldefrag(self.claimed_id)[0]
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name

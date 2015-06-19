@@ -27,12 +27,13 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import base64
 import time
 
 from openid.association import Association as OIDAssociation
 from openid.store.interface import OpenIDStore
 from openid.store.nonce import SKEW
+
+from django.db.models import F
 
 from django_mojeid.models import Association, Nonce
 
@@ -50,12 +51,12 @@ class DjangoOpenIDStore(OpenIDStore):
             assoc = Association(
                 server_url=server_url,
                 handle=association.handle,
-                secret=base64.encodestring(association.secret),
+                secret=association.secret,
                 issued=association.issued,
                 lifetime=association.lifetime,
                 assoc_type=association.assoc_type)
         else:
-            assoc.secret = base64.encodestring(association.secret)
+            assoc.secret = association.secret
             assoc.issued = association.issued
             assoc.lifetime = association.lifetime
             assoc.assoc_type = association.assoc_type
@@ -72,10 +73,13 @@ class DjangoOpenIDStore(OpenIDStore):
         expired = []
         for assoc in assocs:
             association = OIDAssociation(
-                assoc.handle, base64.decodestring(assoc.secret), assoc.issued,
-                assoc.lifetime, assoc.assoc_type
+                assoc.handle,
+                bytes(assoc.secret),
+                assoc.issued,
+                assoc.lifetime,
+                assoc.assoc_type
             )
-            if association.getExpiresIn() == 0:
+            if association.expiresIn == 0:
                 expired.append(assoc)
             else:
                 associations.append((association.issued, association))
@@ -124,8 +128,8 @@ class DjangoOpenIDStore(OpenIDStore):
 
     def cleanupAssociations(self):
         now = int(time.time())
-        expired = Association.objects.extra(
-            where=['issued + lifetime < %d' % now])
+        expired = Association.objects.filter(
+            issued__lt=(int(time.time()) - F('lifetime')))
         count = expired.count()
         if count:
             expired.delete()
