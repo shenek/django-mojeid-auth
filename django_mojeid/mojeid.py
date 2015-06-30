@@ -768,7 +768,7 @@ class InteralAttribute(Attribute):
         value = cls._get_value(openid_response)
         if required and value is None:
             raise RequiredAttributeNotReturned(
-                ugettext("Required Internal Attribute (%(text)s) was not returned.")
+                ugettext("Required Internal Attribute '%(code)s' (%(text)s) was not returned.")
                 % {"code": unicode(cls.code), "text": unicode(cls.text)}
             )
         return value

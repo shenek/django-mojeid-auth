@@ -40,14 +40,14 @@ class RequiredAttributeNotReturned(DjangoOpenIDException):
 
 
 class IdentityAlreadyClaimed(DjangoOpenIDException):
-    message = _("Another user already exists for your selected OpenID")
+    message = _("Another user account is associated with this mojeID account.")
 
     def __init__(self, message=message):
         super(IdentityAlreadyClaimed, self).__init__(message)
 
 
 class DuplicateUserViolation(DjangoOpenIDException):
-    message = _("Your user was already being used.")
+    message = _("User already exists.")
 
     def __init__(self, message=message):
         super(DuplicateUserViolation, self).__init__(message)
