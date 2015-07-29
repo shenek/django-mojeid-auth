@@ -127,7 +127,6 @@ class DjangoOpenIDStore(OpenIDStore):
         return count
 
     def cleanupAssociations(self):
-        now = int(time.time())
         expired = Association.objects.filter(
             issued__lt=(int(time.time()) - F('lifetime')))
         count = expired.count()

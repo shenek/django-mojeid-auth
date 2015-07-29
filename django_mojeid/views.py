@@ -118,7 +118,7 @@ def render_failure(request, error, template_name='openid/failure.html'):
     for r in resp:
         if r[1] is not None and isinstance(r[1], HttpResponse):
             return r[1]
-    
+
     # No response to signal - render default page
     data = render_to_string(template_name, {'message': error.msg},
                             context_instance=RequestContext(request))
@@ -128,26 +128,26 @@ def render_failure(request, error, template_name='openid/failure.html'):
 @require_POST
 def login_begin(request, attribute_set='default'):
     """Begin an MojeID login request."""
-    
+
     if 'next_page' in request.session:
         del request.session['next_page']
-    
+
     # create consumer, start login process
     consumer = MojeIDConsumer(DjangoOpenIDStore())
     openid_request = consumer.begin(create_service())
-    
+
     # Request user details.
     attributes = get_attribute_query(attribute_set)
     # save settings set name for response handler
     request.session[SESSION_ATTR_SET_KEY] = attribute_set
-    
+
     fetch_request = ax.FetchRequest()
     for attribute, required in attributes:
         fetch_request.add(attribute.generate_ax_attrinfo(required))
 
     if attributes:
         openid_request.addExtension(fetch_request)
-    
+
     if mojeid_settings.MOJEID_LOGIN_METHOD != 'ANY' or \
             mojeid_settings.MOJEID_MAX_AUTH_AGE is not None:
         # set authentication method to OTP or CERT
@@ -157,36 +157,36 @@ def login_begin(request, attribute_set='default'):
             auth_method = [pape.AUTH_PHISHING_RESISTANT]
         else:
             auth_method = None
-        
+
         pape_request = pape.Request(
-                preferred_auth_policies=auth_method,
-                max_auth_age=mojeid_settings.MOJEID_MAX_AUTH_AGE,
+            preferred_auth_policies=auth_method,
+            max_auth_age=mojeid_settings.MOJEID_MAX_AUTH_AGE,
         )
         openid_request.addExtension(pape_request)
-    
+
     # Construct the request completion URL
     return_to = request.build_absolute_uri(reverse(login_complete))
-    
+
     # get 'next page' and save it to the session
     redirect_to = sanitise_redirect_url(OpenIDBackend.get_redirect_to(request))
     if redirect_to:
         request.session['next_page'] = redirect_to
-    
+
     # Realm should be always something like 'https://example.org/openid/'
     realm = getattr(settings, 'MOJEID_REALM', None)
     if not realm:
         realm = request.build_absolute_uri(reverse(top))
-    
+
     # we always use POST request
     form_html = openid_request.htmlMarkup(
-            realm, return_to, form_tag_attrs={'id': 'openid_message'})
+        realm, return_to, form_tag_attrs={'id': 'openid_message'})
     return HttpResponse(form_html, content_type='text/html; charset=UTF-8')
 
 
 def registration(request, attribute_set='default',
                  template_name='openid/registration_form.html'):
     """ Try to submit all the registration attributes for mojeID registration"""
-    
+
     # Realm should be always something like 'https://example.org/openid/'
     realm = getattr(settings, 'MOJEID_REALM',
                     request.build_absolute_uri(reverse(top)))
@@ -226,27 +226,27 @@ def login_complete(request):
     # Get addres where to redirect after the login
     redirect_to = sanitise_redirect_url(request.session.get('next_page'))
     attribute_set = request.session.get(SESSION_ATTR_SET_KEY, 'default')
-    
+
     # clean the session
     if 'next_page' in request.session:
         del request.session['next_page']
-    
+
     if SESSION_ATTR_SET_KEY in request.session:
         del request.session[SESSION_ATTR_SET_KEY]
-    
+
     # Get OpenID response and test whether it is valid
-    
+
     endpoint = create_service()
     message = Message.fromPostArgs(request.REQUEST)
     consumer = MojeIDConsumer(DjangoOpenIDStore())
-    
+
     try:
-        openid_response = consumer.complete(message, endpoint,
-                                            request.build_absolute_uri())
+        openid_response = consumer.complete(
+            message, endpoint, request.build_absolute_uri())
     except HTTPFetchingError:
         # if not using association and can't contact MojeID server
         return render_failure(request, errors.EndpointError())
-    
+
     # Check whether the user is already logged in
     user_orig = OpenIDBackend.get_user_from_request(request)
     user_model = get_user_model()
@@ -256,10 +256,10 @@ def login_complete(request):
         try:
             if user_orig:
                 # Send a signal to obtain HttpResponse
-                resp = associate_user.send(sender=__name__, request=request,
-                                           openid_response=openid_response,
-                                           attribute_set=attribute_set,
-                                           redirect=redirect_to)
+                resp = associate_user.send(
+                    sender=__name__, request=request, openid_response=openid_response,
+                    attribute_set=attribute_set, redirect=redirect_to
+                )
                 resp = [r[1] for r in resp if isinstance(r[1], HttpResponse)]
                 if resp:
                     # Return first valid response
@@ -270,10 +270,10 @@ def login_complete(request):
             else:
                 # Authenticate mojeID user.
                 # Send a signal to obtain HttpResponse
-                resp = authenticate_user.send(sender=__name__, request=request,
-                                              openid_response=openid_response,
-                                              attribute_set=attribute_set,
-                                              redirect=redirect_to)
+                resp = authenticate_user.send(
+                    sender=__name__, request=request, openid_response=openid_response,
+                    attribute_set=attribute_set, redirect=redirect_to
+                )
                 resp = [r[1] for r in resp if isinstance(r[1], HttpResponse)]
                 if resp:
                     # Return first valid response
@@ -298,19 +298,16 @@ def login_complete(request):
                 user_id = UserOpenID.objects.get(claimed_id=openid_response.identity_url).user_id
             except (UserOpenID.DoesNotExist, user_model.DoesNotExist):
                 # Report an error with identity_url
-                user_login_report.send(sender=__name__,
-                                       request=request,
-                                       username=openid_response.identity_url,
-                                       method='openid',
-                                       success=False)
+                user_login_report.send(
+                    sender=__name__, request=request, username=openid_response.identity_url,
+                    method='openid', success=False
+                )
 
             # Report an error with the username
-            user_login_report.send(sender=__name__,
-                                   request=request,
-                                   username=openid_response.identity_url,
-                                   user_id=user_id,
-                                   method='openid',
-                                   success=False)
+            user_login_report.send(
+                sender=__name__, request=request, username=openid_response.identity_url,
+                user_id=user_id, method='openid', success=False
+            )
 
             # Render the failure page
             return render_failure(request, errors.AuthenticationFailed(e))
@@ -318,36 +315,32 @@ def login_complete(request):
         response = HttpResponseRedirect(redirect_to)
 
         # Send signal to log the successful login attempt
-        user_login_report.send(sender=__name__,
-                               request=request,
-                               user_id=user_orig.id if user_orig else user_new.id,
-                               method='openid',
-                               success=True)
+        user_login_report.send(
+            sender=__name__, request=request,
+            user_id=user_orig.id if user_orig else user_new.id, method='openid', success=True
+        )
 
         return response
 
     # Render other failures
     elif openid_response.status == FAILURE:
-        user_login_report.send(sender=__name__,
-                               request=request,
-                               username=openid_response.identity_url,
-                               method='openid',
-                               success=False)
+        user_login_report.send(
+            sender=__name__, request=request, username=openid_response.identity_url,
+            method='openid', success=False
+        )
         return render_failure(request, errors.OpenIDAuthenticationFailed(openid_response))
 
     elif openid_response.status == CANCEL:
-        user_login_report.send(sender=__name__,
-                               request=request,
-                               username=openid_response.identity_url,
-                               method='openid',
-                               success=False)
+        user_login_report.send(
+            sender=__name__, request=request, username=openid_response.identity_url,
+            method='openid', success=False
+        )
         return render_failure(request, errors.OpenIDAuthenticationCanceled())
     else:
-        user_login_report.send(sender=__name__,
-                               request=request,
-                               username=openid_response.identity_url,
-                               method='openid',
-                               success=False)
+        user_login_report.send(
+            sender=__name__, request=request, username=openid_response.identity_url,
+            method='openid', success=False
+        )
         return render_failure(request, errors.OpenIDUnknownResponseType(openid_response))
 
 
@@ -372,7 +365,7 @@ def assertion(request):
     status = request.POST.get('status', None)
     if not status:
         return _reject(request, Assertion.ErrorString.MISSING_STATUS)
-    if not status in Assertion.StatusCodes:
+    if status not in Assertion.StatusCodes:
         return _reject(request, Assertion.ErrorString.INVALID_STATUS)
 
     # TODO check whether this request is from mojeID server and uses https with a proper certificate

@@ -37,11 +37,10 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
 
 from openid.consumer.consumer import SUCCESS
-from openid.extensions import ax, pape
+from openid.extensions import ax
 
 from django_mojeid.exceptions import (
     IdentityAlreadyClaimed,
-    MissingPhysicalMultiFactor,
     DuplicateUserViolation,
 )
 from django_mojeid.mojeid import get_attributes
@@ -167,7 +166,7 @@ class OpenIDBackend:
 
         if not new_user:
             self.update_user_from_openid(user.pk, openid_response, attribute_set)
-        
+
         # Run custom Attribute handler
         OpenIDBackend.run_handlers(openid_response, user, attribute_set)
 
@@ -189,7 +188,7 @@ class OpenIDBackend:
             attributes = [x for x in attributes if x.updatable]
 
         for attribute in attributes:
-            if not attribute.model in res:
+            if attribute.model not in res:
                 res[attribute.model] = {'user_id_field_name': attribute.user_id_field_name}
             val = attribute.get_value(fetch_response, attribute.required,
                                       openid_response=openid_response)

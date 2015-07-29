@@ -16,19 +16,19 @@ class Settings(object):
             try:
                 attr = globals()[name]
             except KeyError:
-                raise AttributeError("'Settings' object has no attribute '%s'"
-                                     % name)
-        
+                raise AttributeError(
+                    "'Settings' object has no attribute '%s'" % name)
+
         # validate
         if name == 'MOJEID_LOGIN_METHOD' and attr not in ("ANY", "CERT", "OTP"):
-            raise ImproperlyConfigured("Invalid MOJEID_LOGIN_METHOD '%s'"
-                                        % attr)
-        
+            raise ImproperlyConfigured(
+                "Invalid MOJEID_LOGIN_METHOD '%s'" % attr)
+
         if name == 'MOJEID_MAX_AUTH_AGE' and not (
                 attr is None or
                 (isinstance(attr, int) and attr >= 0)):
-            raise ImproperlyConfigured("MOJEID_MAX_AUTH_AGE must be "
-                                       "a positive integer (>= 0) or None")
+            raise ImproperlyConfigured(
+                "MOJEID_MAX_AUTH_AGE must be a positive integer (>= 0) or None")
         return attr
 
 mojeid_settings = Settings()

@@ -46,6 +46,7 @@ if getattr(settings, 'USE_MOJEID_REGISTRATION_URLS', True):
     urlpatterns += patterns(
         '',
         url(r'^registration/$', views.registration, name='openid-registration'),
-        url(r'^registration/(?P<attribute_set>\w*)$', views.registration, name='openid-registration'),
+        url(r'^registration/(?P<attribute_set>\w*)$', views.registration,
+            name='openid-registration'),
         url(r'^assertion/$', views.assertion, name='openid-assertion'),
     )

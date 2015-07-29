@@ -105,29 +105,29 @@ class MojeIDConsumer(GenericConsumer):
         another xrds document from $username.mojeid.cz)
         """
         pass
-    
+
     def complete(self, message, endpoint, return_to):
-        response = super(MojeIDConsumer, self).complete(message, endpoint,
-                                                         return_to)
-        
+        response = super(MojeIDConsumer, self).complete(
+            message, endpoint, return_to)
+
         if response.status != SUCCESS:
             return response
-        
+
         # check if pape login method is the required one
-        required_auth = \
-            {"OTP": pape.AUTH_MULTI_FACTOR,
-             "CERT": pape.AUTH_PHISHING_RESISTANT} \
-                .get(mojeid_settings.MOJEID_LOGIN_METHOD, None)
-        
+        required_auth = {
+            "OTP": pape.AUTH_MULTI_FACTOR,
+            "CERT": pape.AUTH_PHISHING_RESISTANT
+        }.get(mojeid_settings.MOJEID_LOGIN_METHOD, None)
+
         if required_auth:
             pape_response = pape.Response.fromSuccessResponse(response)
             if required_auth not in pape_response.auth_policies:
                 return FailureResponse(endpoint, "Required authentication "
                                        "method was not used.")
-        
+
         # check if all required attributes are present
         # TODO
-        
+
         return response
 
 
@@ -250,8 +250,10 @@ class MojeIDAttribute(Attribute):
                  user_id_field_name='user_id', required=True,
                  updatable=False, use_for_registration=True):
         self.use_for_registration = use_for_registration
-        super(MojeIDAttribute, self).__init__(modelApp, modelClass, modelAttribute,
-                                              user_id_field_name, required, updatable)
+        super(MojeIDAttribute, self).__init__(
+            modelApp, modelClass, modelAttribute, user_id_field_name,
+            required, updatable
+        )
 
     @classmethod
     def _get_value(cls, response):
@@ -808,11 +810,14 @@ class Assertion:
 
             def __getattr__(self, name):
                 if name not in self._codes:
-                    raise AttributeError(_("class %(class)s has no attribute '%(attr)s'") %
-                                         {"class": self.__name__, "attr": name})
+                    raise AttributeError(
+                        _("class %(class)s has no attribute '%(attr)s'") % {
+                            "class": self.__name__, "attr": name
+                        }
+                    )
                 return name
 
-    #Error strings
+    # Error strings
     class ErrorString:
         BAD_REQUEST = _('Bad request.')
         MISSING_STATUS = _('Status is missing.')
