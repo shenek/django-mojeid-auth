@@ -390,22 +390,24 @@ def assertion(request):
         user_id = nonce.user_id
         nonce.delete()
 
-        # Fetch the user
-        user_model = get_user_model()
-        try:
-            user = user_model.objects.get(pk=user_id)
-            # Create association
-            OpenIDBackend.associate_openid(user, claimed_id)
-        except (user_model.DoesNotExist, IdentityAlreadyClaimed):
-            # Don't associte the user when the user doesn't exist or is already claimed
-            # And assume that server sent us a valid claimed_id
-            #
-            # Note that user might been deleted before this assertion is triggered
-            # Or the newly created mojeID account might been already associated
-            # with a local account by the client
-            #
-            # Both of these cases are not considered as errors
-            pass
+        # Try to associate the user with mojeID
+        if user_id:
+            # Fetch the user
+            user_model = get_user_model()
+            try:
+                user = user_model.objects.get(pk=user_id)
+                # Create association
+                OpenIDBackend.associate_openid(user, claimed_id)
+            except (user_model.DoesNotExist, IdentityAlreadyClaimed):
+                # Don't associte the user when the user doesn't exist or is already claimed
+                # And assume that server sent us a valid claimed_id
+                #
+                # Note that user might been deleted before this assertion is triggered
+                # Or the newly created mojeID account might been already associated
+                # with a local account by the client
+                #
+                # Both of these cases are not considered as errors
+                pass
 
     return _accept(request)
 
