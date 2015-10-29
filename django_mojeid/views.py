@@ -129,8 +129,8 @@ def render_failure(request, error, template_name='openid/failure.html'):
 def login_begin(request, attribute_set='default'):
     """Begin an MojeID login request."""
 
-    if 'next_page' in request.session:
-        del request.session['next_page']
+    if mojeid_settings.MOJEID_SESSION_NEXT_PAGE_ATTR in request.session:
+        del request.session[mojeid_settings.MOJEID_SESSION_NEXT_PAGE_ATTR]
 
     # create consumer, start login process
     consumer = MojeIDConsumer(DjangoOpenIDStore())
@@ -170,7 +170,7 @@ def login_begin(request, attribute_set='default'):
     # get 'next page' and save it to the session
     redirect_to = sanitise_redirect_url(OpenIDBackend.get_redirect_to(request))
     if redirect_to:
-        request.session['next_page'] = redirect_to
+        request.session[mojeid_settings.MOJEID_SESSION_NEXT_PAGE_ATTR] = redirect_to
 
     # Realm should be always something like 'https://example.org/openid/'
     realm = getattr(settings, 'MOJEID_REALM', None)
@@ -224,12 +224,13 @@ def registration(request, attribute_set='default',
 @csrf_exempt
 def login_complete(request):
     # Get addres where to redirect after the login
-    redirect_to = sanitise_redirect_url(request.session.get('next_page'))
+    redirect_to = sanitise_redirect_url(
+        request.session.get(mojeid_settings.MOJEID_SESSION_NEXT_PAGE_ATTR))
     attribute_set = request.session.get(SESSION_ATTR_SET_KEY, 'default')
 
     # clean the session
-    if 'next_page' in request.session:
-        del request.session['next_page']
+    if mojeid_settings.MOJEID_SESSION_NEXT_PAGE_ATTR in request.session:
+        del request.session[mojeid_settings.MOJEID_SESSION_NEXT_PAGE_ATTR]
 
     if SESSION_ATTR_SET_KEY in request.session:
         del request.session[SESSION_ATTR_SET_KEY]

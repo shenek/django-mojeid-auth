@@ -7,6 +7,7 @@ from django.core.exceptions import ImproperlyConfigured
 MOJEID_LOGIN_METHOD = "ANY"
 MOJEID_INSTANCE_PRODUCTION = False
 MOJEID_MAX_AUTH_AGE = None
+MOJEID_SESSION_NEXT_PAGE_ATTR = 'mojeid_next_page'
 
 class Settings(object):
     def __getattr__(self, name):
